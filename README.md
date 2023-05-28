@@ -1,4 +1,5 @@
 Orbital 2023 project rememberMe
+
 A platform that enables people to build and manage their genealogy.
 
 ## Level of achievement: 
@@ -13,12 +14,12 @@ Our aim is to provide a vivid platform that enables people to build their family
 - Easy collaboration
 
 ## Our progress
-Up to milestone 1 (2023/05/29), we managed to achieve: 
+Up to Milestone 1 (2023/05/29), we managed to achieve: 
 - A simple sign up/login feature.
 - A family tree with modifiable tree nodes
 
 ## Future plan
-Our next step is (probably by milestone 2):
+Our next step is (probably by Milestone 2):
 - Adding data storage.
 - Design the way our data is being stored (forms in database).
 - Improve the current family tree feature.
