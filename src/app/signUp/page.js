@@ -1,12 +1,9 @@
 "use client"
-import { useState } from "react"
-// import app, { auth } from "../firebase-config";
-// import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createContext, useState } from "react"
 import { useRouter } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase-config";
-// import { withRouter } from "react-router";
+import { TextField } from "@mui/material";
 
 const SignUpScreen = () => {
     const [email, setEmail] = useState("");
@@ -32,9 +29,6 @@ const SignUpScreen = () => {
         // Add check of pwd
         // Put user into database
         createUserWithEmailAndPassword(auth,email, password).then(authUser => {
-            console.log("user created");
-            console.log(email);
-            console.log(password);
             router.push("/myHome");
         }).catch(error => {
             setError(error.message);
@@ -47,12 +41,10 @@ const SignUpScreen = () => {
             <form onSubmit={handleSignUp}>
                 {error && <div>{error}</div>}
                 <label>
-                    Email
-                    <input name="email" type="email" value={email} onChange={(event)=>{setEmail(event.target.value)}} placeholder="Email"/>
+                    <TextField label="Email" name="email" type="email" value={email} onChange={(event)=>{setEmail(event.target.value)}} placeholder="Email"/>
                 </label>
                 <label>
-                    Password
-                    <input name="password" type="password" value={password} onChange={(event)=>{setPassword(event.target.value)}} placeholder="Password"/>
+                    <TextField label="Password" name="password" type="password" value={password} onChange={(event)=>{setPassword(event.target.value)}} placeholder="Password"/>
                 </label>
                 <button type="submit">Sign up</button>
             </form>

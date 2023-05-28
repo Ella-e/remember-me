@@ -1,24 +1,13 @@
 "use client"
-import React, { useEffect, useState } from "react"
-// import app, { auth } from "../firebase-config"
-// import { signOut } from "firebase/auth"
-import { AuthProvider, useAuth } from "../context/AuthContext"
+import React, { Suspense, useContext, useState } from "react"
+import { AuthContext, AuthProvider, useAuth } from "../context/AuthContext"
 import { useRouter } from "next/navigation"
 import { auth } from "../firebase-config"
 import { onAuthStateChanged } from "firebase/auth"
-// import { signOut } from "firebase/auth"
 
 const MainScreen = () => {
-    const {authUser, loading, FirebaseSignout} = useAuth();
+    console.log("reach")
     const router = useRouter();
-    // console.log("authUser")
-    // console.log(authUser);
-    // console.log(loading);
-    // useEffect(()=>{
-    //     if (!loading&&!authUser) {
-    //         router.push('/');
-    //     }
-    // }, [authUser, loading]);
     const [user, setUser] = useState(null);
     onAuthStateChanged(auth, authUser => {
         if (!authUser) {
@@ -42,14 +31,11 @@ const MainScreen = () => {
     }
 
     return (
+      <Suspense fallback={<Loading />}>
         <div>
 
         {
-          loading ?
-            <div>
-              <div>Loading....</div>
-            </div> :
-            <>
+          <>
               <div>
                 <div>
                   { <div>Congratulations {user?.email}! You are logged in.</div> }
@@ -60,10 +46,15 @@ const MainScreen = () => {
                   <button onClick={handleSignOut}>Sign out</button>
                 </div>
               </div>
-            </>
+          </>
         }
         </div>
+      </Suspense>
     )
+}
+
+function Loading() {
+  return(<h2>loading</h2>)
 }
 
 export default MainScreen;

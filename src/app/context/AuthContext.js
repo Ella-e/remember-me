@@ -2,13 +2,14 @@ import { createContext, useContext, Context } from 'react'
 import useFirebaseAuth from '../utils/Auth';
 
 
-const AuthContext = createContext({
-    authUser:null,
-    loading:false,
-    FirebaseEmailCreate: async (a, b)=>{},
-    FirebaseEmailSignIn: async (a, b)=>{},
-    FirebaseSignout: async (a, b)=>{},
-})
+// export const AuthContext = createContext({
+//     authUser:null,
+//     loading:false,
+//     FirebaseEmailCreate: async (a, b)=>{},
+//     FirebaseEmailSignIn: async (a, b)=>{},
+//     FirebaseSignout: async (a, b)=>{},
+// })
+export const AuthContext = createContext(null);
 
 // const AuthContext = useFirebaseAuth();
 

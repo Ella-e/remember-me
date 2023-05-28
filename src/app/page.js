@@ -1,5 +1,5 @@
 "use client"
-import React from "react";
+import React, { useState } from "react";
 // import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 // import LoginScreen from "./login/page";
@@ -8,29 +8,21 @@ import React from "react";
 
 // import PrivateRoute from "./utils/PrivateRoute";
 import Link from "next/link";
-import { useAuth, AuthProvider } from "./context/AuthContext";
+import { useAuth, AuthProvider, AuthContext } from "./context/AuthContext";
 import LoginScreen from "./login/page";
 // import { auth } from "./firebase-config";
 
 
 export default function Home() {
   // const {authUser, loading} = useAuth();
+  const [user, setUser] = useState(null);
     return (
-        <AuthProvider>
-          {/* {authUser && loading ? 
-          <>
-            <h1>Hi {{currentUser}}</h1>
-            <Link href={"/home"}></Link><br/>
-          </>
-          :
-          <>
-            <Link href="/login">Login</Link>
-            <Link href="/signUp">Sign up</Link>
-          </>  
-        } */}
-            {/* <PrivateRoute exact path="/home" component={MainScreen}/> */}
+        // <AuthContext.Provider value={{
+        //   user,
+        //   setUser
+        // }}>
             <LoginScreen/>
-        </AuthProvider>
+        // </AuthContext.Provider>
         // <AuthProvider>
         //     <Router>
         //         <div>
