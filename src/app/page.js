@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth, AuthProvider, AuthContext } from "./context/AuthContext";
 import LoginScreen from "./login/page";
+import EditTree from "./editTree/page";
 // import { auth } from "./firebase-config";
 
 
@@ -22,6 +23,7 @@ export default function Home() {
         //   setUser
         // }}>
             <LoginScreen/>
+            // <EditTree/>
         // </AuthContext.Provider>
         // <AuthProvider>
         //     <Router>
