@@ -1,11 +1,11 @@
 Orbital 2023 project rememberMe
 
-A platform that enables people to build and manage their genealogy.
-
 ## Level of achievement: 
 Apollo 11
 
 ## Project scope:
+rememberMe is a platform that enables people to build and manage their genealogy.
+
 Our aim is to provide a vivid platform that enables people to build their family trees and record down family members’ life conveniently. By using our platform, people should be able to find connections with their distant relatives and establish a close bond with the entire family. Additionally, people can use the information they have recorded to observe some patterns within their family, learning useful experiences from various aspects, such as life experiences, inspirational thoughts, and medical backgrounds.
 
 ## Key Features
