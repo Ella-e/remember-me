@@ -2,9 +2,9 @@ import React from 'react';
 import Node from './node';
 
 // get data
-// const familyData = [
-//     { id: 1, name: 'M', children: [2, 3] },
-//   ];
+const familyData = [
+    { id: 1, name: 'M', children: [2, 3] },
+  ];
 
 const FamilyTree = () => {
   const renderNodes = (nodes) => {

@@ -4,6 +4,7 @@ import { AuthContext, AuthProvider, useAuth } from "../context/AuthContext"
 import { useRouter } from "next/navigation"
 import { auth } from "../firebase-config"
 import { onAuthStateChanged } from "firebase/auth"
+import EditTree from "../editTree/page"
 
 const MainScreen = () => {
     console.log("reach")
@@ -40,6 +41,7 @@ const MainScreen = () => {
                 <div>
                   { <div>Congratulations {user?.email}! You are logged in.</div> }
                 </div>
+                <EditTree/>
               </div>
               <div>
                 <div>

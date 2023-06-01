@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation"
 import { AuthContext, AuthProvider } from "../context/AuthContext";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase-config";
-import { TextField } from "@mui/material";
+import { Button, Stack, TextField } from "@mui/material";
 import MainScreen from "../myHome/page";
+import "./page.css"
 
 const LoginScreen = () => {
     const [email, setEmail] = useState("");
@@ -27,8 +28,8 @@ const LoginScreen = () => {
                 //     <MainScreen/>
                 //     {router.push("/myHome")}
                 // </AuthContext.Provider>)
-                setLoading(false);
                 router.push("/myHome");
+                setLoading(false);
             });
         } catch (error) {
             setError(error.message)
@@ -57,23 +58,44 @@ const LoginScreen = () => {
 
     return (
         !loading ?
-        <div>
-            <h1>Login</h1>
-            <form onSubmit={handleLogin}>
-                {error && <div>{error}</div>}
-                <label>
-                    <TextField label="Email" name="email" type="email" onChange={(event)=>{setEmail(event.target.value)}} placeholder="Email"/>
-                </label>
-                <label>
-                    <TextField label="password" type="password" name="password" onChange={(event)=>{setPassword(event.target.value)}} placeholder="Password"/>
-                </label>
-                <button type="submit">Login</button>
-            </form>
-            <div>
-                No Account? <AuthProvider><Link href={"/signUp"}>Sign Up</Link></AuthProvider>
+        <div className="out-most">
+            <div className="input-box">
+                <Stack><h1 className="title">Login</h1></Stack>
+                <form onSubmit={handleLogin}>
+                    {/* {error && <div>{error}</div>} */}
+                    <Stack>
+                        <Stack className="input-item">
+                            <TextField fullWidth label="Email" name="email" type="email" onChange={(event)=>{setEmail(event.target.value)}} placeholder="Email"/>
+                        </Stack>
+                        <Stack className="input-item">
+                            <TextField fullWidth label="password" type="password" name="password" onChange={(event)=>{setPassword(event.target.value)}} placeholder="Password"/>
+                        </Stack>
+                        <Stack className="input-item">
+                            <Button fullWidth variant="outlined" type="submit">Login</Button>
+                        </Stack>
+                    </Stack>
+                </form>
+                <Stack>
+                    No Account? <AuthProvider><Link href={"/signUp"}>Sign Up</Link></AuthProvider>
+                </Stack>
             </div>
         </div>
-        : <div>loading...</div>
+        : <div>
+        <h1>Login</h1>
+        <form onSubmit={handleLogin}>
+            {error && <div>{error}</div>}
+            <Stack className="input">
+                <TextField disabled label="Email" name="email" onChange={(event)=>{setEmail(event.target.value)}} placeholder="Email"/>
+            </Stack>
+            <Stack className="input">
+                <TextField disabled label="Password" name="password" onChange={(event)=>{setPassword(event.target.value)}} placeholder="Password"/>
+            </Stack>
+            <button type="submit">Login</button>
+        </form>
+        <div>
+            No Account? <AuthProvider><Link href={"/signUp"}>Sign Up</Link></AuthProvider>
+        </div>
+    </div>
     );
 };
 
