@@ -15,15 +15,14 @@ import EditTree from "./editTree/page";
 
 
 export default function Home() {
-  // const {authUser, loading} = useAuth();
-  const [user, setUser] = useState(null);
+    // const {authUser, loading} = useAuth();
+    const [user, setUser] = useState(null);
     return (
         // <AuthContext.Provider value={{
         //   user,
         //   setUser
         // }}>
             <LoginScreen/>
-            // <EditTree/>
         // </AuthContext.Provider>
         // <AuthProvider>
         //     <Router>
