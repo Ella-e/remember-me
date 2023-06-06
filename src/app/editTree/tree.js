@@ -8,8 +8,8 @@ const familyData = [
 
 const FamilyTree = () => {
   const renderNodes = (nodes) => {
-    return nodes.map((node) => (
-      <Node name={node.name} children={node.children} />
+    return nodes.map((node, index) => (
+      <Node name={node.name} children={node.children} id={index} />
     ));
   };
 

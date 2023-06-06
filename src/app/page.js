@@ -22,8 +22,8 @@ export default function Home() {
         //   user,
         //   setUser
         // }}>
-            // <LoginScreen/>
-            <EditTree />
+        <LoginScreen />
+        // < EditTree />
         // </AuthContext.Provider>
         // <AuthProvider>
         //     <Router>

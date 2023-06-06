@@ -13,7 +13,7 @@ const formatAuthUser = (user) => ({
 export default function useFirebaseAuth() {
     const [authUser, setAuthUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const clear= () => {
+    const clear = () => {
         setAuthUser(null);
         setLoading(true);
     }
@@ -44,9 +44,9 @@ export default function useFirebaseAuth() {
     }
 
     // listen for firebase state change
-    useEffect(()=> {
+    useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, authStateChange);
-        return ()=>unsubscribe();
+        return () => unsubscribe();
     }, []);
 
     return {

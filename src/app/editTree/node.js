@@ -3,8 +3,7 @@ import React from 'react';
 const Node = ({ id, name, children }) => {
   const renderChildren = () => {
     return children.map((childId) => (
-      <Node name={`Child ${childId}`} children={[]}
-      //   avatar={node.avatar} 
+      <Node name={`Child ${childId}`} children={[]} id={childId}      //   avatar={node.avatar} 
       />
     ));
   };
