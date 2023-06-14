@@ -12,6 +12,9 @@
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.13.2",
-    "antd": "^5.5.2"
+    "antd": "^5.5.2",
+    "firebase": "^9.22.2",
+    "next": "^13.4.5",
+    "react-router-dom": "^6.12.1"
   }
 }

@@ -23,7 +23,6 @@ export default function Home() {
         //   setUser
         // }}>
         <LoginScreen />
-        // < EditTree />
         // </AuthContext.Provider>
         // <AuthProvider>
         //     <Router>
