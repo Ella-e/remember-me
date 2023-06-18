@@ -10,28 +10,28 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth, AuthProvider, AuthContext } from "./context/AuthContext";
 import LoginScreen from "./login/page";
-import EditTree from "./editTree/page";
+import EditTree from "./myHome/MyHome";
 import MainScreen from "./myHome/page";
 // import { auth } from "./firebase-config";
 
 export default function Home() {
-  // const {authUser, loading} = useAuth();
-  const [user, setUser] = useState(null);
-  return (
-    // <AuthContext.Provider value={{
-    //   user,
-    //   setUser
-    // }}>
-    <EditTree />
-    // </AuthContext.Provider>
-    // <AuthProvider>
-    //     <Router>
-    //         <div>
-    //             <PrivateRoute exact path="/home" component={MainScreen}/>
-    //             <Route exact path="/login" component={LoginScreen}/>
-    //             <Route exact path="/signup" component={SignUpScreen}/>
-    //         </div>
-    //     </Router>
-    // </AuthProvider>
-  );
+    // const {authUser, loading} = useAuth();
+    const [user, setUser] = useState(null);
+    return (
+        // <AuthContext.Provider value={{
+        //   user,
+        //   setUser
+        // }}>
+        <EditTree />
+        // </AuthContext.Provider>
+        // <AuthProvider>
+        //     <Router>
+        //         <div>
+        //             <PrivateRoute exact path="/home" component={MainScreen}/>
+        //             <Route exact path="/login" component={LoginScreen}/>
+        //             <Route exact path="/signup" component={SignUpScreen}/>
+        //         </div>
+        //     </Router>
+        // </AuthProvider>
+    );
 }

@@ -4,7 +4,7 @@ import { AuthContext, AuthProvider, useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { auth } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
-import EditTree from "../editTree/page";
+import MyHome from "./MyHome";
 
 const MainScreen = () => {
   const router = useRouter();
@@ -26,7 +26,7 @@ const MainScreen = () => {
     <Suspense fallback={<Loading />}>
       <div>
         {
-          <EditTree />
+          <MyHome />
           // <>
           //   <div>
           //     <div>
