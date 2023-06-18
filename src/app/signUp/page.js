@@ -1,7 +1,13 @@
 "use client";
 import React, { createContext, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  deleteUser,
+  isSignInWithEmailLink,
+  sendEmailVerification,
+  signOut,
+} from "firebase/auth";
 import { auth } from "../firebase-config";
 import { Button, Stack, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
@@ -15,6 +21,22 @@ const SignUpScreen = () => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  let user = auth.currentUser;
+  const [infoMsg, setInfoMsg] = useState("");
+  const actionCodeSetting = {
+    url: "http://localhost:3000/login",
+    handleCodeInApp: true,
+  };
+
+  //   React.useEffect(() => {
+  //     user = auth.currentUser;
+  //     if (user.emailVerified) {
+  //       const saved_email = window.localStorage.getItem("email");
+  //       router.push("/myHome");
+  //     } else {
+  //       signOut(auth);
+  //     }
+  //   }, []);
 
   const handleSignUp = (event) => {
     event.preventDefault();
@@ -22,13 +44,36 @@ const SignUpScreen = () => {
     setLoading(true);
     // Add check of pwd
     // Put user into database
+    // ADD email link verification
+    window.localStorage.setItem("email", email);
     createUserWithEmailAndPassword(auth, email, password)
       .then((authUser) => {
-        router.push("/myHome");
+        user = auth.currentUser;
+        sendEmailVerification(user, actionCodeSetting).then(() => {
+          setInfoMsg("A verification link has sent to your email");
+          if (user.emailVerified) {
+            const saved_email = window.localStorage.getItem("email");
+            router.push("/myHome");
+          } else {
+            signOut(auth);
+          }
+        });
+        setLoading(false);
+        // router.push("/myHome");
+        // signOut(auth);
       })
       .catch((error) => {
         setError(error.message);
+        setLoading(false);
       });
+
+    // createUserWithEmailAndPassword(auth, email, password)
+    //   .then((authUser) => {
+    //     router.push("/myHome");
+    //   })
+    //   .catch((error) => {
+    //     setError(error.message);
+    //   });
   };
 
   return (
@@ -63,6 +108,8 @@ const SignUpScreen = () => {
                 placeholder="Password"
               />
             </Stack>
+            {error}
+            {infoMsg !== "" && <div>{infoMsg}</div>}
             <Stack className="input-item">
               {loading ? (
                 <LoadingButton loading variant="outlined">

@@ -3,7 +3,15 @@ import React, { Suspense, useContext, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthContext, AuthProvider } from "../context/AuthContext";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  isSignInWithEmailLink,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  sendSignInLinkToEmail,
+  signInWithEmailAndPassword,
+  signInWithEmailLink,
+  signOut,
+} from "firebase/auth";
 import { auth } from "../firebase-config";
 import { Button, Stack, TextField } from "@mui/material";
 import MainScreen from "../myHome/page";
@@ -11,53 +19,61 @@ import "./page.css";
 import { LoadingButton } from "@mui/lab";
 
 const LoginScreen = () => {
+  let user = auth.currentUser;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  // const {FirebaseEmailSignIn} = useAuth();
+  const [errMsg, setErrMsg] = useState("");
+  const [infoMsg, setInfoMsg] = useState("");
 
   const handleLogin = (event) => {
+    event.preventDefault();
     try {
       setLoading(true);
-      // ADD verification from database
       signInWithEmailAndPassword(auth, email, password)
         .then((authUser) => {
+          user = auth.currentUser;
+          if (user.emailVerified) {
+            router.push("/myHome");
+          } else {
+            window.confirm(
+              "please click the link in your email to verify first"
+            );
+            setLoading(false);
+            signOut(auth);
+            router.push("/login");
+          }
           // return (<AuthContext.Provider value={{user, setUser}}>
           //     <MainScreen/>
           //     {router.push("/myHome")}
           // </AuthContext.Provider>)
-          router.push("/myHome");
         })
         .catch((error) => {
-          // console.log(error);
-          // setError(error.message);
           handleError(error.message);
         });
     } catch (error) {
-      // setError(error.message);
       handleError(error.message);
     }
-    event.preventDefault();
   };
 
   const handleError = (msg) => {
+    setErrMsg(msg);
     if (msg?.indexOf("wrong-password") != -1) {
-      setError("wrong-password");
+      setErrMsg("wrong-password");
     } else if (msg?.indexOf("invalid-email") != -1) {
-      setError("invalid-email");
+      setErrMsg("invalid-email");
     } else if (msg?.indexOf("too-many-request") != -1) {
-      setError("too-many-request");
+      setErrMsg("too-many-request");
     } else {
-      setError("other");
+      setErrMsg("other");
     }
     setLoading(false);
   };
 
   const resetError = () => {
-    setError(null);
+    setError("");
   };
 
   return (
@@ -75,6 +91,7 @@ const LoginScreen = () => {
                 label="Email"
                 name="email"
                 type="email"
+                value={email || ""}
                 onChange={(event) => {
                   setEmail(event.target.value);
                 }}
@@ -82,7 +99,7 @@ const LoginScreen = () => {
               />
             </Stack>
             <Stack className="input-item">
-              {error === "wrong-password" ? (
+              {errMsg === "wrong-password" ? (
                 <TextField
                   error
                   id="outlined-error-helper-text"
@@ -104,13 +121,8 @@ const LoginScreen = () => {
               )}
             </Stack>
             <Stack>
-              {error === "too-many-request" ? (
-                <div style={{ color: "red" }}>Too many request</div>
-              ) : error === "other" ? (
-                <div style={{ color: "red" }}>Some error happended</div>
-              ) : (
-                <div></div>
-              )}
+              {errMsg !== "" && <div>{errMsg}</div>}
+              {infoMsg !== "" && <div>{infoMsg}</div>}
             </Stack>
             <Stack className="input-item">
               {loading ? (
@@ -130,6 +142,9 @@ const LoginScreen = () => {
           <AuthProvider>
             <Link href={"/signUp"}>Sign Up</Link>
           </AuthProvider>
+        </Stack>
+        <Stack>
+          Forget Password? <Link href={"/resetPassword"}>Reset password</Link>
         </Stack>
       </div>
     </div>
