@@ -6,7 +6,7 @@ import { treeStore } from './store';
 const Toolbar = () => {
   const handleClick = () => {
     treeStore.setCurrentNode("test");
-
+    treeStore.setGenerable(true);
   }
   return (
     <div className="flex flex-col justify-center px-[32px] py-6 parent-full flex-grow">

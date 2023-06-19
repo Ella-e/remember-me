@@ -90,6 +90,7 @@ const EditTree = () => {
               }}
             >
               {activeTab == "1" ? (
+
                 <TreeEditor />
               ) : activeTab == "2" ? (
                 <TreeContent />
