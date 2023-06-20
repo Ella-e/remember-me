@@ -1,13 +1,17 @@
 import { action, makeAutoObservable } from 'mobx';
 class TreeStore {
   currentNode = "";
+  generable = false;
   constructor() {
     makeAutoObservable(this);
   }
 
   setCurrentNode(str) {
     this.currentNode = str;
-    console.log(str);
+  }
+
+  setGenerable(bool) {
+    this.generable = bool;
   }
 
 
