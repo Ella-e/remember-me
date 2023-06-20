@@ -8,7 +8,7 @@ import { Breadcrumb, Layout, Menu } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
 import TreeContent from "../editTree/TreeContent";
 import ViewTree from "../editTree/ViewTree";
-import MyHeader from "../editTree/MyHeader";
+import MyHeader from "./MyHeader";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase-config";
 import TreeEditor from "../editTree/page";
@@ -35,7 +35,6 @@ const EditTree = () => {
 
   const handleTabChange = (key) => {
     setActiveTab(key);
-
   };
 
   const section = ["Create Tree", "Edit Node", "View Tree"];
@@ -79,7 +78,6 @@ const EditTree = () => {
               padding: "0 24px 24px",
             }}
           >
-
             <Content
               className="site-layout-background"
               style={{

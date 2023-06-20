@@ -10,10 +10,16 @@ const MermaidChart = ({ chartDefinition, callBack }) => {
 
     window.callback = callBack;
     mermaid.contentLoaded();
-
   }, []);
 
-  return <div className="mermaid" style={{ width: "fit-content", height: "fit-content" }}>{chartDefinition}</div>;
+  return (
+    <div
+      className="mermaid"
+      style={{ width: "fit-content", height: "fit-content" }}
+    >
+      {chartDefinition}
+    </div>
+  );
 };
 
 export default MermaidChart;

@@ -9,18 +9,16 @@ import MyHome from "./MyHome";
 const MainScreen = () => {
   const router = useRouter();
   const [user, setUser] = useState(null);
-  onAuthStateChanged(auth, (authUser) => {
-    if (!authUser) {
-      router.push("/login");
-    } else {
-      setUser(authUser);
-    }
-  });
-
-  function handleSignOut() {
-    auth.signOut();
-    setUser(null);
-  }
+  // React.useEffect(() => {
+  //   onAuthStateChanged(auth, (authUser) => {
+  //     if (!authUser) {
+  //       window.confirm("Please login to experience full functionalities");
+  //       // router.push("/login");
+  //     } else {
+  //       setUser(authUser);
+  //     }
+  //   });
+  // }, []);
 
   return (
     <Suspense fallback={<Loading />}>

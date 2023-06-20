@@ -93,7 +93,7 @@ const MyHeader = () => {
         router.push("/login");
       }}
     >
-      Sign In
+      Login
     </div>
   );
 };

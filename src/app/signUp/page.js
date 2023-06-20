@@ -8,12 +8,13 @@ import {
   sendEmailVerification,
   signOut,
 } from "firebase/auth";
-import { auth } from "../firebase-config";
+import { auth, db } from "../firebase-config";
 import { Button, Stack, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { AuthContext, AuthProvider } from "../context/AuthContext";
 import Link from "next/link";
 import "./page.css";
+import { doc, setDoc } from "firebase/firestore";
 
 const SignUpScreen = () => {
   const [email, setEmail] = useState("");
@@ -42,38 +43,54 @@ const SignUpScreen = () => {
     event.preventDefault();
     setError(null);
     setLoading(true);
-    // Add check of pwd
-    // Put user into database
-    // ADD email link verification
+    // Email link verification
     window.localStorage.setItem("email", email);
     createUserWithEmailAndPassword(auth, email, password)
-      .then((authUser) => {
+      .then(async (authUser) => {
         user = auth.currentUser;
-        sendEmailVerification(user, actionCodeSetting).then(() => {
-          setInfoMsg("A verification link has sent to your email");
-          if (user.emailVerified) {
-            const saved_email = window.localStorage.getItem("email");
-            router.push("/myHome");
-          } else {
-            signOut(auth);
-          }
+        // add user into the database
+        await setDoc(doc(db, "users", authUser.user.uid), {
+          email: email,
+          password: password,
+          uid: authUser.user.uid,
         });
+        // send email verification
+        sendEmailVerification(user, actionCodeSetting)
+          .then(() => {
+            setInfoMsg("A verification link has sent to your email");
+            signOut(auth);
+            //   if (user.emailVerified) {
+            //     const saved_email = window.localStorage.getItem("email");
+            //     router.push("/myHome");
+            //   } else {
+            //     signOut(auth);
+            //   }
+          })
+          .catch((error) => {
+            // if there is an error, delete the created user.
+            if (user) {
+              window.confirm(
+                "woops, something goes wrong, please sign up again"
+              );
+              deleteUser(user).then(() => {});
+            }
+          });
         setLoading(false);
-        // router.push("/myHome");
-        // signOut(auth);
       })
       .catch((error) => {
+        // if there is an error, delete the created user.
+        console.log("run here");
+        if (user) {
+          window.confirm("woops, something goes wrong, please sign up again");
+          deleteUser(user)
+            .then(() => {})
+            .catch((err) => {
+              console.log(err.message);
+            });
+        }
         setError(error.message);
         setLoading(false);
       });
-
-    // createUserWithEmailAndPassword(auth, email, password)
-    //   .then((authUser) => {
-    //     router.push("/myHome");
-    //   })
-    //   .catch((error) => {
-    //     setError(error.message);
-    //   });
   };
 
   return (

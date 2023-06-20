@@ -45,10 +45,6 @@ const LoginScreen = () => {
             signOut(auth);
             router.push("/login");
           }
-          // return (<AuthContext.Provider value={{user, setUser}}>
-          //     <MainScreen/>
-          //     {router.push("/myHome")}
-          // </AuthContext.Provider>)
         })
         .catch((error) => {
           handleError(error.message);
