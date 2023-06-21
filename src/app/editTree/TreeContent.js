@@ -1,5 +1,6 @@
 import { Input } from "antd";
 import {
+  Alert,
   Backdrop,
   Box,
   Button,
@@ -19,6 +20,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -38,102 +40,51 @@ const TreeContent = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [loading, setLoading] = useState(false);
+  const currentUid = auth?.currentUser?.uid;
+  const [authWarning, setAuthWarning] = useState(false);
 
-  // initialize memerbList
+  // Initialize memerbList
   const [memberList, setMemberList] = useState(new Array());
 
   const getMemberList = async () => {
     setLoading(true);
-    const q = query(
-      collection(db, "nodes"),
-      where("uid", "==", auth.currentUser.uid)
-    );
-    const querySnapshot = await getDocs(q);
-    const tempMemberList = [...memberList];
-    querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      const docData = doc.data();
-      const tempMember = {
-        uid: docData.uid,
-        id: docData.id,
-        firstName: docData.firstName,
-        lastName: docData.lastName,
-      };
-      tempMemberList.push(tempMember);
-      console.log(doc.id, " => ", doc.data());
-    });
+    if (auth.currentUser) {
+      const q = query(
+        collection(db, "nodes"),
+        where("uid", "==", auth.currentUser.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const tempMemberList = [...memberList];
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        const docData = doc.data();
+        const tempMember = {
+          uid: docData.uid,
+          id: docData.id,
+          firstName: docData.firstName,
+          lastName: docData.lastName,
+        };
+        tempMemberList.push(tempMember);
+        console.log(doc.id, " => ", doc.data());
+      });
+      setMemberList(tempMemberList);
+    }
     setLoading(false);
-    setMemberList(tempMemberList);
   };
 
   useEffect(() => {
-    getMemberList();
+    if (auth.currentUser) {
+      setAuthWarning(false);
+      getMemberList();
+    } else {
+      setAuthWarning(true);
+    }
   }, []);
 
   useEffect(() => {
     //TODO: get member list
     setMemberList(memberList);
   }, [memberList]);
-
-  /**
-   * save a member into the database
-   */
-  const saveMember = async (member) => {
-    console.log("run save member List");
-    // check if this person's memberlist exist first
-    const docRef = doc(db, "nodes", member.id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      // update the doc
-      await updateDoc(docRef, {
-        firstName: member.firstName,
-        lastName: member.lastName,
-      });
-    } else {
-      await setDoc(docRef, {
-        id: member.id,
-        uid: auth.currentUser.uid,
-        firstName: member.firstName,
-        lastName: member.lastName,
-      });
-    }
-  };
-
-  /**
-   * handle add member action.
-   */
-  const handleAddMember = (event) => {
-    let newMember = {};
-    try {
-      // generate ulid for the member
-      let generator = ULID();
-      let tempUid = generator();
-      console.log(tempUid);
-      newMember = {
-        id: tempUid,
-        firstName: firstName,
-        lastName: lastName,
-        uid: auth.currentUser.uid,
-      };
-      if (memberList) {
-        setMemberList((current) => [...current, newMember]);
-      } else {
-        setMemberList([newMember]);
-      }
-      // save memberlist to the databse
-      saveMember(newMember);
-    } catch (err) {
-      console.log(err.message);
-    }
-    setFirstName("");
-    setLastName("");
-    setEditNode(false);
-  };
-
-  const handleSelectMember = (event) => {
-    console.log(event);
-    setSelectedMember(event.row);
-  };
 
   const MemberList = () => {
     const columns = [
@@ -176,6 +127,76 @@ const TreeContent = () => {
   };
 
   /**
+   * save a member into the database
+   */
+  const saveMemberToDb = async (member) => {
+    // check if this person's memberlist exist first
+    const docRef = doc(db, "nodes", member.id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      // update the doc
+      await updateDoc(docRef, {
+        firstName: member.firstName,
+        lastName: member.lastName,
+      });
+    } else {
+      await setDoc(docRef, {
+        id: member.id,
+        uid: currentUid,
+        firstName: member.firstName,
+        lastName: member.lastName,
+      });
+    }
+  };
+
+  /**
+   * delete a member from database
+   */
+  const deleteMemberFromDb = async (member) => {
+    console.log("run");
+    await deleteDoc(doc(db, "nodes", member.id)).then(() => {
+      console.log("success");
+    });
+  };
+
+  /**
+   * handle add member action.
+   */
+  const handleAddMember = (event) => {
+    let newMember = {};
+    try {
+      // generate ulid for the member
+      let generator = ULID();
+      let tempUid = generator();
+      console.log(tempUid);
+      newMember = {
+        id: tempUid,
+        firstName: firstName,
+        lastName: lastName,
+      };
+      if (memberList) {
+        setMemberList((current) => [...current, newMember]);
+      } else {
+        setMemberList([newMember]);
+      }
+      // save memberlist to the databse
+      if (currentUid) {
+        saveMemberToDb(newMember);
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
+    setFirstName("");
+    setLastName("");
+    setEditNode(false);
+  };
+
+  const handleSelectMember = (event) => {
+    console.log(event);
+    setSelectedMember(event.row);
+  };
+
+  /**
    * called when user click the edit button in the home page
    */
   const handleEditMember = () => {
@@ -207,7 +228,10 @@ const TreeContent = () => {
           }
         }
         // save memberlist to the databse
-        saveMember(newMember);
+        if (currentUid) {
+          saveMemberToDb(newMember);
+        }
+
         setSelectedId(null);
       } catch (err) {
         console.log(err.message);
@@ -216,6 +240,7 @@ const TreeContent = () => {
     setIsEdit(false);
     setFirstName("");
     setLastName("");
+    setSelectedMember(null);
   };
 
   const preDeleteAlert = (event) => {
@@ -235,6 +260,11 @@ const TreeContent = () => {
           if (memberList[i].id === selectedMember.id) {
             let tempList = [...memberList];
             tempList.splice(i, 1);
+            // delete member in the database
+            if (currentUid) {
+              deleteMemberFromDb(memberList[i]);
+            }
+            // update memberList
             setMemberList(tempList);
           }
         }
@@ -242,7 +272,6 @@ const TreeContent = () => {
         console.log(err.message);
       }
     }
-    // save memberlist to the databse
   };
 
   const DeleteAlert = () => {
@@ -329,6 +358,16 @@ const TreeContent = () => {
 
   return (
     <div>
+      {authWarning && (
+        <Alert
+          severity="warning"
+          onClick={() => {
+            setAuthWarning(false);
+          }}
+        >
+          This is a warning alert — check it out!
+        </Alert>
+      )}
       {!editNode && !isEdit && (
         <div>
           <h1>Add New Member</h1>
