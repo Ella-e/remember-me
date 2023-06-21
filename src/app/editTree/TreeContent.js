@@ -365,7 +365,7 @@ const TreeContent = () => {
             setAuthWarning(false);
           }}
         >
-          This is a warning alert — check it out!
+          Please login to save data into database.
         </Alert>
       )}
       {!editNode && !isEdit && (
