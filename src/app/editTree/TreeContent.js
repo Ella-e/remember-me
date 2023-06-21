@@ -191,6 +191,16 @@ const TreeContent = () => {
     setEditNode(false);
   };
 
+  const handleCancel = (str) => {
+    setFirstName("");
+    setLastName("");
+    if (str === "edit") {
+      setIsEdit(false);
+    }
+    else {
+      setEditNode(false);
+    }
+  }
   const handleSelectMember = (event) => {
     console.log(event);
     setSelectedMember(event.row);
@@ -306,55 +316,12 @@ const TreeContent = () => {
       </Dialog>
     );
   };
-  const AddOneMember = () => {
-    return (
-      <div className="border-line-[#E4E6F0] rounded-2xl leading-5 overflow-auto h-[189px] mb-[26px]">
-        <form onSubmit={handleAddMember}>
-          <h1>First Name</h1>
-          <Input.TextArea
-            value={firstName}
-            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-            onChange={(e) => setFirstName(e.target.value)}
-            // placeholder=""
-          ></Input.TextArea>
-          <h1>Last Name</h1>
-          <Input.TextArea
-            value={lastName}
-            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-            onChange={(e) => setLastName(e.target.value)}
-            // placeholder=""
-          ></Input.TextArea>
-          <Button type="submit">Save Member</Button>
-        </form>
-      </div>
-    );
-  };
+  // const AddOneMember = () => {
+  //   return (
 
-  const EditOneMember = () => {
-    return (
-      <div className="border-line-[#E4E6F0] rounded-2xl leading-5 overflow-auto h-[189px] mb-[26px]">
-        <h1>Edit member</h1>
-        <form onSubmit={handleSaveEditMember}>
-          <h1>First Name</h1>
-          <Input.TextArea
-            value={firstName}
-            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-            onChange={(e) => setFirstName(e.target.value)}
-            // placeholder=""
-          ></Input.TextArea>
-          <h1>Last Name</h1>
-          <Input.TextArea
-            value={lastName}
-            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-            onChange={(e) => setLastName(e.target.value)}
-            // placeholder=""
-          ></Input.TextArea>
-          <Button type="submit">Save Member</Button>
-          <Button>Cancel</Button>
-        </form>
-      </div>
-    );
-  };
+  //   );
+  // };
+
 
   return (
     <div>
@@ -407,9 +374,48 @@ const TreeContent = () => {
           </Box>
         </div>
       )}
-      {editNode && !isEdit && <AddOneMember />}
-      {isEdit && <EditOneMember />}
-    </div>
+      {editNode && !isEdit && (<div className="border-line-[#E4E6F0] rounded-2xl leading-5 overflow-auto h-[189px] mb-[26px]">
+
+        <h1>First Name</h1>
+        <Input.TextArea
+          value={firstName}
+          className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+          onChange={(e) => setFirstName(e.target.value)}
+        // placeholder=""
+        ></Input.TextArea>
+        <h1>Last Name</h1>
+        <Input.TextArea
+          value={lastName}
+          className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+          onChange={(e) => setLastName(e.target.value)}
+        // placeholder=""
+        ></Input.TextArea>
+        <Button type="submit" onClick={handleAddMember}>Save Member</Button>
+        <Button onClick={() => handleCancel("add")}>Cancel</Button>
+
+      </div>)}
+      {isEdit && (<div className="border-line-[#E4E6F0] rounded-2xl leading-5 overflow-auto h-[189px] mb-[26px]">
+        <h1>Edit member</h1>
+
+        <h1>First Name</h1>
+        <Input.TextArea
+          value={firstName}
+          className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+          onChange={(e) => setFirstName(e.target.value)}
+        // placeholder=""
+        ></Input.TextArea>
+        <h1>Last Name</h1>
+        <Input.TextArea
+          value={lastName}
+          className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+          onChange={(e) => setLastName(e.target.value)}
+        // placeholder=""
+        ></Input.TextArea>
+        <Button type="submit" onClick={handleSaveEditMember}>Save Member</Button>
+        <Button onClick={() => handleCancel("edit")}>Cancel</Button>
+      </div>)
+      }
+    </div >
   );
 };
 
