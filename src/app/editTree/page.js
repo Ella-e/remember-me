@@ -5,13 +5,22 @@ import React, { useState, useEffect } from "react";
 import Toolbar from "./Toolbar";
 import { observer } from "mobx-react-lite";
 import { treeStore } from "./store";
-import MermaidChartComponent from "./Mermaid";
 import mermaid from "mermaid";
+import "./page.css";
+import MermaidChartComponent from "./Mermaid";
+
+mermaid.initialize({
+  startOnLoad: true,
+  securityLevel: "loose",
+});
+
+
 
 const TreeEditor = () => {
-  const [start, setStart] = useState(false);
-  const [useTool, setUseTool] = useState(false);
-  const { currentNode, generable } = treeStore;
+  const [start, setStart] = useState(true);
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [desc, setDesc] = useState("");
+  const { addNode, generable, hasNode, setSelected, relation } = treeStore;
   const handleClick = () => {
     setStart(true);
   };
@@ -19,22 +28,41 @@ const TreeEditor = () => {
   class App extends React.Component {
     constructor(props) {
       super(props);
+      this.selected = "";
       this.state = {
-        description: `graph TD
-      add(("✚"))
-      click add callback`,
+        description: `graph LR
+        ${addNode.docId}((${addNode.firstName} ${addNode.lastName}))
+        click ${addNode.docId} callback`,
       };
-      this.callBack = () => {
-        setUseTool(true);
+      setDesc(this.state.description.toString());
+      this.callBack = (e) => {
+        console.log(e);
+        if (!this.selected) {
+          this.setState({
+            description: desc.toString() + `\nstyle ${e} fill:#bbf`,
+          });
+          this.selected = e;
+          setSelected(true);
+          setSelectedNode(e);
+          setDesc(this.state.description);
+          //FIXME: have to click twice
+        }
+        else {
+          this.setState({
+            description: `${desc}
+            style ${e} fill:#ECECFF`,
+          });
+          this.selected = "";
+          setSelected(false);
+        }
       };
     }
 
     refresh() {
       this.setState({
-        description: `graph TD
-        currentNode((${currentNode}))
-        currentNode --- add(("✚"))
-        click add callback`,
+        description: desc + `\nstyle ${selectedNode.docId} fill:#ECECFF
+        ${selectedNode.docId} --- ${addNode.docId}((${addNode.firstName} ${addNode.lastName}))
+        click ${addNode.docId} callback`,
       });
     }
 
@@ -50,7 +78,7 @@ const TreeEditor = () => {
               this.refresh();
               // treeStore.setGenerable(false);
             }}
-            disabled={!generable}
+          // disabled={!generable}
           >
             generate tree
           </Button>
@@ -61,22 +89,25 @@ const TreeEditor = () => {
 
   return (
     <div>
-      {!start && (
+      {/* {!start && (
         <div>
           <h1>Start to create your new family tree!</h1>
           <Button type="primary" onClick={handleClick}>
             Let's Go
           </Button>
         </div>
-      )}
+      )} */}
       {start && (
-        <div className="flex-1 min-h-0 flex justify-end">
-          <App />
-          {useTool && (
-            <div className="flex flex-col bg-white min-w-[248px] w-1/4">
-              <Toolbar />
-            </div>
-          )}
+        <div className="flex-1 flex justify-end">
+          <div className="justify-center h-full w-half">
+            <h1>Family Tree</h1>
+            {hasNode &&
+              <App />
+            }
+          </div>
+          <div className=" bg-white w-half">
+            <Toolbar />
+          </div>
         </div>
       )}
     </div>

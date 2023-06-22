@@ -1,0 +1,52 @@
+.flex-1 {
+  flex: 110%;
+}
+
+.min-h-0 {
+  min-height: 0;
+}
+
+.flex {
+  display: flex;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.bg-white {
+  background-color: #fff;
+}
+
+.w-one-third {
+  width: 33%;
+}
+
+.justify-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.ml-one-tenth {
+  margin-left: 10%;
+}
+
+.mr-one-tenth {
+  margin-right: 10%;
+}
+
+.h-full {
+  height: 100vh;
+}
+
+.w-half {
+  width: 50%;
+}
+
+.mt-10 {
+  margin-top: 10px;
+}
+
+.mr-10 {
+  margin-right: 10px;
+}
