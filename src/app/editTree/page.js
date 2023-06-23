@@ -8,6 +8,16 @@ import { treeStore } from "./store";
 import mermaid from "mermaid";
 import "./page.css";
 import MermaidChartComponent from "./Mermaid";
+import { auth, db } from "../firebase-config";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -15,48 +25,72 @@ mermaid.initialize({
 });
 
 const TreeEditor = () => {
-  const [start, setStart] = useState(true);
-  const [selectedNode, setSelectedNode] = useState(null);
   const [desc, setDesc] = useState(null);
   const [nodeInTree, setNodeInTree] = useState(null);
   const {
-    addNode,
-    generable,
     hasNode,
     setSelected,
+    selected,
     relation,
-    description,
+    setRelation,
     setDescription,
   } = treeStore;
-  const handleClick = () => {
-    setStart(true);
+
+  const updateMemberToDb = async (member, update) => {
+    // check if this person's memberlist exist first
+    const docRef = doc(db, "nodes", member.id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      // update the doc
+      await updateDoc(docRef, {
+        subgraphId: update.subgraphId
+      });
+    }
   };
+
+  // const getMemberList = async () => {
+  //   if (auth.currentUser) {
+  //     const q = query(
+  //       collection(db, "nodes"),
+  //       where("uid", "==", auth.currentUser.uid)
+  //     );
+  //     const querySnapshot = await getDocs(q);
+  //     // const tempMemberList = [...memberList];
+  //     const tempMemberList = new Array();
+  //     querySnapshot.forEach((doc) => {
+  //       // doc.data() is never undefined for query doc snapshots
+  //       const docData = doc.data();
+  //       const tempMember = {
+  //         id: docData.id,
+  //         firstName: docData.firstName,
+  //         lastName: docData.lastName,
+  //         docId: doc.id,
+  //         subgraphId: docData.subgraphId
+  //       };
+  //       tempMemberList.push(tempMember);
+  //     });
+  //     localStorage.setItem("memberList", JSON.stringify(tempMemberList));
+  //   }
+  // };
 
   class App extends React.Component {
     constructor(props) {
       super(props);
       this.selected = "";
       const tempNode = JSON.parse(localStorage.getItem("selectedMember"));
+      // if (description) {
+      //   setDesc(description);
+      // }
       if (!desc) {
         let tempDesc = `graph TD
+        subgraph ${tempNode.docId.slice(0, 10)}[ ]
+        direction LR
         ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
+        end
         click ${tempNode.docId} callback`;
         setDesc(tempDesc);
+        updateMemberToDb(tempNode, { subgraphId: tempNode.docId.slice(0, 10) });
       }
-      // this.setState({
-      //   description: `graph TD
-      // ${addNode.docId}((${addNode.firstName} ${addNode.lastName}))
-      // click ${addNode.docId} callback`,
-      // });
-
-      // this.state = {
-      //   description: `graph TD
-      //   B((B))
-      //   click B callback
-      //   A((A))---B((B))
-      //   click A callback`,
-      // };
-      // setDesc(this.state.description);
       this.callBack = (e) => {
         console.log("e");
         console.log(e);
@@ -67,63 +101,62 @@ const TreeEditor = () => {
             setNodeInTree(memberList[i]);
           }
         }
-        if (this.selected) {
+        if (selected) {
           this.selected = "";
           setSelected(false);
-          // setSelectedNode(null);
+          setDesc(desc.replace("style " + e + " fill:#bbf", ""))
+
         } else {
           this.selected = e;
           setSelected(true);
-          // setSelectedNode(JSON.parse(localStorage.getItem("selectedMember")));
+          setDesc(desc + `\nstyle ${e} fill:#bbf`)
         }
 
         // let onFocusNodeDocId = e;
         // get selectedMember from local storage
         // console.log(JSON.parse(localStorage.getItem("selectedMember")));
-
-        // if (!this.selected) {
-        //   this.setState({
-        //     description: desc.toString() + `\nstyle ${e} fill:#bbf`,
-        //   });
-        //   this.selected = e;
-        //   setSelected(true);
-        //   // setSelectedNode(treeStore.addNode);
-        //   setSelectedNode(JSON.parse(localStorage.getItem("selectedMember")));
-        //   setDesc(this.state.description);
-        //   //FIXME: have to click twice
-        // } else {
-        //   this.setState({
-        //     description: `${desc}
-        //     style ${e} fill:#ECECFF`,
-        //   });
-        //   this.selected = "";
-        //   setSelected(false);
-        // }
       };
     }
 
     refresh() {
-      // treeStore.setDescription(
-      //   treeStore.description +
-      //     `\nstyle ${selectedNode.docId} fill:#ECECFF
-      // ${selectedNode.docId} --- ${addNode.docId}((${addNode.firstName} ${addNode.lastName}))
-      // click ${addNode.docId} callback`
-      // );
-      console.log(selectedNode);
       const tempNode = JSON.parse(localStorage.getItem("selectedMember"));
-      setDesc(
-        desc +
-          `\nstyle ${nodeInTree.docId} fill:#ECECFF
-      ${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
-      click ${tempNode.docId} callback`
-      );
-      // this.setState({
-      //   description:
-      //     desc +
-      //     `\nstyle ${selectedNode.docId} fill:#ECECFF
-      //   ${selectedNode.docId}((${selectedNode.firstName} ${selectedNode.lastName})) --- ${addNode.docId}((${addNode.firstName} ${addNode.lastName}))
-      //   click ${selectedNode.docId} callback`,
-      // });
+      console.log(relation);
+      setSelected(false);
+      if (relation == "Partner") {
+        setDesc(desc.replace(`${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))`,
+          `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`).
+          replace("style " + nodeInTree.docId + " fill:#bbf", "") +
+          `click ${tempNode.docId} callback`
+        )
+        // updateMemberToDb(tempNode, { subgraphId: nodeInTree.docId.slice(0, 10) });
+      }
+      else if (relation == "Children") {
+        console.log('c');
+        //TODO: db 存 subgraph名
+        setDesc(desc.
+          replace("style " + nodeInTree.docId + " fill:#bbf", "").
+          replace(`graph TD`, `graph TD
+          subgraph ${tempNode.docId.slice(0, 10)}[ ]
+        direction LR
+        ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
+        end
+        ${nodeInTree.docId.slice(0, 10)} --- ${tempNode.docId.slice(0, 10)}`) +
+          `click ${tempNode.docId} callback`
+        )
+      }
+      else {
+        setDesc(desc.
+          replace("style " + nodeInTree.docId + " fill:#bbf", "").
+          replace(`graph TD`, `graph TD
+          subgraph ${tempNode.docId.slice(0, 10)}[ ]
+        direction LR
+        ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
+        end
+        ${tempNode.docId.slice(0, 10)} --- ${nodeInTree.docId.slice(0, 10)}`) +
+          `click ${tempNode.docId} callback`
+        )
+      }
+      setRelation("Partner");
     }
 
     render() {
@@ -131,15 +164,16 @@ const TreeEditor = () => {
       let chart = desc;
       console.log("chart");
       console.log(chart);
+      setDescription(desc);
       // let chart = treeStore.description;
       /**
- * graph LR
+    * graph LR
         01H3HAWJ6R7NTT3Q4HV40SMTTY((Jiali Yu))
         click 01H3HAWJ6R7NTT3Q4HV40SMTTY callback
-style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
+    style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
         01H3HAP36BHKGSAYQZZ1RCHK8A((Ella Mu)) --- 01H3HAWJ6R7NTT3Q4HV40SMTTY((Jiali Yu))
         click 01H3HAWJ6R7NTT3Q4HV40SMTTY callback
- */
+    */
       let test_chart = `graph TD
 style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
         01H3HAWJ6R7NTT3Q4HV40SMTTY((Jiali Yu)) --- 01H3HAP36BHKGSAYQZZ1RCHK8A((Ella Mu))
@@ -155,7 +189,7 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
               this.refresh();
               // treeStore.setGenerable(false);
             }}
-            // disabled={!generable}
+          // disabled={!generable}
           >
             generate tree
           </Button>
@@ -165,26 +199,14 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
   }
 
   return (
-    <div>
-      {/* {!start && (
-        <div>
-          <h1>Start to create your new family tree!</h1>
-          <Button type="primary" onClick={handleClick}>
-            Let's Go
-          </Button>
-        </div>
-      )} */}
-      {start && (
-        <div className="flex-1 flex justify-end">
-          <div className="justify-center h-full w-half">
-            <h1>Family Tree</h1>
-            {hasNode && <App />}
-          </div>
-          <div className=" bg-white w-half">
-            <Toolbar />
-          </div>
-        </div>
-      )}
+    <div className="flex-1 flex justify-end">
+      <div className="justify-center h-full w-half">
+        <h1>Family Tree</h1>
+        {hasNode && <App />}
+      </div>
+      <div className=" bg-white w-half">
+        <Toolbar />
+      </div>
     </div>
   );
 };

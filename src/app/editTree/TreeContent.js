@@ -148,6 +148,7 @@ const TreeContent = () => {
         firstName: member.firstName,
         lastName: member.lastName,
         used: false,
+        subgraphId: "",
       });
     }
   };
@@ -400,14 +401,14 @@ const TreeContent = () => {
             value={firstName}
             className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
             onChange={(e) => setFirstName(e.target.value)}
-            // placeholder=""
+          // placeholder=""
           ></Input.TextArea>
           <h1>Last Name</h1>
           <Input.TextArea
             value={lastName}
             className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
             onChange={(e) => setLastName(e.target.value)}
-            // placeholder=""
+          // placeholder=""
           ></Input.TextArea>
           <img src={imgData} style={{ width: "200px", height: "200px" }} />
           <input

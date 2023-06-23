@@ -7,12 +7,10 @@ import { DataGrid } from "@mui/x-data-grid";
 import { auth, db } from "../firebase-config";
 import {
   collection,
-  deleteDoc,
   doc,
   getDoc,
   getDocs,
   query,
-  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -23,18 +21,34 @@ const Toolbar = () => {
   const [loading, setLoading] = useState(true);
   const [selectedMember, setSelectedMember] = useState(null);
   const { hasNode, setHasNode, selected, setRelation } = treeStore;
+
+  const updateMemberToDb = async (member, update) => {
+    // check if this person's memberlist exist first
+    const docRef = doc(db, "nodes", member.id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      // update the doc
+      await updateDoc(docRef, {
+        used: update.used,
+        subgraphId: update.subgraphId
+      });
+    }
+  };
+
   const handleChoose = () => {
     if (selectedMember) {
-      treeStore.setAddNode(selectedMember);
-      // set selectedMember to local storage
       window.localStorage.setItem(
         "selectedMember",
         JSON.stringify(selectedMember)
       );
+      updateMemberToDb(selectedMember, { used: true, subgraphId: "" }).then(() => {
+        // set selectedMember to local storage
+
+        getMemberList();
+      })
     } else {
       alert("please choose a member from table on the right");
     }
-
     if (!hasNode) {
       setHasNode(true);
     }
@@ -50,29 +64,35 @@ const Toolbar = () => {
     />
   );
   const [memberList, setMemberList] = useState(new Array());
-  const MemberList = () => {
-    const columns = [
-      // { field: "id", headerName: "id", width: 100, hide: true },
-      { field: "firstName", headerName: "First name", width: 130 },
-      { field: "lastName", headerName: "Last name", width: 130 },
-    ];
-    return (
-      <div style={{ height: 400, width: "100%" }}>
-        <DataGrid
-          rows={memberList}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 5 },
-            },
-          }}
-          pageSizeOptions={[5, 10]}
-          rowSelection
-          onCellClick={handleSelectMember}
-        />
-      </div>
-    );
-  };
+  const columns = [
+    // { field: "id", headerName: "id", width: 100, hide: true },
+    { field: "firstName", headerName: "First name", width: 130 },
+    { field: "lastName", headerName: "Last name", width: 130 },
+  ];
+  // const MemberList = () => {
+  //   const columns = [
+  //     // { field: "id", headerName: "id", width: 100, hide: true },
+  //     { field: "firstName", headerName: "First name", width: 130 },
+  //     { field: "lastName", headerName: "Last name", width: 130 },
+  //   ];
+  //   return (
+  //     <div style={{ height: 400, width: "100%" }}>
+  //       <DataGrid
+  //         rows={memberList}
+  //         columns={columns}
+  //         initialState={{
+  //           pagination: {
+  //             paginationModel: { page: 0, pageSize: 5 },
+  //           },
+  //         }}
+  //         pageSizeOptions={[5, 10]}
+  //         rowSelection
+  //         onCellClick={handleSelectMember}
+  //       />
+  //     </div>
+  //   );
+  // };
+
   const handleSelectRelation = (value) => {
     setRelation(value);
   };
@@ -87,7 +107,24 @@ const Toolbar = () => {
         where("uid", "==", auth.currentUser.uid)
       );
       const querySnapshot = await getDocs(q);
-      const tempMemberList = [...memberList];
+      // const tempMemberList = [...memberList];
+      let tempMemberList = new Array();
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        const docData = doc.data();
+        if (!docData.used) {
+          const tempMember = {
+            id: docData.id,
+            firstName: docData.firstName,
+            lastName: docData.lastName,
+            docId: doc.id,
+            subgraphId: docData.subgraphId
+          };
+          tempMemberList.push(tempMember);
+        }
+      });
+      setMemberList(tempMemberList);
+      tempMemberList = new Array();
       querySnapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
         const docData = doc.data();
@@ -96,10 +133,10 @@ const Toolbar = () => {
           firstName: docData.firstName,
           lastName: docData.lastName,
           docId: doc.id,
+          subgraphId: docData.subgraphId
         };
         tempMemberList.push(tempMember);
       });
-      setMemberList(tempMemberList);
       localStorage.setItem("memberList", JSON.stringify(tempMemberList));
     }
     setLoading(false);
@@ -142,7 +179,21 @@ const Toolbar = () => {
       )}
       <h1>Choose Member</h1>
       <div>{selectedMember?.lastName}</div>
-      <MemberList />
+      {/* <MemberList /> */}
+      <div style={{ height: 400, width: "100%" }}>
+        <DataGrid
+          rows={memberList}
+          columns={columns}
+          initialState={{
+            pagination: {
+              paginationModel: { page: 0, pageSize: 5 },
+            },
+          }}
+          pageSizeOptions={[5, 10]}
+          rowSelection
+          onCellClick={handleSelectMember}
+        />
+      </div>
       <Button
         type="primary"
         onClick={handleChoose}

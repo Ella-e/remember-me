@@ -40,19 +40,9 @@ subgraph Grandparents[ ]
   const testContent = `
   graph TD
   subgraph Layer1[ ]
-    Father((Father))
+  direction LR
+    Father((Father)) --- B((B))
   end
-
-  subgraph Layer2-1[ ]
-    Son((Son)) 
-  end
-
-  subgraph Layer2-2[ ]
-    Daughter((Daughter)) 
-  end
-
-  Layer1 --- Layer2-1
-  Layer1 --- Layer2-2
   `;
 
   useEffect(() => {
@@ -68,7 +58,8 @@ subgraph Grandparents[ ]
   // Example of using the bindFunctions
   const drawDiagram = async function () {
     const element = document.querySelector(".graphDiv");
-    const graphDefinition = "graph TB\na-->b";
+    // const graphDefinition = "graph TB\na-->b";
+    const graphDefinition = testContent;
     const { svg, bindFunctions } = await mermaid.render(
       "graphDiv",
       graphDefinition

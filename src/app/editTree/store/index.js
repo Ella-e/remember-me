@@ -1,19 +1,14 @@
 import { action, makeAutoObservable } from "mobx";
 class TreeStore {
-  addNode = null;
   generable = false;
   hasNode = false; //FIXME: move
   callback = "";
   selected = false;
-  relation = "";
-  description = "graph LR";
+  relation = "Partner";
+  description = "";
 
   constructor() {
     makeAutoObservable(this);
-  }
-
-  setAddNode(node) {
-    this.addNode = node;
   }
 
   setGenerable(bool) {
@@ -30,6 +25,7 @@ class TreeStore {
 
   setRelation = (str) => {
     this.relation = str;
+    console.log(this.relation);
   };
 
   setSelected = (bool) => {
