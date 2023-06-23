@@ -42,6 +42,8 @@ const TreeContent = () => {
   const [loading, setLoading] = useState(false);
   const currentUid = auth?.currentUser?.uid;
   const [authWarning, setAuthWarning] = useState(false);
+  const [imgState, setImgState] = useState(true);
+  const [imgData, setImgData] = useState(null);
 
   // Initialize memerbList
   const [memberList, setMemberList] = useState(new Array());
@@ -163,6 +165,7 @@ const TreeContent = () => {
    * handle add member action.
    */
   const handleAddMember = (event) => {
+    console.log("run save add");
     let newMember = {};
     try {
       // generate ulid for the member
@@ -194,13 +197,14 @@ const TreeContent = () => {
   const handleCancel = (str) => {
     setFirstName("");
     setLastName("");
-    if (str === "edit") {
-      setIsEdit(false);
-    }
-    else {
-      setEditNode(false);
-    }
-  }
+    setIsEdit(false);
+    setEditNode(false);
+    // if (str === "edit") {
+    //   setIsEdit(false);
+    // } else {
+    //   setEditNode(false);
+    // }
+  };
   const handleSelectMember = (event) => {
     console.log(event);
     setSelectedMember(event.row);
@@ -214,7 +218,8 @@ const TreeContent = () => {
       setFirstName(selectedMember.firstName);
       setLastName(selectedMember.lastName);
       setSelectedId(selectedMember.id);
-      setIsEdit(true);
+      setEditNode(true); // open the page
+      setIsEdit(true); // call right submit function
     }
   };
 
@@ -222,6 +227,7 @@ const TreeContent = () => {
    * handle save editted member information action.
    */
   const handleSaveEditMember = () => {
+    console.log("run save edit");
     let newMember = {};
     if (selectedId) {
       try {
@@ -248,6 +254,7 @@ const TreeContent = () => {
       }
     }
     setIsEdit(false);
+    setEditNode(false);
     setFirstName("");
     setLastName("");
     setSelectedMember(null);
@@ -316,12 +323,23 @@ const TreeContent = () => {
       </Dialog>
     );
   };
-  // const AddOneMember = () => {
-  //   return (
 
-  //   );
-  // };
-
+  const handleSelectImage = (event) => {
+    // console.log(event);
+    let imgFile = event.target.files[0];
+    if (imgFile.size > 1024000) {
+      alert("image size can't exeed 1M");
+    } else {
+      let reader = new FileReader();
+      reader.readAsDataURL(imgFile);
+      reader.onload = function (subEvent) {
+        let img = this.result;
+        console.log(img);
+        setImgState(false);
+        setImgData(img);
+      };
+    }
+  };
 
   return (
     <div>
@@ -374,48 +392,39 @@ const TreeContent = () => {
           </Box>
         </div>
       )}
-      {editNode && !isEdit && (<div className="border-line-[#E4E6F0] rounded-2xl leading-5 overflow-auto h-[189px] mb-[26px]">
-
-        <h1>First Name</h1>
-        <Input.TextArea
-          value={firstName}
-          className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-          onChange={(e) => setFirstName(e.target.value)}
-        // placeholder=""
-        ></Input.TextArea>
-        <h1>Last Name</h1>
-        <Input.TextArea
-          value={lastName}
-          className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-          onChange={(e) => setLastName(e.target.value)}
-        // placeholder=""
-        ></Input.TextArea>
-        <Button type="submit" onClick={handleAddMember}>Save Member</Button>
-        <Button onClick={() => handleCancel("add")}>Cancel</Button>
-
-      </div>)}
-      {isEdit && (<div className="border-line-[#E4E6F0] rounded-2xl leading-5 overflow-auto h-[189px] mb-[26px]">
-        <h1>Edit member</h1>
-
-        <h1>First Name</h1>
-        <Input.TextArea
-          value={firstName}
-          className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-          onChange={(e) => setFirstName(e.target.value)}
-        // placeholder=""
-        ></Input.TextArea>
-        <h1>Last Name</h1>
-        <Input.TextArea
-          value={lastName}
-          className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-          onChange={(e) => setLastName(e.target.value)}
-        // placeholder=""
-        ></Input.TextArea>
-        <Button type="submit" onClick={handleSaveEditMember}>Save Member</Button>
-        <Button onClick={() => handleCancel("edit")}>Cancel</Button>
-      </div>)
-      }
-    </div >
+      {editNode && (
+        <div className="border-line-[#E4E6F0] rounded-2xl leading-5 overflow-auto h-[189px] mb-[26px]">
+          <h1>First Name</h1>
+          <Input.TextArea
+            value={firstName}
+            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+            onChange={(e) => setFirstName(e.target.value)}
+            // placeholder=""
+          ></Input.TextArea>
+          <h1>Last Name</h1>
+          <Input.TextArea
+            value={lastName}
+            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+            onChange={(e) => setLastName(e.target.value)}
+            // placeholder=""
+          ></Input.TextArea>
+          <img src={imgData} style={{ width: "200px", height: "200px" }} />
+          <input
+            id="image"
+            type="file"
+            accept="image/jpeg,image/jpg,image/png"
+            onChange={handleSelectImage}
+          />
+          <Button
+            type="submit"
+            onClick={isEdit ? handleSaveEditMember : handleAddMember}
+          >
+            Save Member
+          </Button>
+          <Button onClick={() => handleCancel("add")}>Cancel</Button>
+        </div>
+      )}
+    </div>
   );
 };
 
