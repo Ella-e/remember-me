@@ -147,6 +147,7 @@ const TreeContent = () => {
         uid: currentUid,
         firstName: member.firstName,
         lastName: member.lastName,
+        used: false,
       });
     }
   };

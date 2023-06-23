@@ -16,16 +16,25 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { LoadingOutlined } from '@ant-design/icons';
-import { Spin } from 'antd';
-
+import { LoadingOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
 
 const Toolbar = () => {
   const [loading, setLoading] = useState(true);
   const [selectedMember, setSelectedMember] = useState(null);
-  const { hasNode, setHasNode, selected, setRelation } = treeStore
+  const { hasNode, setHasNode, selected, setRelation } = treeStore;
   const handleChoose = () => {
-    treeStore.setAddNode(selectedMember);
+    if (selectedMember) {
+      treeStore.setAddNode(selectedMember);
+      // set selectedMember to local storage
+      window.localStorage.setItem(
+        "selectedMember",
+        JSON.stringify(selectedMember)
+      );
+    } else {
+      alert("please choose a member from table on the right");
+    }
+
     if (!hasNode) {
       setHasNode(true);
     }
@@ -66,7 +75,7 @@ const Toolbar = () => {
   };
   const handleSelectRelation = (value) => {
     setRelation(value);
-  }
+  };
   const handleSelectMember = (event) => {
     setSelectedMember(event.row);
   };
@@ -86,11 +95,12 @@ const Toolbar = () => {
           id: docData.id,
           firstName: docData.firstName,
           lastName: docData.lastName,
-          docId: doc.id
+          docId: doc.id,
         };
         tempMemberList.push(tempMember);
       });
       setMemberList(tempMemberList);
+      localStorage.setItem("memberList", JSON.stringify(tempMemberList));
     }
     setLoading(false);
   };
@@ -99,40 +109,46 @@ const Toolbar = () => {
     getMemberList();
   }, []);
 
-
   return (
     // <div className="flex justify-between items-center">
 
     <div className="ml-one-tenth h-full mr-one-tenth">
       <Spin indicator={antIcon} spinning={loading} />
-      {selected && (<div>
-        <h1>Relationship</h1>
-        <Select
-          defaultValue="Partner"
-          style={{
-            width: 120,
-          }}
-          onChange={handleSelectRelation}
-          options={[
-            {
-              value: 'Partner',
-              label: 'Partner',
-            },
-            {
-              value: 'Parent',
-              label: 'Parent',
-            },
-            {
-              value: 'Children',
-              label: 'Children',
-            },
-          ]}
-        />
-
-      </div>)}
+      {selected && (
+        <div>
+          <h1>Relationship</h1>
+          <Select
+            defaultValue="Partner"
+            style={{
+              width: 120,
+            }}
+            onChange={handleSelectRelation}
+            options={[
+              {
+                value: "Partner",
+                label: "Partner",
+              },
+              {
+                value: "Parent",
+                label: "Parent",
+              },
+              {
+                value: "Children",
+                label: "Children",
+              },
+            ]}
+          />
+        </div>
+      )}
       <h1>Choose Member</h1>
+      <div>{selectedMember?.lastName}</div>
       <MemberList />
-      <Button type="primary" onClick={handleChoose} disabled={!selectedMember} className="mt-10">
+      <Button
+        type="primary"
+        onClick={handleChoose}
+        disabled={!selectedMember}
+        className="mt-10"
+      >
         CHOOSE
       </Button>
     </div>
