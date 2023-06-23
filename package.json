@@ -15,17 +15,19 @@
     "@mui/material": "^5.13.2",
     "@mui/x-data-grid": "^6.8.0",
     "antd": "^5.5.2",
-    "autoprefixer": "^10.4.14",
     "encoding": "^0.1.13",
     "firebase": "^9.22.2",
     "mermaid": "^10.2.3",
     "mobx": "^6.9.0",
     "mobx-react-lite": "^3.4.3",
-    "next": "^13.4.5",
-    "postcss": "^8.4.24",
+    "next": "^13.4.7",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.12.1",
-    "supports-color": "^9.3.1",
+    "supports-color": "^9.3.1"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.24",
     "tailwindcss": "^3.3.2"
   }
 }

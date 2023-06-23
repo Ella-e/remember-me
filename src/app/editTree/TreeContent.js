@@ -84,7 +84,6 @@ const TreeContent = () => {
   }, []);
 
   useEffect(() => {
-    //TODO: get member list
     setMemberList(memberList);
   }, [memberList]);
 
