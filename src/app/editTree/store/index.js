@@ -2,6 +2,7 @@ import { action, makeAutoObservable } from "mobx";
 class TreeStore {
   generable = false;
   hasNode = false; //FIXME: move
+  onRootNode = false;
   callback = "";
   selected = false;
   relation = "Partner";
@@ -17,6 +18,10 @@ class TreeStore {
 
   setHasNode = (bool) => {
     this.hasNode = bool;
+  };
+
+  setOnRootNode = (bool) => {
+    this.onRootNode = bool;
   };
 
   setCallBack = (str) => {

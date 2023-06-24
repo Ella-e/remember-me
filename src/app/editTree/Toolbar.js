@@ -16,13 +16,21 @@ import {
 } from "firebase/firestore";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
+import { Card, CardContent, Typography } from "@mui/material";
 
 const Toolbar = () => {
   const [loading, setLoading] = useState(true);
   const [selectedMember, setSelectedMember] = useState(null);
-  const { hasNode, setHasNode, selected, setRelation } = treeStore;
+  const {
+    hasNode,
+    setHasNode,
+    onRootNode,
+    setOnRootNode,
+    selected,
+    setRelation,
+  } = treeStore;
 
-  const updateMemberToDb = async (member, update) => {
+  const markUseState = async (member, update) => {
     // check if this person's memberlist exist first
     const docRef = doc(db, "nodes", member.id);
     const docSnap = await getDoc(docRef);
@@ -30,22 +38,36 @@ const Toolbar = () => {
       // update the doc
       await updateDoc(docRef, {
         used: update.used,
-        subgraphId: update.subgraphId
+        subgraphId: update.subgraphId,
+      });
+    }
+    localStorage.setItem("refresh", JSON.stringify(new Date()));
+  };
+
+  const handleUnChoose = () => {
+    const temp = JSON.parse(localStorage.getItem("selectedMember"));
+    if (temp) {
+      // document.getElementById("unchoose-button").disabled = true;
+      // document.getElementById("choose-button").disabled = false;
+      window.localStorage.removeItem("selectedMember");
+      markUseState(temp, { used: false, subgraphId: "" }).then(() => {
+        getMemberList();
       });
     }
   };
 
   const handleChoose = () => {
     if (selectedMember) {
+      // document.getElementById("choose-button").disabled = true;
+      // document.getElementById("unchoose-button").disabled = false;
       window.localStorage.setItem(
         "selectedMember",
         JSON.stringify(selectedMember)
       );
-      updateMemberToDb(selectedMember, { used: true, subgraphId: "" }).then(() => {
+      markUseState(selectedMember, { used: true, subgraphId: "" }).then(() => {
         // set selectedMember to local storage
-
         getMemberList();
-      })
+      });
     } else {
       alert("please choose a member from table on the right");
     }
@@ -69,29 +91,6 @@ const Toolbar = () => {
     { field: "firstName", headerName: "First name", width: 130 },
     { field: "lastName", headerName: "Last name", width: 130 },
   ];
-  // const MemberList = () => {
-  //   const columns = [
-  //     // { field: "id", headerName: "id", width: 100, hide: true },
-  //     { field: "firstName", headerName: "First name", width: 130 },
-  //     { field: "lastName", headerName: "Last name", width: 130 },
-  //   ];
-  //   return (
-  //     <div style={{ height: 400, width: "100%" }}>
-  //       <DataGrid
-  //         rows={memberList}
-  //         columns={columns}
-  //         initialState={{
-  //           pagination: {
-  //             paginationModel: { page: 0, pageSize: 5 },
-  //           },
-  //         }}
-  //         pageSizeOptions={[5, 10]}
-  //         rowSelection
-  //         onCellClick={handleSelectMember}
-  //       />
-  //     </div>
-  //   );
-  // };
 
   const handleSelectRelation = (value) => {
     setRelation(value);
@@ -101,6 +100,7 @@ const Toolbar = () => {
   };
 
   const getMemberList = async () => {
+    setLoading(true);
     if (auth.currentUser) {
       const q = query(
         collection(db, "nodes"),
@@ -118,25 +118,13 @@ const Toolbar = () => {
             firstName: docData.firstName,
             lastName: docData.lastName,
             docId: doc.id,
-            subgraphId: docData.subgraphId
+            subgraphId: docData.subgraphId,
+            used: docData.used,
           };
           tempMemberList.push(tempMember);
         }
       });
       setMemberList(tempMemberList);
-      tempMemberList = new Array();
-      querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        const docData = doc.data();
-        const tempMember = {
-          id: docData.id,
-          firstName: docData.firstName,
-          lastName: docData.lastName,
-          docId: doc.id,
-          subgraphId: docData.subgraphId
-        };
-        tempMemberList.push(tempMember);
-      });
       localStorage.setItem("memberList", JSON.stringify(tempMemberList));
     }
     setLoading(false);
@@ -178,7 +166,6 @@ const Toolbar = () => {
         </div>
       )}
       <h1>Choose Member</h1>
-      <div>{selectedMember?.lastName}</div>
       {/* <MemberList /> */}
       <div style={{ height: 400, width: "100%" }}>
         <DataGrid
@@ -195,6 +182,7 @@ const Toolbar = () => {
         />
       </div>
       <Button
+        id="choose-button"
         type="primary"
         onClick={handleChoose}
         disabled={!selectedMember}
@@ -202,6 +190,27 @@ const Toolbar = () => {
       >
         CHOOSE
       </Button>
+      <Button
+        id="unchoose-button"
+        type="primary"
+        onClick={handleUnChoose}
+        className="mt-10"
+      >
+        UNCHOOSE
+      </Button>
+      <h1>Chosen Member</h1>
+      <Card sx={{ minWidth: 275 }}>
+        <CardContent>
+          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+            First Name:{" "}
+            {JSON.parse(localStorage.getItem("selectedMember"))?.firstName}
+          </Typography>
+          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+            Last Name:{" "}
+            {JSON.parse(localStorage.getItem("selectedMember"))?.lastName}
+          </Typography>
+        </CardContent>
+      </Card>
     </div>
   );
 };

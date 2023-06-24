@@ -29,6 +29,9 @@ const TreeEditor = () => {
   const [nodeInTree, setNodeInTree] = useState(null);
   const {
     hasNode,
+    setHasNode,
+    onRootNode,
+    setOnRootNode,
     setSelected,
     selected,
     relation,
@@ -43,7 +46,7 @@ const TreeEditor = () => {
     if (docSnap.exists()) {
       // update the doc
       await updateDoc(docRef, {
-        subgraphId: update.subgraphId
+        subgraphId: update.subgraphId,
       });
     }
   };
@@ -77,10 +80,10 @@ const TreeEditor = () => {
     constructor(props) {
       super(props);
       this.selected = "";
-      const tempNode = JSON.parse(localStorage.getItem("selectedMember"));
       // if (description) {
       //   setDesc(description);
       // }
+      const tempNode = JSON.parse(localStorage.getItem("selectedMember"));
       if (!desc) {
         let tempDesc = `graph TD
         subgraph ${tempNode.docId.slice(0, 10)}[ ]
@@ -89,11 +92,15 @@ const TreeEditor = () => {
         end
         click ${tempNode.docId} callback`;
         setDesc(tempDesc);
-        updateMemberToDb(tempNode, { subgraphId: tempNode.docId.slice(0, 10) });
+        updateMemberToDb(tempNode, {
+          subgraphId: tempNode.docId.slice(0, 10),
+        });
       }
+
       this.callBack = (e) => {
         console.log("e");
         console.log(e);
+        // setOnRootNode(false);
         const memberList = JSON.parse(localStorage.getItem("memberList"));
         // select member by id from memberlist
         for (let i = 0; i < memberList.length; i++) {
@@ -104,12 +111,11 @@ const TreeEditor = () => {
         if (selected) {
           this.selected = "";
           setSelected(false);
-          setDesc(desc.replace("style " + e + " fill:#bbf", ""))
-
+          setDesc(desc.replace("style " + e + " fill:#bbf", ""));
         } else {
           this.selected = e;
           setSelected(true);
-          setDesc(desc + `\nstyle ${e} fill:#bbf`)
+          setDesc(desc + `\nstyle ${e} fill:#bbf`);
         }
 
         // let onFocusNodeDocId = e;
@@ -119,44 +125,51 @@ const TreeEditor = () => {
     }
 
     refresh() {
+      setHasNode(true);
       const tempNode = JSON.parse(localStorage.getItem("selectedMember"));
       console.log(relation);
       setSelected(false);
       if (relation == "Partner") {
-        setDesc(desc.replace(`${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))`,
-          `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`).
-          replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-          `click ${tempNode.docId} callback`
-        )
+        setDesc(
+          desc
+            ?.replace(
+              `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))`,
+              `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
+            )
+            .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
+            `click ${tempNode.docId} callback`
+        );
         // updateMemberToDb(tempNode, { subgraphId: nodeInTree.docId.slice(0, 10) });
-      }
-      else if (relation == "Children") {
-        console.log('c');
+      } else if (relation == "Children") {
+        console.log("c");
         //TODO: db 存 subgraph名
-        setDesc(desc.
-          replace("style " + nodeInTree.docId + " fill:#bbf", "").
-          replace(`graph TD`, `graph TD
+        setDesc(
+          desc?.replace("style " + nodeInTree.docId + " fill:#bbf", "").replace(
+            `graph TD`,
+            `graph TD
           subgraph ${tempNode.docId.slice(0, 10)}[ ]
         direction LR
         ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
         end
-        ${nodeInTree.docId.slice(0, 10)} --- ${tempNode.docId.slice(0, 10)}`) +
-          `click ${tempNode.docId} callback`
-        )
-      }
-      else {
-        setDesc(desc.
-          replace("style " + nodeInTree.docId + " fill:#bbf", "").
-          replace(`graph TD`, `graph TD
+        ${nodeInTree.docId.slice(0, 10)} --- ${tempNode.docId.slice(0, 10)}`
+          ) + `click ${tempNode.docId} callback`
+        );
+      } else {
+        setDesc(
+          desc?.replace("style " + nodeInTree.docId + " fill:#bbf", "").replace(
+            `graph TD`,
+            `graph TD
           subgraph ${tempNode.docId.slice(0, 10)}[ ]
         direction LR
         ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
         end
-        ${tempNode.docId.slice(0, 10)} --- ${nodeInTree.docId.slice(0, 10)}`) +
-          `click ${tempNode.docId} callback`
-        )
+        ${tempNode.docId.slice(0, 10)} --- ${nodeInTree.docId.slice(0, 10)}`
+          ) + `click ${tempNode.docId} callback`
+        );
       }
       setRelation("Partner");
+      // release localStorage
+      localStorage.removeItem("selectedMember");
     }
 
     render() {
@@ -189,7 +202,7 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
               this.refresh();
               // treeStore.setGenerable(false);
             }}
-          // disabled={!generable}
+            // disabled={!generable}
           >
             generate tree
           </Button>
