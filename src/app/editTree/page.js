@@ -39,8 +39,6 @@ const TreeEditor = () => {
     setDescription,
   } = treeStore;
 
-
-
   const getTree = async () => {
     const docRef = doc(db, "trees", currentUid);
     const docSnap = await getDoc(docRef);
@@ -53,7 +51,20 @@ const TreeEditor = () => {
   useEffect(() => {
     if (auth.currentUser) {
       getTree();
+      return () => {
+        const memberList = JSON.parse(localStorage.getItem("memberList"));
+        const docRef = doc(db, "trees", currentUid);
+        getDoc(docRef).then((docSnap) => {
+          if (docSnap.exists()) { }
+          for (let i = 0; i < memberList.length; i++) {
+            if (docSnap.data().desc.search(memberList[i].docId) === -1) {
+              updateMemberToDb(memberList[i], { subgraphId: memberList[i].subgraphId, used: false });
+            }
+          }
+        });
+      }
     }
+
   }, []);
 
   const saveTreeToDb = async (desc) => {
@@ -79,9 +90,11 @@ const TreeEditor = () => {
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       // update the doc
-      await updateDoc(docRef, {
-        subgraphId: update.subgraphId,
-      }).then(() => {
+      const updateData = { subgraphId: update.subgraphId };
+      if (update.hasOwnProperty("used")) {
+        updateData.used = update.used;
+      }
+      await updateDoc(docRef, updateData).then(() => {
         const memberList = JSON.parse(localStorage.getItem("memberList"));
         for (let i = 0; i < memberList.length; i++) {
           if (memberList[i].docId === member.docId) {
@@ -96,27 +109,29 @@ const TreeEditor = () => {
   class App extends React.Component {
     constructor(props) {
       super(props);
-      this.selected = "";
 
       this.callBack = (e) => {
-        console.log("e");
         console.log(e);
         // setOnRootNode(false);
         const memberList = JSON.parse(localStorage.getItem("memberList"));
         // select member by id from memberlist
-        for (let i = 0; i < memberList.length; i++) {
-          if (memberList[i].docId === e) {
-            setNodeInTree(memberList[i]);
-          }
-        }
-        if (selected) {
-          this.selected = "";
+
+        if (nodeInTree && nodeInTree.docId === e) {
           setSelected(false);
           setDesc(desc.replace("style " + e + " fill:#bbf", ""));
+          setNodeInTree(null);
         } else {
-          this.selected = e;
+          if (!nodeInTree) {
+            setDesc(desc + `\nstyle ${e} fill:#bbf`);
+          } else {
+            setDesc(desc.replace("style " + nodeInTree.docId + " fill:#bbf", "style " + e + " fill:#bbf"));
+          }
+          for (let i = 0; i < memberList.length; i++) {
+            if (memberList[i].docId === e) {
+              setNodeInTree(memberList[i]);
+            }
+          }
           setSelected(true);
-          setDesc(desc + `\nstyle ${e} fill:#bbf`);
         }
 
         // let onFocusNodeDocId = e;
@@ -152,7 +167,6 @@ const TreeEditor = () => {
         );
         updateMemberToDb(tempNode, { subgraphId: nodeInTree.docId.slice(0, 10) });
       } else if (relation == "Children") {
-        console.log("c");
         //TODO: db 存 subgraph名
         setDesc(
           desc?.replace("style " + nodeInTree.docId + " fill:#bbf", "").replace(
@@ -183,6 +197,8 @@ const TreeEditor = () => {
       setRelation("Partner");
       // release localStorage
       localStorage.removeItem("selectedMember");
+      setNodeInTree(null);
+      setSelected(false);
     }
 
     save() {
@@ -212,7 +228,6 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
 
       return (
         <div className="App">
-          {desc && <MermaidChartComponent chart={chart} callBack={this.callBack} />}
           <Button
             className="mr-10"
             type="primary"
@@ -226,7 +241,10 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
           </Button>
           <Button
             type="primary"
-            onClick={() => { this.save(); }}>SAVE</Button>
+            onClick={() => { this.save(); }}>
+            SAVE
+          </Button>
+          {desc && <MermaidChartComponent chart={chart} callBack={this.callBack} />}
         </div >
       );
     }
