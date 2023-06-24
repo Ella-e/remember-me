@@ -10,13 +10,14 @@ import "./page.css";
 import MermaidChartComponent from "./Mermaid";
 import { auth, db } from "../firebase-config";
 import {
-  collection,
   doc,
   getDoc,
-  getDocs,
-  query,
   updateDoc,
+  setDoc,
+  query,
+  collection,
   where,
+  getDocs,
 } from "firebase/firestore";
 
 mermaid.initialize({
@@ -25,19 +26,52 @@ mermaid.initialize({
 });
 
 const TreeEditor = () => {
-  const [desc, setDesc] = useState(null);
+  const [desc, setDesc] = useState("");
   const [nodeInTree, setNodeInTree] = useState(null);
+  const currentUid = auth?.currentUser?.uid;
   const {
     hasNode,
     setHasNode,
-    onRootNode,
-    setOnRootNode,
     setSelected,
     selected,
     relation,
     setRelation,
     setDescription,
   } = treeStore;
+
+
+
+  const getTree = async () => {
+    const docRef = doc(db, "trees", currentUid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      setDesc(data.desc);
+      setHasNode(true);
+    }
+  }
+  useEffect(() => {
+    if (auth.currentUser) {
+      getTree();
+    }
+  }, []);
+
+  const saveTreeToDb = async (desc) => {
+    const docRef = doc(db, "trees", currentUid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      // update the doc
+      await updateDoc(docRef, {
+        desc: desc
+      });
+    } else {
+      await setDoc(docRef, {
+        id: currentUid,
+        uid: currentUid,
+        desc: desc
+      });
+    }
+  };
 
   const updateMemberToDb = async (member, update) => {
     // check if this person's memberlist exist first
@@ -47,55 +81,22 @@ const TreeEditor = () => {
       // update the doc
       await updateDoc(docRef, {
         subgraphId: update.subgraphId,
+      }).then(() => {
+        const memberList = JSON.parse(localStorage.getItem("memberList"));
+        for (let i = 0; i < memberList.length; i++) {
+          if (memberList[i].docId === member.docId) {
+            memberList[i].subgraphId = update.subgraphId;
+          }
+        }
+        localStorage.setItem("memberList", JSON.stringify(memberList));
       });
     }
   };
-
-  // const getMemberList = async () => {
-  //   if (auth.currentUser) {
-  //     const q = query(
-  //       collection(db, "nodes"),
-  //       where("uid", "==", auth.currentUser.uid)
-  //     );
-  //     const querySnapshot = await getDocs(q);
-  //     // const tempMemberList = [...memberList];
-  //     const tempMemberList = new Array();
-  //     querySnapshot.forEach((doc) => {
-  //       // doc.data() is never undefined for query doc snapshots
-  //       const docData = doc.data();
-  //       const tempMember = {
-  //         id: docData.id,
-  //         firstName: docData.firstName,
-  //         lastName: docData.lastName,
-  //         docId: doc.id,
-  //         subgraphId: docData.subgraphId
-  //       };
-  //       tempMemberList.push(tempMember);
-  //     });
-  //     localStorage.setItem("memberList", JSON.stringify(tempMemberList));
-  //   }
-  // };
 
   class App extends React.Component {
     constructor(props) {
       super(props);
       this.selected = "";
-      // if (description) {
-      //   setDesc(description);
-      // }
-      const tempNode = JSON.parse(localStorage.getItem("selectedMember"));
-      if (!desc) {
-        let tempDesc = `graph TD
-        subgraph ${tempNode.docId.slice(0, 10)}[ ]
-        direction LR
-        ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
-        end
-        click ${tempNode.docId} callback`;
-        setDesc(tempDesc);
-        updateMemberToDb(tempNode, {
-          subgraphId: tempNode.docId.slice(0, 10),
-        });
-      }
 
       this.callBack = (e) => {
         console.log("e");
@@ -125,11 +126,21 @@ const TreeEditor = () => {
     }
 
     refresh() {
-      setHasNode(true);
       const tempNode = JSON.parse(localStorage.getItem("selectedMember"));
-      console.log(relation);
       setSelected(false);
-      if (relation == "Partner") {
+      if (!desc) {
+        let tempDesc = `graph TD
+        subgraph ${tempNode.docId.slice(0, 10)}[ ]
+        direction LR
+        ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
+        end
+        click ${tempNode.docId} callback`;
+        setDesc(tempDesc);
+        updateMemberToDb(tempNode, {
+          subgraphId: tempNode.docId.slice(0, 10),
+        });
+      }
+      else if (relation == "Partner") {
         setDesc(
           desc
             ?.replace(
@@ -137,9 +148,9 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-            `click ${tempNode.docId} callback`
+          `click ${tempNode.docId} callback`
         );
-        // updateMemberToDb(tempNode, { subgraphId: nodeInTree.docId.slice(0, 10) });
+        updateMemberToDb(tempNode, { subgraphId: nodeInTree.docId.slice(0, 10) });
       } else if (relation == "Children") {
         console.log("c");
         //TODO: db 存 subgraph名
@@ -151,9 +162,10 @@ const TreeEditor = () => {
         direction LR
         ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
         end
-        ${nodeInTree.docId.slice(0, 10)} --- ${tempNode.docId.slice(0, 10)}`
+        ${nodeInTree.subgraphId.slice(0, 10)} --- ${tempNode.docId.slice(0, 10)}`
           ) + `click ${tempNode.docId} callback`
         );
+        updateMemberToDb(tempNode, { subgraphId: tempNode.docId.slice(0, 10) });
       } else {
         setDesc(
           desc?.replace("style " + nodeInTree.docId + " fill:#bbf", "").replace(
@@ -163,13 +175,18 @@ const TreeEditor = () => {
         direction LR
         ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
         end
-        ${tempNode.docId.slice(0, 10)} --- ${nodeInTree.docId.slice(0, 10)}`
+        ${tempNode.docId.slice(0, 10)} --- ${nodeInTree.subgraphId.slice(0, 10)}`
           ) + `click ${tempNode.docId} callback`
         );
+        updateMemberToDb(tempNode, { subgraphId: tempNode.docId.slice(0, 10) });
       }
       setRelation("Partner");
       // release localStorage
       localStorage.removeItem("selectedMember");
+    }
+
+    save() {
+      saveTreeToDb(desc);
     }
 
     render() {
@@ -195,18 +212,22 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
 
       return (
         <div className="App">
-          <MermaidChartComponent chart={chart} callBack={this.callBack} />
+          {desc && <MermaidChartComponent chart={chart} callBack={this.callBack} />}
           <Button
+            className="mr-10"
             type="primary"
             onClick={() => {
               this.refresh();
               // treeStore.setGenerable(false);
             }}
-            // disabled={!generable}
+          // disabled={!generable}
           >
-            generate tree
+            GENERATE TREE
           </Button>
-        </div>
+          <Button
+            type="primary"
+            onClick={() => { this.save(); }}>SAVE</Button>
+        </div >
       );
     }
   }

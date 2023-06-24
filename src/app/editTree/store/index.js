@@ -30,7 +30,6 @@ class TreeStore {
 
   setRelation = (str) => {
     this.relation = str;
-    console.log(this.relation);
   };
 
   setSelected = (bool) => {

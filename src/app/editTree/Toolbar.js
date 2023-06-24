@@ -125,6 +125,19 @@ const Toolbar = () => {
         }
       });
       setMemberList(tempMemberList);
+      tempMemberList = new Array();
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        const docData = doc.data();
+        const tempMember = {
+          id: docData.id,
+          firstName: docData.firstName,
+          lastName: docData.lastName,
+          docId: doc.id,
+          subgraphId: docData.subgraphId
+        };
+        tempMemberList.push(tempMember);
+      });
       localStorage.setItem("memberList", JSON.stringify(tempMemberList));
     }
     setLoading(false);
@@ -186,7 +199,7 @@ const Toolbar = () => {
         type="primary"
         onClick={handleChoose}
         disabled={!selectedMember}
-        className="mt-10"
+        className="mt-10 mr-10"
       >
         CHOOSE
       </Button>
