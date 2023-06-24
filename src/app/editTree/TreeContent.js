@@ -30,6 +30,10 @@ import {
   where,
 } from "firebase/firestore";
 import { auth, db } from "../firebase-config";
+// import RichText from "./RichText";
+import ReactQuill from "react-quill";
+import "../../../node_modules/react-quill/dist/quill.snow.css";
+import { FORMATS, MODULES } from "./RichText";
 
 const TreeContent = () => {
   const [editNode, setEditNode] = useState(false);
@@ -44,6 +48,7 @@ const TreeContent = () => {
   const [authWarning, setAuthWarning] = useState(false);
   const [imgState, setImgState] = useState(true);
   const [imgData, setImgData] = useState(null);
+  const [richTextValue, setRichTextValue] = useState("");
 
   // Initialize memerbList
   const [memberList, setMemberList] = useState(new Array());
@@ -65,6 +70,7 @@ const TreeContent = () => {
           id: docData.id,
           firstName: docData.firstName,
           lastName: docData.lastName,
+          story: docData.story,
         };
         tempMemberList.push(tempMember);
         console.log(doc.id, " => ", doc.data());
@@ -140,6 +146,7 @@ const TreeContent = () => {
       await updateDoc(docRef, {
         firstName: member.firstName,
         lastName: member.lastName,
+        story: richTextValue,
       });
     } else {
       await setDoc(docRef, {
@@ -149,6 +156,7 @@ const TreeContent = () => {
         lastName: member.lastName,
         used: false,
         subgraphId: "",
+        sotry: richTextValue,
       });
     }
   };
@@ -178,6 +186,7 @@ const TreeContent = () => {
         id: tempUid,
         firstName: firstName,
         lastName: lastName,
+        story: richTextValue,
       };
       if (memberList) {
         setMemberList((current) => [...current, newMember]);
@@ -193,12 +202,14 @@ const TreeContent = () => {
     }
     setFirstName("");
     setLastName("");
+    setRichTextValue("");
     setEditNode(false);
   };
 
   const handleCancel = (str) => {
     setFirstName("");
     setLastName("");
+    setRichTextValue("");
     setIsEdit(false);
     setEditNode(false);
     // if (str === "edit") {
@@ -220,6 +231,7 @@ const TreeContent = () => {
       setFirstName(selectedMember.firstName);
       setLastName(selectedMember.lastName);
       setSelectedId(selectedMember.id);
+      setRichTextValue(selectedMember.story);
       setEditNode(true); // open the page
       setIsEdit(true); // call right submit function
     }
@@ -240,6 +252,7 @@ const TreeContent = () => {
               id: selectedId,
               firstName: firstName,
               lastName: lastName,
+              story: richTextValue,
             };
             tempList.splice(i, 1, newMember);
             setMemberList(tempList);
@@ -326,23 +339,6 @@ const TreeContent = () => {
     );
   };
 
-  const handleSelectImage = (event) => {
-    // console.log(event);
-    let imgFile = event.target.files[0];
-    if (imgFile.size > 1024000) {
-      alert("image size can't exeed 1M");
-    } else {
-      let reader = new FileReader();
-      reader.readAsDataURL(imgFile);
-      reader.onload = function (subEvent) {
-        let img = this.result;
-        console.log(img);
-        setImgState(false);
-        setImgData(img);
-      };
-    }
-  };
-
   return (
     <div>
       {authWarning && (
@@ -401,22 +397,32 @@ const TreeContent = () => {
             value={firstName}
             className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
             onChange={(e) => setFirstName(e.target.value)}
-          // placeholder=""
+            // placeholder=""
           ></Input.TextArea>
           <h1>Last Name</h1>
           <Input.TextArea
             value={lastName}
             className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
             onChange={(e) => setLastName(e.target.value)}
-          // placeholder=""
+            // placeholder=""
           ></Input.TextArea>
-          <img src={imgData} style={{ width: "200px", height: "200px" }} />
-          <input
+          {/* <img src={imgData} style={{ width: "200px", height: "200px" }} /> */}
+          {/* <input
             id="image"
             type="file"
             accept="image/jpeg,image/jpg,image/png"
             onChange={handleSelectImage}
-          />
+          /> */}
+          <div>
+            <ReactQuill
+              modules={MODULES}
+              formats={FORMATS}
+              value={richTextValue}
+              onChange={setRichTextValue}
+              theme="snow"
+            />
+            {richTextValue}
+          </div>
           <Button
             type="submit"
             onClick={isEdit ? handleSaveEditMember : handleAddMember}
