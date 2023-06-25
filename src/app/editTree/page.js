@@ -9,7 +9,16 @@ import "./page.css";
 import MermaidChartComponent from "./Mermaid";
 import { auth, db } from "../firebase-config";
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
-import { Alert, Backdrop, CircularProgress } from "@mui/material";
+import {
+  Alert,
+  Backdrop,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -21,6 +30,7 @@ const TreeEditor = () => {
   const [loading, setLoading] = useState(false);
   const [nodeInTree, setNodeInTree] = useState(null);
   const [authWarning, setAuthWarning] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
   const currentUid = auth?.currentUser?.uid;
   const {
     hasNode,
@@ -32,6 +42,8 @@ const TreeEditor = () => {
     generable,
     setGenerable,
     setChooseAble,
+    selected,
+    setRefreshMemberList,
   } = treeStore;
 
   const getTree = async () => {
@@ -51,6 +63,7 @@ const TreeEditor = () => {
       setAuthWarning(false);
       getTree();
       return () => {
+        setRefreshMemberList(false);
         const memberList = JSON.parse(localStorage.getItem("memberList"));
         const docRef = doc(db, "trees", currentUid);
         getDoc(docRef).then((docSnap) => {
@@ -59,7 +72,7 @@ const TreeEditor = () => {
           for (let i = 0; i < memberList.length; i++) {
             if (
               docSnap.data() &&
-              docSnap.data().desc.search(memberList[i].docId) === -1
+              docSnap.data().desc.indexOf(memberList[i].docId) === -1
             ) {
               updateMemberToDb(memberList[i], {
                 subgraphId: memberList[i].subgraphId,
@@ -179,12 +192,12 @@ const TreeEditor = () => {
       } else if (relation == "Partner") {
         setDesc(
           desc
-            ?.replace(
+            .replace(
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))`,
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-            `click ${tempNode.docId} callback`
+          `click ${tempNode.docId} callback`
         );
         updateMemberToDb(tempNode, {
           subgraphId: nodeInTree.docId.slice(0, 10),
@@ -233,6 +246,75 @@ const TreeEditor = () => {
       saveTreeToDb(desc);
     }
 
+    handleDelete() {
+      function deleteChildren(desc, subgraphId, updateList) {
+        while (desc.indexOf(`${subgraphId} ---`) !== -1) {
+          console.log("recurse");
+          let sub = desc.slice(desc.indexOf(`${subgraphId} ---`) + 15, desc.indexOf(`${subgraphId} ---`) + 25);
+          console.log(sub);
+          desc = "";
+
+
+
+        }
+        return { desc: desc, update: updateList };
+      }
+      let description = desc.replace(
+        "style " + nodeInTree.docId + " fill:#bbf",
+        ""
+      );
+      let update = [{ docId: nodeInTree.docId, subgraphId: nodeInTree.docId.slice(0, 10), id: nodeInTree.id }];
+      const memberList = JSON.parse(localStorage.getItem("memberList"));
+      console.log(memberList);
+      //FIXME: 有的时候即使是相等的也会判断false
+      if (nodeInTree.subgraphId == nodeInTree.docId.slice(0, 10)) {
+        console.log("1");
+        let subgraphID = nodeInTree.subgraphId;
+        description = description.replace(`click ${nodeInTree.docId} callback`, "");
+        if (description.indexOf(`${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) ---`) === -1) {
+          console.log("2");
+          description = description
+            .replace(
+              `subgraph ${nodeInTree.subgraphId}[ ]
+          direction LR
+          ${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))
+          end`,
+              ""
+            );
+        }
+        else {
+          console.log("3");
+          const index = description.indexOf(`${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) ---`);
+          const len = 36 + nodeInTree.firstName.length + nodeInTree.lastName.length;
+          const subId = description.slice(index + len, index + len + 10);
+          description = description.replace(`subgraph ${nodeInTree.subgraphId}`, `subgraph ${subId}`).replace(`${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- `, "");
+        }
+
+        if (description.indexOf(`${subgraphID} ---`) !== -1) {
+          description = deleteChildren(description, subgraphID, update).desc;
+          update = deleteChildren(description, subgraphID, update).update;
+
+        }
+      } else {
+        //TODO: see if it has partner
+      }
+      memberList.forEach((member) => {
+        const index = update.findIndex((item) => item.docId === member.docId);
+        if (index !== -1) {
+          member.subgraphId = update[index].subgraphId;
+        }
+      });
+      localStorage.setItem("memberList", JSON.stringify(memberList));
+      update.forEach((item) => {
+        updateMemberToDb(item, { subgraphId: item.subgraphId, used: false });
+      });
+      setDesc(description);
+      setSelected(false);
+      setNodeInTree(null);
+      setRefreshMemberList(true);
+
+    }
+
     render() {
       // let chart = this.state.description;
       let chart = desc;
@@ -256,6 +338,40 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
 
       return (
         <div className="App">
+          <Dialog
+            open={showAlert}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">
+              {"Are you sure to remove the member?"}
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                After removal of member all its sub-relation in the tree will be
+                removed. Please be aware of the result of this attempt. Click
+                agree to continue removing the member.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setShowAlert(false);
+                }}
+              >
+                Disagree
+              </Button>
+              <Button
+                onClick={() => {
+                  this.handleDelete();
+                }}
+                autoFocus
+              >
+                Agree
+              </Button>
+            </DialogActions>
+          </Dialog>
+
           <Button
             className="mr-10"
             type="primary"
@@ -266,11 +382,23 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
           >
             GENERATE TREE
           </Button>
+          {selected && (
+            <Button
+              id="delete-button"
+              className="mr-10"
+              type="primary"
+              onClick={() => {
+                setShowAlert(true);
+              }}
+            >
+              REMOVE MEMBER
+            </Button>
+          )}
           <Button
             type="primary"
             onClick={() => {
               this.save();
-              this.render();
+              // this.render();
             }}
           >
             SAVE
@@ -295,7 +423,8 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
         >
           Please login to save data into database.
         </Alert>
-      )}
+      )
+      }
       <div className="flex-1 flex justify-end">
         <div className="justify-center h-full w-half">
           <h1>Family Tree</h1>
@@ -311,7 +440,7 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
           <Toolbar />
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

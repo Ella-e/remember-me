@@ -382,6 +382,12 @@ const TreeContent = () => {
 
   return (
     <div>
+      <Button
+        type="submit"
+        onClick={isEdit ? handleSaveEditMember : handleAddMember}
+      >
+        Save Member
+      </Button>
       {authWarning && (
         <Alert
           severity="warning"
@@ -440,7 +446,7 @@ const TreeContent = () => {
             value={firstName}
             className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
             onChange={(e) => setFirstName(e.target.value)}
-            // placeholder=""
+          // placeholder=""
           ></Input.TextArea>
           <h1>
             Last Name<i style={{ color: "red" }}>*</i>
@@ -449,14 +455,14 @@ const TreeContent = () => {
             value={lastName}
             className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
             onChange={(e) => setLastName(e.target.value)}
-            // placeholder=""
+          // placeholder=""
           ></Input.TextArea>
           <h1>Nick Name</h1>
           <Input.TextArea
             value={nickName}
             className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
             onChange={(e) => setNickName(e.target.value)}
-            // placeholder=""
+          // placeholder=""
           ></Input.TextArea>
           <h1>Gender</h1>
           <Select

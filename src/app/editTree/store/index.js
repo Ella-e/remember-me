@@ -8,10 +8,15 @@ class TreeStore {
   relation = "Partner";
   description = "";
   chooseAble = false;
+  refreshMemberList = false;
 
   constructor() {
     makeAutoObservable(this);
   }
+
+  setRefreshMemberList = (bool) => {
+    this.refreshMemberList = bool;
+  };
 
   setChooseAble = (bool) => {
     this.chooseAble = bool;

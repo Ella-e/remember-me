@@ -39,6 +39,8 @@ const Toolbar = () => {
     generable,
     chooseAble,
     setChooseAble,
+    refreshMemberList,
+    setRefreshMemberList,
   } = treeStore;
 
   const markUseState = async (member, update) => {
@@ -157,6 +159,13 @@ const Toolbar = () => {
       setSelected(false);
     };
   }, []);
+
+  useEffect(() => {
+    if (refreshMemberList) {
+      getMemberList();
+      setRefreshMemberList(false);
+    }
+  }, [refreshMemberList]);
 
   return (
     // <div className="flex justify-between items-center">
