@@ -1,12 +1,22 @@
 import React from "react";
 import mermaid from "mermaid";
+import PropTypes from 'prop-types';
 
 mermaid.initialize({
   startOnLoad: true,
   securityLevel: "loose",
 });
 
+
 class MermaidChartComponent extends React.Component {
+
+  static get propTypes() {
+    return {
+      callBack: PropTypes.func,
+      chart: PropTypes.any
+    };
+  }
+
   componentDidMount() {
     window.callback = this.props.callBack;
     mermaid.contentLoaded();

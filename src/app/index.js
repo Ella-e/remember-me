@@ -4,7 +4,7 @@ import reactDom from "react-dom";
 import Home from "./page";
 import { BrowserRouter } from "react-router-dom";
 
-const root = ReactDOM.render(
+ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <Home></Home>

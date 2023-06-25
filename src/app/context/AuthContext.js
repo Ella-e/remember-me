@@ -1,4 +1,4 @@
-import { createContext, useContext, Context } from 'react'
+import React, { createContext, useContext } from 'react'
 import useFirebaseAuth from '../utils/Auth';
 
 
@@ -13,10 +13,11 @@ export const AuthContext = createContext(null);
 
 // const AuthContext = useFirebaseAuth();
 
-export const AuthProvider = ({children}) => {
+// eslint-disable-next-line react/prop-types
+export const AuthProvider = ({ children }) => {
     const auth = useFirebaseAuth();
     return (
-        <AuthContext.Provider value={{auth}}>
+        <AuthContext.Provider value={{ auth }}>
             {children}
         </AuthContext.Provider>
     );
@@ -25,7 +26,7 @@ export const AuthProvider = ({children}) => {
     // useEffect(() => {
     //     auth.onAuthStateChanged(setCurrentUser);
     // }, []);
-   
+
 };
 
 // customize hook to use the AuthContext

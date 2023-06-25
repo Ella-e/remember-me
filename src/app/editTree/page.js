@@ -184,7 +184,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-            `click ${tempNode.docId} callback`
+          `click ${tempNode.docId} callback`
         );
         updateMemberToDb(tempNode, {
           subgraphId: nodeInTree.docId.slice(0, 10),

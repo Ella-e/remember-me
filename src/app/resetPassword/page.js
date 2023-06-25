@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { auth } from "../firebase-config";
 import "./page.css";
 
-const resetPassword = () => {
+const ResetPassword = () => {
   const [email, setEmail] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
   const [error, setError] = useState("");
@@ -48,4 +48,4 @@ const resetPassword = () => {
   );
 };
 
-export default resetPassword;
+export default ResetPassword;
