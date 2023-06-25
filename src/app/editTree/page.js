@@ -252,10 +252,7 @@ const TreeEditor = () => {
           console.log("recurse");
           let sub = desc.slice(desc.indexOf(`${subgraphId} ---`) + 15, desc.indexOf(`${subgraphId} ---`) + 25);
           console.log(sub);
-          desc = "";
-
-
-
+          desc = desc.replace(`${subgraphId} --- ${sub}`, "").replace(`subgraph ${sub}\ndirection LR\n` + /.*/ + `\nend`, "");
         }
         return { desc: desc, update: updateList };
       }
