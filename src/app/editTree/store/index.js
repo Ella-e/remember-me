@@ -1,20 +1,25 @@
 import { action, makeAutoObservable } from "mobx";
 class TreeStore {
   generable = false;
-  hasNode = false; //FIXME: move
+  hasNode = false;
   onRootNode = false;
   callback = "";
   selected = false;
   relation = "Partner";
   description = "";
+  chooseAble = false;
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  setGenerable(bool) {
+  setChooseAble = (bool) => {
+    this.chooseAble = bool;
+  };
+
+  setGenerable = (bool) => {
     this.generable = bool;
-  }
+  };
 
   setHasNode = (bool) => {
     this.hasNode = bool;

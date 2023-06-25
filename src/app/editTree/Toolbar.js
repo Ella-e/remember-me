@@ -16,10 +16,16 @@ import {
 } from "firebase/firestore";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
-import { Card, CardContent, Typography } from "@mui/material";
+import {
+  Backdrop,
+  Card,
+  CardContent,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 
 const Toolbar = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const {
     hasNode,
@@ -27,7 +33,12 @@ const Toolbar = () => {
     onRootNode,
     setOnRootNode,
     selected,
+    setSelected,
     setRelation,
+    setGenerable,
+    generable,
+    chooseAble,
+    setChooseAble,
   } = treeStore;
 
   const markUseState = async (member, update) => {
@@ -54,6 +65,8 @@ const Toolbar = () => {
         getMemberList();
       });
     }
+    setSelectedMember(null);
+    setGenerable(false);
   };
 
   const handleChoose = () => {
@@ -68,23 +81,16 @@ const Toolbar = () => {
         // set selectedMember to local storage
         getMemberList();
       });
+      if (!hasNode) {
+        setHasNode(true);
+      }
+      setChooseAble(false);
+      setGenerable(true);
     } else {
       alert("please choose a member from table on the right");
     }
-    if (!hasNode) {
-      setHasNode(true);
-    }
-    setSelectedMember(null);
   };
-  const antIcon = (
-    //FIXME: full space
-    <LoadingOutlined
-      style={{
-        fontSize: 24,
-      }}
-      spin
-    />
-  );
+
   const [memberList, setMemberList] = useState(new Array());
   const columns = [
     // { field: "id", headerName: "id", width: 100, hide: true },
@@ -97,6 +103,7 @@ const Toolbar = () => {
   };
   const handleSelectMember = (event) => {
     setSelectedMember(event.row);
+    setChooseAble(true);
   };
 
   const getMemberList = async () => {
@@ -134,7 +141,7 @@ const Toolbar = () => {
           firstName: docData.firstName,
           lastName: docData.lastName,
           docId: doc.id,
-          subgraphId: docData.subgraphId
+          subgraphId: docData.subgraphId,
         };
         tempMemberList.push(tempMember);
       });
@@ -145,13 +152,22 @@ const Toolbar = () => {
 
   useEffect(() => {
     getMemberList();
+    return () => {
+      setRelation("Partner");
+      setSelected(false);
+    };
   }, []);
 
   return (
     // <div className="flex justify-between items-center">
 
     <div className="ml-one-tenth h-full mr-one-tenth">
-      <Spin indicator={antIcon} spinning={loading} />
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
       {selected && (
         <div>
           <h1>Relationship</h1>
@@ -198,7 +214,7 @@ const Toolbar = () => {
         id="choose-button"
         type="primary"
         onClick={handleChoose}
-        disabled={!selectedMember}
+        disabled={!chooseAble}
         className="mt-10 mr-10"
       >
         CHOOSE
@@ -206,6 +222,7 @@ const Toolbar = () => {
       <Button
         id="unchoose-button"
         type="primary"
+        disabled={!generable}
         onClick={handleUnChoose}
         className="mt-10"
       >
