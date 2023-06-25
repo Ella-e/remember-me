@@ -5,10 +5,14 @@ import {
   Box,
   Button,
   CircularProgress,
+  InputLabel,
+  MenuItem,
   Pagination,
+  Select,
   TableCell,
   TableHead,
   TableRow,
+  TextField,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useState, useEffect } from "react";
@@ -49,6 +53,10 @@ const TreeContent = () => {
   const [imgState, setImgState] = useState(true);
   const [imgData, setImgData] = useState(null);
   const [richTextValue, setRichTextValue] = useState("");
+  const [status, setStatus] = useState("alive");
+  const [nickName, setNickName] = useState("");
+  const [gender, setGender] = useState("male");
+  const [otherGender, setOtherGender] = useState("");
 
   // Initialize memerbList
   const [memberList, setMemberList] = useState(new Array());
@@ -70,6 +78,10 @@ const TreeContent = () => {
           id: docData.id,
           firstName: docData.firstName,
           lastName: docData.lastName,
+          nickName: docData.nickName,
+          gender: docData.gender,
+          otherGender: docData.otherGender,
+          status: docData.status,
           story: docData.story,
         };
         tempMemberList.push(tempMember);
@@ -141,12 +153,17 @@ const TreeContent = () => {
     // check if this person's memberlist exist first
     const docRef = doc(db, "nodes", member.id);
     const docSnap = await getDoc(docRef);
+    console.log(member);
     if (docSnap.exists()) {
       // update the doc
       await updateDoc(docRef, {
         firstName: member.firstName,
         lastName: member.lastName,
-        story: richTextValue,
+        nickName: member.nickName,
+        gender: member.gender,
+        otherGender: member.otherGender,
+        status: member.status,
+        story: member.story,
       });
     } else {
       await setDoc(docRef, {
@@ -154,9 +171,13 @@ const TreeContent = () => {
         uid: currentUid,
         firstName: member.firstName,
         lastName: member.lastName,
+        nickName: member.nickName,
+        gender: member.gender,
+        otherGender: member.otherGender,
+        status: member.status,
         used: false,
         subgraphId: "",
-        sotry: richTextValue,
+        sotry: member.story,
       });
     }
   };
@@ -171,45 +192,58 @@ const TreeContent = () => {
     });
   };
 
+  const clearVar = () => {
+    setFirstName("");
+    setLastName("");
+    setRichTextValue("");
+    setNickName("");
+    setGender("");
+    setOtherGender("");
+    setStatus("");
+  };
+
   /**
    * handle add member action.
    */
   const handleAddMember = (event) => {
-    console.log("run save add");
     let newMember = {};
-    try {
-      // generate ulid for the member
-      let generator = ULID();
-      let tempUid = generator();
-      console.log(tempUid);
-      newMember = {
-        id: tempUid,
-        firstName: firstName,
-        lastName: lastName,
-        story: richTextValue,
-      };
-      if (memberList) {
-        setMemberList((current) => [...current, newMember]);
-      } else {
-        setMemberList([newMember]);
+    if (firstName === "" || lastName === "") {
+      alert("Please enter a first name and a last last name");
+    } else {
+      try {
+        // generate ulid for the member
+        let generator = ULID();
+        let tempUid = generator();
+        console.log(tempUid);
+        newMember = {
+          id: tempUid,
+          firstName: firstName,
+          lastName: lastName,
+          nickName: nickName,
+          gender: gender,
+          otherGender: otherGender,
+          status: status,
+          story: richTextValue,
+        };
+        if (memberList) {
+          setMemberList((current) => [...current, newMember]);
+        } else {
+          setMemberList([newMember]);
+        }
+        // save memberlist to the databse
+        if (currentUid) {
+          saveMemberToDb(newMember);
+        }
+      } catch (err) {
+        console.log(err.message);
       }
-      // save memberlist to the databse
-      if (currentUid) {
-        saveMemberToDb(newMember);
-      }
-    } catch (err) {
-      console.log(err.message);
+      clearVar();
+      setEditNode(false);
     }
-    setFirstName("");
-    setLastName("");
-    setRichTextValue("");
-    setEditNode(false);
   };
 
   const handleCancel = (str) => {
-    setFirstName("");
-    setLastName("");
-    setRichTextValue("");
+    clearVar();
     setIsEdit(false);
     setEditNode(false);
     // if (str === "edit") {
@@ -230,6 +264,10 @@ const TreeContent = () => {
     if (selectedMember) {
       setFirstName(selectedMember.firstName);
       setLastName(selectedMember.lastName);
+      setNickName(selectedMember.nickName);
+      setGender(selectedMember.gender);
+      setOtherGender(selectedMember.otherGender);
+      setStatus(selectedMember.status);
       setSelectedId(selectedMember.id);
       setRichTextValue(selectedMember.story);
       setEditNode(true); // open the page
@@ -252,6 +290,10 @@ const TreeContent = () => {
               id: selectedId,
               firstName: firstName,
               lastName: lastName,
+              nickName: nickName,
+              gender: gender,
+              otherGender: otherGender,
+              status: status,
               story: richTextValue,
             };
             tempList.splice(i, 1, newMember);
@@ -270,8 +312,7 @@ const TreeContent = () => {
     }
     setIsEdit(false);
     setEditNode(false);
-    setFirstName("");
-    setLastName("");
+    clearVar();
     setSelectedMember(null);
   };
 
@@ -392,28 +433,64 @@ const TreeContent = () => {
       )}
       {editNode && (
         <div className="border-line-[#E4E6F0] rounded-2xl leading-5 overflow-auto h-[189px] mb-[26px]">
-          <h1>First Name</h1>
+          <h1>
+            First Name<i style={{ color: "red" }}>*</i>
+          </h1>
           <Input.TextArea
             value={firstName}
             className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
             onChange={(e) => setFirstName(e.target.value)}
             // placeholder=""
           ></Input.TextArea>
-          <h1>Last Name</h1>
+          <h1>
+            Last Name<i style={{ color: "red" }}>*</i>
+          </h1>
           <Input.TextArea
             value={lastName}
             className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
             onChange={(e) => setLastName(e.target.value)}
             // placeholder=""
           ></Input.TextArea>
-          {/* <img src={imgData} style={{ width: "200px", height: "200px" }} /> */}
-          {/* <input
-            id="image"
-            type="file"
-            accept="image/jpeg,image/jpg,image/png"
-            onChange={handleSelectImage}
-          /> */}
-          <div>
+          <h1>Nick Name</h1>
+          <Input.TextArea
+            value={nickName}
+            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+            onChange={(e) => setNickName(e.target.value)}
+            // placeholder=""
+          ></Input.TextArea>
+          <h1>Gender</h1>
+          <Select
+            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+            value={gender}
+            onChange={(e) => {
+              setGender(e.target.value);
+              setOtherGender("");
+            }}
+          >
+            <MenuItem value={"male"}>male</MenuItem>
+            <MenuItem value={"female"}>female</MenuItem>
+            <MenuItem value={"other"}>other</MenuItem>
+          </Select>
+          {gender === "other" && (
+            <TextField
+              placeholder="please specify"
+              value={otherGender}
+              onChange={(e) => {
+                setOtherGender(e.target.value);
+              }}
+            ></TextField>
+          )}
+          <h1>Status</h1>
+          <Select
+            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <MenuItem value={"alive"}>alive</MenuItem>
+            <MenuItem value={"desceased"}>deceased</MenuItem>
+          </Select>
+          <div className="">
+            <h1>Life Story</h1>
             <ReactQuill
               modules={MODULES}
               formats={FORMATS}
@@ -421,7 +498,6 @@ const TreeContent = () => {
               onChange={setRichTextValue}
               theme="snow"
             />
-            {richTextValue}
           </div>
           <Button
             type="submit"
