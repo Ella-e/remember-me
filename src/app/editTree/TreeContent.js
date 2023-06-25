@@ -186,9 +186,8 @@ const TreeContent = () => {
    * delete a member from database
    */
   const deleteMemberFromDb = async (member) => {
-    console.log("run");
     await deleteDoc(doc(db, "nodes", member.id)).then(() => {
-      console.log("success");
+      clearVar();
     });
   };
 
@@ -200,6 +199,7 @@ const TreeContent = () => {
     setGender("");
     setOtherGender("");
     setStatus("");
+    setSelectedMember(null);
   };
 
   /**
@@ -327,7 +327,6 @@ const TreeContent = () => {
     setShowAlert(false);
     // display a popup telling user this is an action in the danger zone
     if (selectedMember) {
-      console.log(selectedMember.id);
       try {
         for (var i = 0; i < memberList.length; i++) {
           if (memberList[i].id === selectedMember.id) {
@@ -341,6 +340,7 @@ const TreeContent = () => {
             setMemberList(tempList);
           }
         }
+        clearVar();
       } catch (err) {
         console.log(err.message);
       }
