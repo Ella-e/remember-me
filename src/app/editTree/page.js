@@ -197,7 +197,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-          `click ${tempNode.docId} callback`
+            `click ${tempNode.docId} callback`
         );
         updateMemberToDb(tempNode, {
           subgraphId: nodeInTree.docId.slice(0, 10),
@@ -250,47 +250,70 @@ const TreeEditor = () => {
       function deleteChildren(desc, subgraphId, updateList) {
         while (desc.indexOf(`${subgraphId} ---`) !== -1) {
           console.log("recurse");
-          let sub = desc.slice(desc.indexOf(`${subgraphId} ---`) + 15, desc.indexOf(`${subgraphId} ---`) + 25);
+          let sub = desc.slice(
+            desc.indexOf(`${subgraphId} ---`) + 15,
+            desc.indexOf(`${subgraphId} ---`) + 25
+          );
           console.log(sub);
-          desc = desc.replace(`${subgraphId} --- ${sub}`, "").replace(`subgraph ${sub}\ndirection LR\n` + /.*/ + `\nend`, "");
+          desc = desc
+            .replace(`${subgraphId} --- ${sub}`, "")
+            .replace(`subgraph ${sub}\ndirection LR\n` + /.*/ + `\nend`, "");
         }
         return { desc: desc, update: updateList };
       }
       let description = desc.replace(
-        "style " + nodeInTree.docId + " fill:#bbf",
+        "style " + nodeInTree?.docId + " fill:#bbf",
         ""
       );
-      let update = [{ docId: nodeInTree.docId, subgraphId: nodeInTree.docId.slice(0, 10), id: nodeInTree.id }];
+      let update = [
+        {
+          docId: nodeInTree?.docId,
+          subgraphId: nodeInTree?.docId.slice(0, 10),
+          id: nodeInTree?.id,
+        },
+      ];
       const memberList = JSON.parse(localStorage.getItem("memberList"));
       console.log(memberList);
       //FIXME: 有的时候即使是相等的也会判断false
       if (nodeInTree.subgraphId == nodeInTree.docId.slice(0, 10)) {
         console.log("1");
         let subgraphID = nodeInTree.subgraphId;
-        description = description.replace(`click ${nodeInTree.docId} callback`, "");
-        if (description.indexOf(`${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) ---`) === -1) {
+        description = description.replace(
+          `click ${nodeInTree.docId} callback`,
+          ""
+        );
+        if (
+          description.indexOf(
+            `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) ---`
+          ) === -1
+        ) {
           console.log("2");
-          description = description
-            .replace(
-              `subgraph ${nodeInTree.subgraphId}[ ]
+          description = description.replace(
+            `subgraph ${nodeInTree.subgraphId}[ ]
           direction LR
           ${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))
           end`,
+            ""
+          );
+        } else {
+          console.log("3");
+          const index = description.indexOf(
+            `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) ---`
+          );
+          const len =
+            36 + nodeInTree.firstName.length + nodeInTree.lastName.length;
+          const subId = description.slice(index + len, index + len + 10);
+          description = description
+            .replace(`subgraph ${nodeInTree.subgraphId}`, `subgraph ${subId}`)
+            .replace(
+              `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- `,
               ""
             );
-        }
-        else {
-          console.log("3");
-          const index = description.indexOf(`${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) ---`);
-          const len = 36 + nodeInTree.firstName.length + nodeInTree.lastName.length;
-          const subId = description.slice(index + len, index + len + 10);
-          description = description.replace(`subgraph ${nodeInTree.subgraphId}`, `subgraph ${subId}`).replace(`${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- `, "");
         }
 
         if (description.indexOf(`${subgraphID} ---`) !== -1) {
           description = deleteChildren(description, subgraphID, update).desc;
           update = deleteChildren(description, subgraphID, update).update;
-
         }
       } else {
         //TODO: see if it has partner
@@ -309,7 +332,6 @@ const TreeEditor = () => {
       setSelected(false);
       setNodeInTree(null);
       setRefreshMemberList(true);
-
     }
 
     render() {
@@ -379,7 +401,7 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
           >
             GENERATE TREE
           </Button>
-          {selected && (
+          {nodeInTree && (
             <Button
               id="delete-button"
               className="mr-10"
@@ -420,8 +442,7 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
         >
           Please login to save data into database.
         </Alert>
-      )
-      }
+      )}
       <div className="flex-1 flex justify-end">
         <div className="justify-center h-full w-half">
           <h1>Family Tree</h1>
@@ -437,7 +458,7 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
           <Toolbar />
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 

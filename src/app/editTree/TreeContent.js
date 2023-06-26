@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   CircularProgress,
+  Container,
   InputLabel,
   MenuItem,
   Pagination,
@@ -38,6 +39,7 @@ import { auth, db } from "../firebase-config";
 import ReactQuill from "react-quill";
 import "../../../node_modules/react-quill/dist/quill.snow.css";
 import { FORMATS, MODULES } from "./RichText";
+import { Scrollbars } from "react-custom-scrollbars";
 
 const TreeContent = () => {
   const [editNode, setEditNode] = useState(false);
@@ -50,8 +52,6 @@ const TreeContent = () => {
   const [loading, setLoading] = useState(false);
   const currentUid = auth?.currentUser?.uid;
   const [authWarning, setAuthWarning] = useState(false);
-  const [imgState, setImgState] = useState(true);
-  const [imgData, setImgData] = useState(null);
   const [richTextValue, setRichTextValue] = useState("");
   const [status, setStatus] = useState("alive");
   const [nickName, setNickName] = useState("");
@@ -382,12 +382,12 @@ const TreeContent = () => {
 
   return (
     <div>
-      <Button
+      {/* <Button
         type="submit"
         onClick={isEdit ? handleSaveEditMember : handleAddMember}
       >
         Save Member
-      </Button>
+      </Button> */}
       {authWarning && (
         <Alert
           severity="warning"
@@ -439,79 +439,83 @@ const TreeContent = () => {
       )}
       {editNode && (
         <div className="border-line-[#E4E6F0] rounded-2xl leading-5 overflow-auto h-[189px] mb-[26px]">
-          <h1>
-            First Name<i style={{ color: "red" }}>*</i>
-          </h1>
-          <Input.TextArea
-            value={firstName}
-            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-            onChange={(e) => setFirstName(e.target.value)}
-          // placeholder=""
-          ></Input.TextArea>
-          <h1>
-            Last Name<i style={{ color: "red" }}>*</i>
-          </h1>
-          <Input.TextArea
-            value={lastName}
-            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-            onChange={(e) => setLastName(e.target.value)}
-          // placeholder=""
-          ></Input.TextArea>
-          <h1>Nick Name</h1>
-          <Input.TextArea
-            value={nickName}
-            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-            onChange={(e) => setNickName(e.target.value)}
-          // placeholder=""
-          ></Input.TextArea>
-          <h1>Gender</h1>
-          <Select
-            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-            value={gender}
-            onChange={(e) => {
-              setGender(e.target.value);
-              setOtherGender("");
-            }}
-          >
-            <MenuItem value={"male"}>male</MenuItem>
-            <MenuItem value={"female"}>female</MenuItem>
-            <MenuItem value={"other"}>other</MenuItem>
-          </Select>
-          {gender === "other" && (
-            <TextField
-              placeholder="please specify"
-              value={otherGender}
-              onChange={(e) => {
-                setOtherGender(e.target.value);
-              }}
-            ></TextField>
-          )}
-          <h1>Status</h1>
-          <Select
-            className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <MenuItem value={"alive"}>alive</MenuItem>
-            <MenuItem value={"desceased"}>deceased</MenuItem>
-          </Select>
-          <div className="">
-            <h1>Life Story</h1>
-            <ReactQuill
-              modules={MODULES}
-              formats={FORMATS}
-              value={richTextValue}
-              onChange={setRichTextValue}
-              theme="snow"
-            />
-          </div>
-          <Button
-            type="submit"
-            onClick={isEdit ? handleSaveEditMember : handleAddMember}
-          >
-            Save Member
-          </Button>
-          <Button onClick={() => handleCancel("add")}>Cancel</Button>
+          <Scrollbars style={{ width: 1000, height: 650 }}>
+            <Container maxWidth="sm">
+              <h1>
+                First Name<i style={{ color: "red" }}>*</i>
+              </h1>
+              <Input.TextArea
+                value={firstName}
+                className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+                onChange={(e) => setFirstName(e.target.value)}
+                // placeholder=""
+              ></Input.TextArea>
+              <h1>
+                Last Name<i style={{ color: "red" }}>*</i>
+              </h1>
+              <Input.TextArea
+                value={lastName}
+                className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+                onChange={(e) => setLastName(e.target.value)}
+                // placeholder=""
+              ></Input.TextArea>
+              <h1>Nick Name</h1>
+              <Input.TextArea
+                value={nickName}
+                className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+                onChange={(e) => setNickName(e.target.value)}
+                // placeholder=""
+              ></Input.TextArea>
+              <h1>Gender</h1>
+              <Select
+                className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+                value={gender}
+                onChange={(e) => {
+                  setGender(e.target.value);
+                  setOtherGender("");
+                }}
+              >
+                <MenuItem value={"male"}>male</MenuItem>
+                <MenuItem value={"female"}>female</MenuItem>
+                <MenuItem value={"other"}>other</MenuItem>
+              </Select>
+              {gender === "other" && (
+                <TextField
+                  placeholder="please specify"
+                  value={otherGender}
+                  onChange={(e) => {
+                    setOtherGender(e.target.value);
+                  }}
+                ></TextField>
+              )}
+              <h1>Status</h1>
+              <Select
+                className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <MenuItem value={"alive"}>alive</MenuItem>
+                <MenuItem value={"desceased"}>deceased</MenuItem>
+              </Select>
+              <div className="">
+                <h1>Life Story</h1>
+                <ReactQuill
+                  modules={MODULES}
+                  formats={FORMATS}
+                  value={richTextValue}
+                  onChange={setRichTextValue}
+                  theme="snow"
+                />
+              </div>
+              <Button
+                type="submit"
+                onClick={isEdit ? handleSaveEditMember : handleAddMember}
+              >
+                Save Member
+              </Button>
+              <Button onClick={() => handleCancel("add")}>Cancel</Button>
+            </Container>
+          </Scrollbars>
         </div>
       )}
     </div>

@@ -21,6 +21,7 @@
     "mobx": "^6.9.0",
     "mobx-react-lite": "^3.4.3",
     "next": "^13.4.7",
+    "react-custom-scrollbars": "^4.2.1",
     "react-dom": "^18.2.0",
     "react-quill": "^2.0.0",
     "react-router-dom": "^6.12.1",
