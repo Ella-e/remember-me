@@ -262,14 +262,14 @@ const TreeEditor = () => {
         return { desc: desc, update: updateList };
       }
       let description = desc.replace(
-        "style " + nodeInTree?.docId + " fill:#bbf",
+        "style " + nodeInTree.docId + " fill:#bbf",
         ""
       );
       let update = [
         {
-          docId: nodeInTree?.docId,
-          subgraphId: nodeInTree?.docId.slice(0, 10),
-          id: nodeInTree?.id,
+          docId: nodeInTree.docId,
+          subgraphId: nodeInTree.docId.slice(0, 10),
+          id: nodeInTree.id,
         },
       ];
       const memberList = JSON.parse(localStorage.getItem("memberList"));
@@ -288,13 +288,20 @@ const TreeEditor = () => {
           ) === -1
         ) {
           console.log("2");
-          description = description.replace(
-            `subgraph ${nodeInTree.subgraphId}[ ]
+          console.log(`subgraph ${nodeInTree.subgraphId}[ ]
           direction LR
           ${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))
-          end`,
+          end`);
+          description = description.replace(
+            `subgraph ${nodeInTree.subgraphId}[ ]\ndirection LR\n${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))\nend`,
             ""
           );
+          if (
+            description.indexOf("subgraph", description.indexOf("subgraph") + 8)
+          ) {
+            description = "";
+            setDesc("");
+          }
         } else {
           console.log("3");
           const index = description.indexOf(
@@ -382,6 +389,7 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
               </Button>
               <Button
                 onClick={() => {
+                  setShowAlert(false);
                   this.handleDelete();
                 }}
                 autoFocus
@@ -401,7 +409,7 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
           >
             GENERATE TREE
           </Button>
-          {nodeInTree && (
+          {selected && (
             <Button
               id="delete-button"
               className="mr-10"
