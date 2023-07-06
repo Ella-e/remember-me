@@ -13,6 +13,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase-config";
 import TreeEditor from "../editTree/page";
 import NoSsr from "@/components/NoSsr";
+import "./page.css";
 
 const EditTree = () => {
   const { Header, Content, Sider } = Layout;
@@ -54,51 +55,40 @@ const EditTree = () => {
   return (
     // @ts-ignore
     <NoSsr>
-      <Layout className="parent-full">
+      <div className="layout">
         <Header className="header">
-          <div className="logo" />
           <MyHeader />
         </Header>
-        <Layout>
+
+        <div style={{ display: "flex", flex: 1 }}>
           <Sider width={200} className="site-layout-background">
             <Menu
               mode="inline"
               defaultSelectedKeys={["sub1"]}
               defaultOpenKeys={["sub1"]}
               style={{
-                height: "100%",
                 borderRight: 0,
               }}
               items={items2}
               selectedKeys={["sub" + activeTab]}
             />
           </Sider>
-          <Layout
-            style={{
-              padding: "0 24px 24px",
-            }}
-          >
-            <Content
-              className="site-layout-background"
-              style={{
-                padding: 24,
-                margin: 0,
-                height: "100vh",
-                overflow: "hidden",
-              }}
-            >
-              {activeTab == "1" ? (
-                <TreeEditor />
-              ) : activeTab == "2" ? (
-                <TreeContent />
-              ) : (
-                <ViewTree />
-              )}
-            </Content>
-          </Layout>
-        </Layout>
-      </Layout>
-    </NoSsr>
+
+          <div style={{ flex: 1, padding: "20px" }}>
+            {activeTab == "1" ? (
+              <TreeEditor />
+            ) : activeTab == "2" ? (
+              <TreeContent />
+            ) : (
+              <ViewTree />
+            )}
+          </div>
+
+        </div>
+
+      </div>
+    </NoSsr >
+
   );
 };
 

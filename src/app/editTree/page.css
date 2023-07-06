@@ -1,6 +1,10 @@
 .flex-1 {
   flex: 110%;
 }
+.layout {
+  height: "100%";
+  width: "100%";
+}
 
 .min-h-0 {
   min-height: 0;
@@ -18,8 +22,8 @@
   background-color: #fff;
 }
 
-.w-one-third {
-  width: 33%;
+.w-two-third {
+  width: 66%;
 }
 
 .justify-center {

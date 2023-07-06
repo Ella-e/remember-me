@@ -1,3 +1,18 @@
+@font-face {
+  font-family: Caprasimo-Regular;
+  font-weight: lighter;
+  src: url(../../assets/Caprasimo-Regular.ttf);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+
+  background-color: #fff;
+  font-family: Caprasimo-Regular !important;
+}
+
 /* :root {
   --max-width: 1100px;
   --border-radius: 12px;

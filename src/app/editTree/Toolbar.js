@@ -170,7 +170,7 @@ const Toolbar = () => {
   return (
     // <div className="flex justify-between items-center">
 
-    <div className="ml-one-tenth h-full mr-one-tenth">
+    <div>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}
@@ -205,7 +205,7 @@ const Toolbar = () => {
       )}
       <h1>Choose Member</h1>
       {/* <MemberList /> */}
-      <div style={{ height: 400, width: "100%" }}>
+      <div style={{ height: 300, width: "100%" }}>
         <DataGrid
           rows={memberList}
           columns={columns}

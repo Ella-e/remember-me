@@ -197,7 +197,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-            `click ${tempNode.docId} callback`
+          `click ${tempNode.docId} callback`
         );
         updateMemberToDb(tempNode, {
           subgraphId: nodeInTree.docId.slice(0, 10),
@@ -451,8 +451,8 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
           Please login to save data into database.
         </Alert>
       )}
-      <div className="flex-1 flex justify-end">
-        <div className="justify-center h-full w-half">
+      <div className="flex-1 flex ">
+        <div className="justify-center h-full w-two-third">
           <h1>Family Tree</h1>
           <Backdrop
             sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -462,7 +462,7 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
           </Backdrop>
           {hasNode && <App />}
         </div>
-        <div className=" bg-white w-half">
+        <div className=" bg-white">
           <Toolbar />
         </div>
       </div>

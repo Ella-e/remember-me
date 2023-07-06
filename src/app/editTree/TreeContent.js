@@ -40,6 +40,7 @@ import ReactQuill from "react-quill";
 import "../../../node_modules/react-quill/dist/quill.snow.css";
 import { FORMATS, MODULES } from "./RichText";
 import { Scrollbars } from "react-custom-scrollbars";
+import "./page.css";
 
 const TreeContent = () => {
   const [editNode, setEditNode] = useState(false);
@@ -448,7 +449,7 @@ const TreeContent = () => {
                 value={firstName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setFirstName(e.target.value)}
-                // placeholder=""
+              // placeholder=""
               ></Input.TextArea>
               <h1>
                 Last Name<i style={{ color: "red" }}>*</i>
@@ -457,14 +458,14 @@ const TreeContent = () => {
                 value={lastName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setLastName(e.target.value)}
-                // placeholder=""
+              // placeholder=""
               ></Input.TextArea>
               <h1>Nick Name</h1>
               <Input.TextArea
                 value={nickName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setNickName(e.target.value)}
-                // placeholder=""
+              // placeholder=""
               ></Input.TextArea>
               <h1>Gender</h1>
               <Select
