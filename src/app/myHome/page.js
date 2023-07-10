@@ -4,7 +4,8 @@ import { AuthContext, AuthProvider, useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { auth } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
-import MyHome from "./MyHome";
+import MyHome from "../editTree/page";
+import MyHeader from "./MyHeader";
 
 const MainScreen = () => {
   const router = useRouter();
@@ -21,10 +22,18 @@ const MainScreen = () => {
   // }, []);
 
   return (
-    <Suspense fallback={<Loading />}>
+    <div>
+      <Suspense fallback={<Loading />} />
+
+
       <div>
+        <MyHeader />
+        <h1 className="mt-2">rememberMe</h1>
+        <button onClick={() => router.push("/editTree")}>Start a new tree</button>
+        <button onClick={() => router.push("/treeProjects")}>View my trees</button>
         {
-          <MyHome />
+
+          // <MyHome />
           // <>
           //   <div>
           //     <div>
@@ -40,7 +49,7 @@ const MainScreen = () => {
           // </>
         }
       </div>
-    </Suspense>
+    </div>
   );
 };
 

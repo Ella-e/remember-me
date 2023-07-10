@@ -383,12 +383,6 @@ const TreeContent = () => {
 
   return (
     <div>
-      {/* <Button
-        type="submit"
-        onClick={isEdit ? handleSaveEditMember : handleAddMember}
-      >
-        Save Member
-      </Button> */}
       {authWarning && (
         <Alert
           severity="warning"

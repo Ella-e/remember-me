@@ -16,3 +16,30 @@ body {
   height: "100%";
   width: "100vw";
 }
+
+.header {
+  height: 70px;
+  display: flex;
+}
+
+.mr {
+  margin-right: 10px;
+}
+
+.toolBar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.flex {
+  display: flex;
+  justify-content: end;
+  width: 100%;
+}
+
+.justify-end {
+  justify-content: end;
+}

@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth, AuthProvider, AuthContext } from "./context/AuthContext";
 import LoginScreen from "./login/page";
-import EditTree from "./myHome/MyHome";
+import EditTree from "./editTree/page";
 import MainScreen from "./myHome/page";
 // import { auth } from "./firebase-config";
 
@@ -18,11 +18,16 @@ export default function Home() {
   // const {authUser, loading} = useAuth();
   const [user, setUser] = useState(null);
   return (
+    <div>
+      <h1>rememberMe</h1>
+      <Link href="/login">Login</Link>
+      <Link href="/signUp">Sign Up</Link>
+    </div>
     // <AuthContext.Provider value={{
     //   user,
     //   setUser
     // }}>
-    <EditTree />
+    // <EditTree />
     // <LoginScreen />
     // </AuthContext.Provider>
     // <AuthProvider>

@@ -1,36 +1,26 @@
+"use client"
 import React, { useState } from "react";
-import { Menu } from "antd";
+import { Dropdown, Menu, Space } from "antd";
 import { UserOutlined, LaptopOutlined } from "@ant-design/icons";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase-config";
 import { useRouter } from "next/navigation";
 import { colors } from "@mui/material";
+import "./page.css";
 
-// const SignInButton = () => {
-//   const router = useRouter();
-//   return (
-//     <button
-//       onClick={() => {
-//         router.push("/login");
-//       }}
-//     >
-//       Sign In
-//     </button>
-//   );
-// };
+
 
 const MyHeader = () => {
   // check the current login state of the user
   const router = useRouter();
-  const [user, setUser] = useState(null);
-  const items1 = [
+
+  const items = [
     {
       key: "0",
-      icon: <UserOutlined />,
       label: "Profile",
     },
     {
-      key: "1",
+      key: '1',
       label: (
         <div
           onClick={() => {
@@ -41,60 +31,41 @@ const MyHeader = () => {
           Sign Out
         </div>
       ),
-    },
-  ];
+    }];
 
-  const [myComponent, setMyComponent] = useState(null);
+  return (
+    <div className="header">
+      <div className="toolBar">
+        {auth.currentUser ? (
+          <div className="flex">
+            <div className='mr'>Welcome, {auth.currentUser?.email}</div>
+            <Dropdown
+              menu={{ items }}
+            >
+              <a onClick={(e) => e.preventDefault()}>
+                <Space>
+                  <UserOutlined className='mr' />
+                </Space>
+              </a>
+            </Dropdown>
+            <div className='mr' onClick={() => {
+              router.push("/myHome");
+            }}>Home</div>
+          </div>
+        ) : (
+          <div className="flex mr"
+            onClick={() => {
+              router.push("/login");
+            }}
+          >
+            Login
+          </div>
+        )
+        }
 
-  // no idea why this doesn't work???
-  // onAuthStateChanged(auth, (authUser) => {
-  //   if (authUser) {
-  //     setMyComponent(
-  //       <div>
-  //         <Menu
-  //           style={{ float: "right" }}
-  //           theme="dark"
-  //           mode="horizontal"
-  //           items={items1}
-  //         />
-  //         <div style={{ float: "right", color: "white" }}>
-  //           Welcome, {authUser?.email}
-  //         </div>
-  //       </div>
-  //     );
-  //   } else {
-  //     setMyComponent(
-  //       <button
-  //         onClick={() => {
-  //           router.push("/login");
-  //         }}
-  //       >
-  //         Sign In
-  //       </button>
-  //     );
-  //   }
-  // });
-  return auth.currentUser ? (
-    <div>
-      <Menu
-        style={{ float: "right" }}
-        theme="dark"
-        mode="horizontal"
-        items={items1}
-      />
-      <div style={{ float: "right", color: "white" }}>
-        Welcome, {auth.currentUser?.email}
-      </div>
-    </div>
-  ) : (
-    <div
-      style={{ float: "right", color: "white" }}
-      onClick={() => {
-        router.push("/login");
-      }}
-    >
-      Login
-    </div>
+      </div >
+    </div >
+
   );
 };
 
