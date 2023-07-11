@@ -36,7 +36,9 @@ const LoginScreen = () => {
         .then((authUser) => {
           user = auth.currentUser;
           if (user.emailVerified) {
+            // router.back();
             router.push("/myHome");
+            //FIXME:
           } else {
             window.confirm(
               "please click the link in your email to verify first"

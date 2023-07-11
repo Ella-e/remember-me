@@ -41,6 +41,7 @@ import "../../../node_modules/react-quill/dist/quill.snow.css";
 import { FORMATS, MODULES } from "./RichText";
 import { Scrollbars } from "react-custom-scrollbars";
 import "./page.css";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const TreeContent = () => {
   const [editNode, setEditNode] = useState(false);
@@ -62,20 +63,21 @@ const TreeContent = () => {
   // Initialize memerbList
   const [memberList, setMemberList] = useState(new Array());
 
+  const [pid, setPid] = useState("");
+  const router = useRouter();
+
+  const searchParams = useSearchParams();
+
   const getMemberList = async () => {
     setLoading(true);
     if (auth.currentUser) {
-      const q = query(
-        collection(db, "nodes"),
-        where("uid", "==", auth.currentUser.uid)
-      );
+      const q = query(collection(db, "nodes"), where("pid", "==", pid));
       const querySnapshot = await getDocs(q);
       const tempMemberList = [...memberList];
       querySnapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
         const docData = doc.data();
         const tempMember = {
-          uid: docData.uid,
           id: docData.id,
           firstName: docData.firstName,
           lastName: docData.lastName,
@@ -96,14 +98,19 @@ const TreeContent = () => {
   useEffect(() => {
     if (auth.currentUser) {
       setAuthWarning(false);
-      getMemberList();
+      setPid(searchParams.get("tab").slice(6, 32));
     } else {
-      setAuthWarning(true);
+      router.push("/login");
     }
   }, []);
 
   useEffect(() => {
-    //TODO: get member list
+    if (pid) {
+      getMemberList();
+    }
+  }, [pid]);
+
+  useEffect(() => {
     setMemberList(memberList);
   }, [memberList]);
 
@@ -169,7 +176,7 @@ const TreeContent = () => {
     } else {
       await setDoc(docRef, {
         id: member.id,
-        uid: currentUid,
+        pid: pid,
         firstName: member.firstName,
         lastName: member.lastName,
         nickName: member.nickName,
@@ -178,7 +185,7 @@ const TreeContent = () => {
         status: member.status,
         used: false,
         subgraphId: "",
-        sotry: member.story,
+        story: member.story,
       });
     }
   };
@@ -232,7 +239,7 @@ const TreeContent = () => {
           setMemberList([newMember]);
         }
         // save memberlist to the databse
-        if (currentUid) {
+        if (pid) {
           saveMemberToDb(newMember);
         }
       } catch (err) {
@@ -302,7 +309,7 @@ const TreeContent = () => {
           }
         }
         // save memberlist to the databse
-        if (currentUid) {
+        if (pid) {
           saveMemberToDb(newMember);
         }
 
@@ -443,7 +450,7 @@ const TreeContent = () => {
                 value={firstName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setFirstName(e.target.value)}
-              // placeholder=""
+                // placeholder=""
               ></Input.TextArea>
               <h1>
                 Last Name<i style={{ color: "red" }}>*</i>
@@ -452,14 +459,14 @@ const TreeContent = () => {
                 value={lastName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setLastName(e.target.value)}
-              // placeholder=""
+                // placeholder=""
               ></Input.TextArea>
               <h1>Nick Name</h1>
               <Input.TextArea
                 value={nickName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setNickName(e.target.value)}
-              // placeholder=""
+                // placeholder=""
               ></Input.TextArea>
               <h1>Gender</h1>
               <Select

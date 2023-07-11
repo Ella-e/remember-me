@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import { Dropdown, Menu, Space } from "antd";
 import { UserOutlined, LaptopOutlined } from "@ant-design/icons";
@@ -7,8 +7,6 @@ import { auth } from "../firebase-config";
 import { useRouter } from "next/navigation";
 import { colors } from "@mui/material";
 import "./page.css";
-
-
 
 const MyHeader = () => {
   // check the current login state of the user
@@ -20,7 +18,7 @@ const MyHeader = () => {
       label: "Profile",
     },
     {
-      key: '1',
+      key: "1",
       label: (
         <div
           onClick={() => {
@@ -31,41 +29,43 @@ const MyHeader = () => {
           Sign Out
         </div>
       ),
-    }];
+    },
+  ];
 
   return (
     <div className="header">
       <div className="toolBar">
         {auth.currentUser ? (
           <div className="flex">
-            <div className='mr'>Welcome, {auth.currentUser?.email}</div>
-            <Dropdown
-              menu={{ items }}
-            >
+            <div className="mr font-20">Welcome, {auth.currentUser?.email}</div>
+            <Dropdown menu={{ items }}>
               <a onClick={(e) => e.preventDefault()}>
                 <Space>
-                  <UserOutlined className='mr' />
+                  <UserOutlined className="mr font-20" />
                 </Space>
               </a>
             </Dropdown>
-            <div className='mr' onClick={() => {
-              router.push("/myHome");
-            }}>Home</div>
+            <div
+              className="mr font-20"
+              onClick={() => {
+                router.push("/myHome");
+              }}
+            >
+              Home
+            </div>
           </div>
         ) : (
-          <div className="flex mr"
+          <div
+            className="flex mr-40 font-20"
             onClick={() => {
               router.push("/login");
             }}
           >
             Login
           </div>
-        )
-        }
-
-      </div >
-    </div >
-
+        )}
+      </div>
+    </div>
   );
 };
 

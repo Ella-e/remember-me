@@ -23,7 +23,15 @@ body {
 }
 
 .mr {
-  margin-right: 10px;
+  margin-right: 20px;
+}
+
+.mr-40 {
+  margin-right: 40px;
+}
+
+.font-20 {
+  font-size: 20px;
 }
 
 .toolBar {

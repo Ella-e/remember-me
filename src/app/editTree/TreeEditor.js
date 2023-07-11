@@ -8,7 +8,14 @@ import mermaid from "mermaid";
 import "./page.css";
 import MermaidChartComponent from "./Mermaid";
 import { auth, db } from "../firebase-config";
-import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  setDoc,
+  addDoc,
+  collection,
+} from "firebase/firestore";
 import {
   Alert,
   Backdrop,
@@ -19,6 +26,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import { useRouter, useSearchParams } from "next/navigation";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -45,27 +53,23 @@ const TreeEditor = () => {
     selected,
     setRefreshMemberList,
   } = treeStore;
-
-  const getTree = async () => {
-    setLoading(true);
-    const docRef = doc(db, "trees", currentUid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      setDesc(data.desc);
-      setHasNode(true);
-    }
-    setLoading(false);
-  };
+  const [pid, setPid] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     if (auth.currentUser) {
       setAuthWarning(false);
-      getTree();
-      return () => {
-        setRefreshMemberList(false);
-        const memberList = JSON.parse(localStorage.getItem("memberList"));
-        const docRef = doc(db, "trees", currentUid);
+      setPid(searchParams.get("tab").slice(6, 32));
+    } else {
+      router.push("/login");
+    }
+    return () => {
+      setRefreshMemberList(false);
+      const memberList = JSON.parse(localStorage.getItem("memberList"));
+      if (pid) {
+        const docRef = doc(db, "trees", pid);
+
         getDoc(docRef).then((docSnap) => {
           if (docSnap.exists()) {
           }
@@ -81,11 +85,29 @@ const TreeEditor = () => {
             }
           }
         });
-      };
-    } else {
-      setAuthWarning(true);
-    }
+      }
+    };
   }, []);
+
+  useEffect(() => {
+    if (pid) {
+      getTree();
+    }
+  }, [pid]);
+
+  const getTree = async () => {
+    setLoading(true);
+    if (pid) {
+      const docRef = doc(db, "trees", pid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setDesc(data.desc);
+        setHasNode(true);
+      }
+      setLoading(false);
+    }
+  };
 
   const saveTreeToDb = async (desc) => {
     setRelation("Partner");
@@ -97,19 +119,20 @@ const TreeEditor = () => {
       setDesc(desc);
       setNodeInTree(null);
     }
-    const docRef = doc(db, "trees", currentUid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      // update the doc
-      await updateDoc(docRef, {
-        desc: desc,
-      });
-    } else {
-      await setDoc(docRef, {
-        id: currentUid,
-        uid: currentUid,
-        desc: desc,
-      });
+    if (pid) {
+      const docRef = doc(db, "trees", pid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        // update the doc
+        await updateDoc(docRef, {
+          desc: desc,
+        });
+      } else {
+        await setDoc(docRef, {
+          id: pid,
+          desc: desc,
+        });
+      }
     }
   };
 
@@ -197,7 +220,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-          `click ${tempNode.docId} callback`
+            `click ${tempNode.docId} callback`
         );
         updateMemberToDb(tempNode, {
           subgraphId: nodeInTree.docId.slice(0, 10),
@@ -347,20 +370,6 @@ const TreeEditor = () => {
       console.log("chart");
       console.log(chart);
       setDescription(desc);
-      // let chart = treeStore.description;
-      /**
-    * graph LR
-        01H3HAWJ6R7NTT3Q4HV40SMTTY((Jiali Yu))
-        click 01H3HAWJ6R7NTT3Q4HV40SMTTY callback
-    style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
-        01H3HAP36BHKGSAYQZZ1RCHK8A((Ella Mu)) --- 01H3HAWJ6R7NTT3Q4HV40SMTTY((Jiali Yu))
-        click 01H3HAWJ6R7NTT3Q4HV40SMTTY callback
-    */
-      let test_chart = `graph TD
-style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
-        01H3HAWJ6R7NTT3Q4HV40SMTTY((Jiali Yu)) --- 01H3HAP36BHKGSAYQZZ1RCHK8A((Ella Mu))
-      click 01H3HAP36BHKGSAYQZZ1RCHK8A callback
-      click 01H3HAWJ6R7NTT3Q4HV40SMTTY callback`;
 
       return (
         <div className="App">
@@ -451,8 +460,8 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
           Please login to save data into database.
         </Alert>
       )}
-      <div className="flex-1 flex ">
-        <div className="justify-center h-full w-two-third">
+      <div className="flex ">
+        <div className="justify-center w-two-third">
           <h1>Family Tree</h1>
           <Backdrop
             sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -462,7 +471,7 @@ style 01H3HAP36BHKGSAYQZZ1RCHK8A fill:#ECECFF
           </Backdrop>
           {hasNode && <App />}
         </div>
-        <div className=" bg-white">
+        <div className=" bg-white mr-10">
           <Toolbar />
         </div>
       </div>

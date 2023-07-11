@@ -13,11 +13,11 @@ import MyHeader from "../myHome/MyHeader";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase-config";
 import TreeEditor from "./TreeEditor";
-import NoSsr from "@/components/NoSsr";
 import "./page.css";
 
 const EditTree = () => {
   const { Header, Content, Sider } = Layout;
+  const [pid, setPid] = useState("");
 
   const router = useRouter();
   // handle auth state change
@@ -26,13 +26,18 @@ const EditTree = () => {
 
   useEffect(() => {
     if (searchParams.get("tab")) {
-      setActiveTab(searchParams.get("tab"));
+      setPid(searchParams.get("tab").slice(6, 32));
+      setActiveTab(searchParams.get("tab").slice(0, 1));
     }
-  }, [searchParams.get("tab")]);
+  }, []);
 
   const [activeTab, setActiveTab] = useState("1");
   useEffect(() => {
-    router.replace(`/editTree?tab=${activeTab}`);
+    if (pid) {
+      {
+        router.replace(`/editTree?tab=${activeTab}?pid=${pid}`);
+      }
+    }
   }, [activeTab]);
 
   const handleTabChange = (key) => {
@@ -54,12 +59,8 @@ const EditTree = () => {
     }
   );
   return (
-
     <div className="layout">
-
       <MyHeader />
-
-
       <div style={{ display: "flex", flex: 1 }}>
         <Sider width={200} className="site-layout-background">
           <Menu
@@ -83,13 +84,11 @@ const EditTree = () => {
             <ViewTree />
           )}
         </div>
-
       </div>
-
     </div>
-
-
   );
 };
 
 export default EditTree;
+
+//TODO: check if uid included
