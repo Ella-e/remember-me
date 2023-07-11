@@ -51,3 +51,13 @@ body {
 .justify-end {
   justify-content: end;
 }
+
+.center {
+  display: flex;
+  flex: 110%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin-top: 20vh;
+}

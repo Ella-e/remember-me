@@ -1,11 +1,10 @@
 "use client";
-import React, { useState } from "react";
-import { Dropdown, Menu, Space } from "antd";
-import { UserOutlined, LaptopOutlined } from "@ant-design/icons";
+import React from "react";
+import { Dropdown, Space } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase-config";
 import { useRouter } from "next/navigation";
-import { colors } from "@mui/material";
 import "./page.css";
 
 const MyHeader = () => {
@@ -23,7 +22,7 @@ const MyHeader = () => {
         <div
           onClick={() => {
             signOut(auth);
-            router.push("/login");
+            router.push("/");
           }}
         >
           Sign Out
@@ -70,3 +69,5 @@ const MyHeader = () => {
 };
 
 export default MyHeader;
+
+//TODO: sign out add loading

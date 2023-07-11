@@ -13,8 +13,6 @@ import {
   getDoc,
   updateDoc,
   setDoc,
-  addDoc,
-  collection,
 } from "firebase/firestore";
 import {
   Alert,
@@ -39,7 +37,6 @@ const TreeEditor = () => {
   const [nodeInTree, setNodeInTree] = useState(null);
   const [authWarning, setAuthWarning] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const currentUid = auth?.currentUser?.uid;
   const {
     hasNode,
     setHasNode,
@@ -56,6 +53,8 @@ const TreeEditor = () => {
   const [pid, setPid] = useState("");
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [projectName, setProjectName] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -92,8 +91,21 @@ const TreeEditor = () => {
   useEffect(() => {
     if (pid) {
       getTree();
+      getProject();
     }
   }, [pid]);
+
+  const getProject = async () => {
+    if (pid) {
+      const docRef = doc(db, "projects", pid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setProjectName(data.name);
+        console.log(data.name);
+      }
+    }
+  };
 
   const getTree = async () => {
     setLoading(true);
@@ -108,6 +120,28 @@ const TreeEditor = () => {
       setLoading(false);
     }
   };
+
+  const handleInputClick = () => {
+    setIsEditing(true);
+  };
+
+  const updateProject = async () => {
+    const docRef = doc(db, "projects", pid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      console.log("update");
+      await updateDoc(docRef, {
+        name: projectName,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (projectName) {
+      updateProject();
+    }
+  }, [projectName]);
+
 
   const saveTreeToDb = async (desc) => {
     setRelation("Partner");
@@ -220,7 +254,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-            `click ${tempNode.docId} callback`
+          `click ${tempNode.docId} callback`
         );
         updateMemberToDb(tempNode, {
           subgraphId: nodeInTree.docId.slice(0, 10),
@@ -462,7 +496,31 @@ const TreeEditor = () => {
       )}
       <div className="flex ">
         <div className="justify-center w-two-third">
-          <h1>Family Tree</h1>
+          {projectName && (isEditing ? (
+            <h1
+              contentEditable
+              onBlur={(event) => {
+                setProjectName(event.target.textContent);
+                setIsEditing(false);
+              }}
+              autoFocus
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                outline: 'none',
+                fontSize: '2em',
+                fontWeight: 'bold'
+              }}
+            >
+              {projectName}
+            </h1>
+          ) : (
+            <h1 onClick={handleInputClick} style={{ cursor: 'text' }}>
+              {projectName}
+            </h1>
+          ))}
+
+
           <Backdrop
             sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
             open={loading}
@@ -480,3 +538,5 @@ const TreeEditor = () => {
 };
 
 export default observer(TreeEditor);
+
+//FIXME: only project memberlist; input name length limit & input warning

@@ -1,27 +1,14 @@
 "use client";
-import React, { useState } from "react";
-// import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-
-// import LoginScreen from "./login/page";
-// import SignUpScreen from "./signUp/page";
-// import MainScreen from "./home/page";
-
-// import PrivateRoute from "./utils/PrivateRoute";
+import React from "react";
 import Link from "next/link";
-import { useAuth, AuthProvider, AuthContext } from "./context/AuthContext";
-import LoginScreen from "./login/page";
-import EditTree from "./editTree/page";
-import MainScreen from "./myHome/page";
-// import { auth } from "./firebase-config";
+
 
 export default function Home() {
-  // const {authUser, loading} = useAuth();
-  const [user, setUser] = useState(null);
   return (
-    <div>
+    <div style={{ height: '100vh', width: "100%", padding: "0px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
       <h1>rememberMe</h1>
       <Link href="/login">Login</Link>
-      <Link href="/signUp">Sign Up</Link>
+      <Link href="/signUp" style={{ marginBottom: "33vh" }}>Sign Up</Link>
     </div>
     // <AuthContext.Provider value={{
     //   user,

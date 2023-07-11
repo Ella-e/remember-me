@@ -4,17 +4,19 @@ import MyHeader from "../myHome/MyHeader";
 import { auth, db } from "../firebase-config";
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   query,
   setDoc,
   where,
 } from "firebase/firestore";
-import { Backdrop, CircularProgress } from "@mui/material";
+import { Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import "./page.css";
 import ULID from "../utils/ulid";
 import { useRouter, useSearchParams } from "next/navigation";
-import EditTree from "../editTree/page";
+import Link from "next/link";
+import { set } from "mobx";
 
 const TreeProjects = () => {
   const [loading, setLoading] = useState(false);
@@ -22,13 +24,18 @@ const TreeProjects = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pid = searchParams.get("pid");
+  const [showAlert, setShowAlert] = useState(false);
+  const [deleteMember, setDeleteMember] = useState(null);
 
   useEffect(() => {
     getProjects();
   }, []);
 
-  const handleDeleteProject = () => {
-    //TODO:
+  const deleteProject = async (member) => {
+    await deleteDoc(doc(db, "projects", member.id)).then(() => {
+      getProjects();
+      setDeleteMember(null);
+    });
   };
 
   const getProjects = async () => {
@@ -63,13 +70,46 @@ const TreeProjects = () => {
     let tempUid = generator();
     const newProject = {
       id: tempUid,
-      uids: [auth.currentUser.uid],
       name: "untitled",
+      uids: [auth.currentUser.uid],
     };
     const docRef = doc(db, "projects", tempUid);
     setDoc(docRef, newProject).then(() => {
-      router.replace(`/treeProjects?pid=${newProject.id}`);
+      router.push(`/editTree?tab=1?pid=${newProject.id}`);
     });
+  };
+
+  const DeleteAlert = () => {
+    return (
+      <Dialog
+        open={deleteMember}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Are you sure to delete the tree?"}
+        </DialogTitle>
+        {/* <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            After deletion of member all its sub-relation in the tree will be
+            deleted. Please be aware of the result of this attempt. Click agree
+            to continue deleting the member.
+          </DialogContentText>
+        </DialogContent> */}
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setDeleteMember(null);
+            }}
+          >
+            Disagree
+          </Button>
+          <Button onClick={() => deleteProject(deleteMember)} autoFocus>
+            Agree
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
   };
 
   return (
@@ -80,38 +120,43 @@ const TreeProjects = () => {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-      {!pid ? (
-        <div>
-          <MyHeader />
-          <div className="padding">
-            <h1>Tree Projects</h1>
-            {projectList.length > 0 &&
-              projectList.map((project) => {
-                return (
-                  <div>
-                    <h1>{project.name}</h1>
-                    <button
-                      onClick={() =>
-                        router.replace(`/editTree?tab=1?pid=${project.id}`)
-                      }
-                    >
-                      edit
-                    </button>
-                    <button onClick={handleDeleteProject}>delete</button>
-                  </div>
-                );
-              })}
-            {projectList.length == 0 && (
-              <h1 onClick={handleCreateProject}>Start creating your tree!</h1>
-            )}
-          </div>
+
+      <div>
+        <MyHeader />
+        <div className="padding">
+          <h1>Tree Projects</h1>
+          <DeleteAlert />
+          {projectList.length > 0 &&
+            projectList.reverse().map((project) => {
+              return (
+                <div>
+                  <h1>{project.name}</h1>
+                  <button
+                    onClick={() =>
+                      router.replace(`/editTree?tab=1?pid=${project.id}`)
+                    }
+                  >
+                    edit
+                  </button>
+                  <button onClick={() => setDeleteMember(project)}>delete</button>
+                  {/* <Link
+                    onClick={() =>
+                      router.push(`/editTree?tab=1?pid=${project.id}`)
+                    }
+                    href="#"
+                  >
+                    EDIT
+                  </Link>
+                  <Link onClick={() => setShowAlert(true)} href="#">DELETE</Link> */}
+                </div>
+              );
+            })}
+          {projectList.length == 0 && (
+            <Link onClick={handleCreateProject} href="#">Start creating your tree!</Link>
+          )}
         </div>
-      ) : (
-        <div>
-          pid: {pid}
-          <EditTree />
-        </div>
-      )}
+      </div>
+
     </div>
   );
 };

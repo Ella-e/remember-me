@@ -1,12 +1,16 @@
 "use client";
-import React, { Suspense, useContext, useEffect, useState } from "react";
-import { AuthContext, AuthProvider, useAuth } from "../context/AuthContext";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "../firebase-config";
-import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../firebase-config";
 import MyHeader from "./MyHeader";
+import "./page.css";
+import Link from "next/link";
+import { doc, setDoc } from "firebase/firestore";
+import ULID from "../utils/ulid";
+import { Backdrop, CircularProgress } from "@mui/material";
 
 const MainScreen = () => {
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   useEffect(() => {
     if (auth.currentUser) {
@@ -16,19 +20,41 @@ const MainScreen = () => {
     }
   }, []);
 
+  const handleCreateProject = async () => {
+    setLoading(true);
+    let generator = ULID();
+    let tempUid = generator();
+    const newProject = {
+      id: tempUid,
+      name: "untitled",
+      uids: [auth.currentUser.uid],
+    };
+    const docRef = doc(db, "projects", tempUid);
+    setDoc(docRef, newProject).then(() => {
+      router.push(`/editTree?tab=1?pid=${newProject.id}`);
+    });
+  };
+
   return (
     <div>
-      <Suspense fallback={<Loading />} />
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
 
-      <div>
+      <div className="layout">
         <MyHeader />
-        <h1 className="mt-2">rememberMe</h1>
-        <button onClick={() => router.push("/editTree")}>
-          Start a new tree
-        </button>
-        <button onClick={() => router.push("/treeProjects")}>
-          View my trees
-        </button>
+        <div className="center">
+          <h1 className="mt-2">rememberMe</h1>
+          <Link onClick={handleCreateProject} href="#">
+            Start a new tree
+          </Link>
+          <Link href="/treeProjects">
+            View my trees
+          </Link>
+        </div>
         {
           // <MyHome />
           // <>
@@ -49,9 +75,5 @@ const MainScreen = () => {
     </div>
   );
 };
-
-function Loading() {
-  return <h2>loading</h2>;
-}
 
 export default MainScreen;
