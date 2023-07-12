@@ -9,14 +9,15 @@ import {
   getDocs,
   query,
   setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
-import { Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Input } from "@mui/material";
 import "./page.css";
 import ULID from "../utils/ulid";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { set } from "mobx";
+import { message } from "antd";
 
 const TreeProjects = () => {
   const [loading, setLoading] = useState(false);
@@ -26,6 +27,9 @@ const TreeProjects = () => {
   const pid = searchParams.get("pid");
   const [showAlert, setShowAlert] = useState(false);
   const [deleteMember, setDeleteMember] = useState(null);
+  const [shareVisible, setShareVisible] = useState(false);
+  const [shareProject, setShareProject] = useState(null);
+  const [shareEmail, setShareEmail] = useState("");
 
   useEffect(() => {
     getProjects();
@@ -59,7 +63,7 @@ const TreeProjects = () => {
         };
         tempList.push(project);
       });
-      setProjectList(tempList);
+      setProjectList(tempList.reverse());
     }
     setLoading(false);
   };
@@ -87,15 +91,15 @@ const TreeProjects = () => {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"Are you sure to delete the tree?"}
+          {`Are you sure to delete this project?`}
         </DialogTitle>
-        {/* <DialogContent>
+        <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            After deletion of member all its sub-relation in the tree will be
+            After deletion of project all its tree graph and members will be
             deleted. Please be aware of the result of this attempt. Click agree
-            to continue deleting the member.
+            to continue deleting the project.
           </DialogContentText>
-        </DialogContent> */}
+        </DialogContent>
         <DialogActions>
           <Button
             onClick={() => {
@@ -112,6 +116,55 @@ const TreeProjects = () => {
     );
   };
 
+  const handleShare = (project) => {
+    setShareProject(project);
+    setShareVisible(true);
+  }
+
+  const share = async () => {
+    getUsers().then((users) => {
+      let user = users.find((user) => user.email === shareEmail);
+      if (user && shareProject.uids.includes(user.uid)) {
+        message.error("User already in the project!");
+        setShareVisible(false);
+        setShareProject(null);
+      }
+      else if (user) {
+        let tempProject = shareProject;
+        tempProject.uids.push(user.uid);
+        const docRef = doc(db, "projects", tempProject.id);
+        updateDoc(docRef, { uids: tempProject.uids }).then(() => {
+          message.success("Share successfully!");
+          setShareVisible(false);
+          setShareProject(null);
+        });
+      }
+      else {
+        message.error("User not found!");
+      }
+    })
+  };
+
+  const getUsers = async () => {
+    const q = query(
+      collection(db, "users"),
+    );
+    const querySnapshot = await getDocs(q);
+    const tempList = [];
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      const docData = doc.data();
+      const user = {
+        uid: docData.uid,
+        email: docData.email,
+      };
+      tempList.push(user);
+    });
+    return tempList;
+  }
+
+
+
   return (
     <div>
       <Backdrop
@@ -124,30 +177,50 @@ const TreeProjects = () => {
       <div>
         <MyHeader />
         <div className="padding">
-          <h1>Tree Projects</h1>
+          <div style={{ display: "flex" }}>
+            <h1 style={{ marginRight: "33vw" }}>Tree Projects</h1>
+            {shareVisible && (
+              <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                <div style={{ display: "flex" }}>
+                  <Input
+                    sx={{ width: '30vw' }}
+                    placeholder="Please enter the recipient‘s email"
+                    onChange={(e) => setShareEmail(e.target.value)}
+                  />
+                  <div style={{ display: "flex", flexDirection: "column", justifyContent: "end" }}>
+                    <div style={{ display: "flex" }}>
+                      <Link style={{ marginLeft: "8px" }}
+                        href="#" onClick={() => {
+                          setShareVisible(false);
+                          setShareProject(null);
+                        }}>CANCEL</Link>
+                      <Link href="#"
+                        style={{ marginLeft: "8px" }}
+                        onClick={() => {
+                          share();
+                        }}>SHARE</Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
           <DeleteAlert />
+
           {projectList.length > 0 &&
-            projectList.reverse().map((project) => {
+            projectList.map((project) => {
               return (
                 <div>
                   <h1>{project.name}</h1>
-                  <button
-                    onClick={() =>
-                      router.replace(`/editTree?tab=1?pid=${project.id}`)
-                    }
-                  >
-                    edit
-                  </button>
-                  <button onClick={() => setDeleteMember(project)}>delete</button>
-                  {/* <Link
-                    onClick={() =>
-                      router.push(`/editTree?tab=1?pid=${project.id}`)
-                    }
-                    href="#"
+
+
+                  <Link className="ml"
+                    href={`/editTree?tab=1?pid=${project.id}`}
                   >
                     EDIT
                   </Link>
-                  <Link onClick={() => setShowAlert(true)} href="#">DELETE</Link> */}
+                  <Link className="ml" href="#" onClick={() => handleShare(project)}>SHARE</Link>
+                  <Link className="ml" onClick={() => setDeleteMember(project)} href="#">DELETE</Link>
                 </div>
               );
             })}
@@ -157,10 +230,10 @@ const TreeProjects = () => {
         </div>
       </div>
 
-    </div>
+    </div >
   );
 };
 
 export default TreeProjects;
 
-//TODO: add tree graph & share??
+//TODO: add tree graph & disable editable?

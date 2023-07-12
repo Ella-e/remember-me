@@ -58,3 +58,27 @@
 .mb-10 {
   margin-bottom: 10px;
 }
+
+.edit {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  margin-bottom: 22px;
+  margin-left: 5px;
+}
+
+.save {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+}
+
+.input {
+  background-color: aliceblue;
+  border: "none";
+  outline: "none";
+  max-width: "80%";
+  width: "auto";
+  white-space: "nowrap";
+  overflow: "hidden";
+}

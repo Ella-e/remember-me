@@ -23,8 +23,10 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Input,
 } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -119,10 +121,6 @@ const TreeEditor = () => {
       }
       setLoading(false);
     }
-  };
-
-  const handleInputClick = () => {
-    setIsEditing(true);
   };
 
   const updateProject = async () => {
@@ -496,29 +494,44 @@ const TreeEditor = () => {
       )}
       <div className="flex ">
         <div className="justify-center w-two-third">
-          {projectName && (isEditing ? (
-            <h1
-              contentEditable
-              onBlur={(event) => {
-                setProjectName(event.target.textContent);
-                setIsEditing(false);
-              }}
-              autoFocus
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                outline: 'none',
-                fontSize: '2em',
-                fontWeight: 'bold'
-              }}
-            >
-              {projectName}
-            </h1>
-          ) : (
-            <h1 onClick={handleInputClick} style={{ cursor: 'text' }}>
-              {projectName}
-            </h1>
-          ))}
+          {projectName &&
+            (isEditing ? (
+              <div className="flex" style={{ justifyContent: "start" }}>
+                <Input
+                  sx={{ width: '70%' }}
+                  defaultValue={projectName}
+                  inputProps={{
+                    maxLength: 15,
+                  }}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  onBlur={() => {
+                    setIsEditing(false);
+                  }}
+                />
+                <Link
+                  className="save"
+                  onClick={() => setIsEditing(false)}
+                  href="
+                #"
+                >
+                  SAVE
+                </Link>
+              </div>
+            ) : (
+              <div className="flex" style={{ justifyContent: "start" }}>
+                <h1 style={{ cursor: "text", maxWidth: "80%" }}>
+                  {projectName}
+                </h1>
+                <Link
+                  className="edit"
+                  onClick={() => setIsEditing(true)}
+                  href="
+                #"
+                >
+                  EDIT
+                </Link>
+              </div>
+            ))}
 
 
           <Backdrop
@@ -539,4 +552,4 @@ const TreeEditor = () => {
 
 export default observer(TreeEditor);
 
-//FIXME: only project memberlist; input name length limit & input warning
+//FIXME: only project memberlist; input len=0 lost focus
