@@ -8,12 +8,7 @@ import mermaid from "mermaid";
 import "./page.css";
 import MermaidChartComponent from "./Mermaid";
 import { auth, db } from "../firebase-config";
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  setDoc,
-} from "firebase/firestore";
+import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore";
 import {
   Alert,
   Backdrop,
@@ -55,7 +50,7 @@ const TreeEditor = () => {
   const [pid, setPid] = useState("");
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [projectName, setProjectName] = useState('');
+  const [projectName, setProjectName] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -139,7 +134,6 @@ const TreeEditor = () => {
       updateProject();
     }
   }, [projectName]);
-
 
   const saveTreeToDb = async (desc) => {
     setRelation("Partner");
@@ -252,7 +246,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-          `click ${tempNode.docId} callback`
+            `click ${tempNode.docId} callback`
         );
         updateMemberToDb(tempNode, {
           subgraphId: nodeInTree.docId.slice(0, 10),
@@ -498,7 +492,7 @@ const TreeEditor = () => {
             (isEditing ? (
               <div className="flex" style={{ justifyContent: "start" }}>
                 <Input
-                  sx={{ width: '70%' }}
+                  sx={{ width: "70%" }}
                   defaultValue={projectName}
                   inputProps={{
                     maxLength: 15,
@@ -533,7 +527,6 @@ const TreeEditor = () => {
               </div>
             ))}
 
-
           <Backdrop
             sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
             open={loading}
@@ -551,5 +544,6 @@ const TreeEditor = () => {
 };
 
 export default observer(TreeEditor);
+// export default TreeEditor;
 
 //FIXME: only project memberlist; input len=0 lost focus

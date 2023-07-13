@@ -6,13 +6,8 @@ import {
   Button,
   CircularProgress,
   Container,
-  InputLabel,
   MenuItem,
-  Pagination,
   Select,
-  TableCell,
-  TableHead,
-  TableRow,
   TextField,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -36,13 +31,17 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../firebase-config";
 // import RichText from "./RichText";
-import ReactQuill from "react-quill";
-import "../../../node_modules/react-quill/dist/quill.snow.css";
-import { FORMATS, MODULES } from "./RichText";
+
+// import ReactQuill from "react-quill"; // !!!
+
+// import "../../../node_modules/react-quill/dist/quill.snow.css";
+// import { FORMATS, MODULES } from "./RichText";
+
 // import { Scrollbars } from "react-custom-scrollbars";
 // import { Scrollbars } from "rc-scrollbars";
 // import * as Scroll from "react-scroll";
 // import { Element } from "react-scroll";
+
 import "./page.css";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -503,13 +502,13 @@ const TreeContent = () => {
             </Select>
             <div className="">
               <h1>Life Story</h1>
-              <ReactQuill
+              {/* <ReactQuill
                 modules={MODULES}
                 formats={FORMATS}
                 value={richTextValue}
                 onChange={setRichTextValue}
                 theme="snow"
-              />
+              /> */}
             </div>
             <Button
               type="submit"

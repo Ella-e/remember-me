@@ -2,10 +2,10 @@
 import React from "react";
 import mermaid from "mermaid";
 
-mermaid.initialize({
-  startOnLoad: true,
-  securityLevel: "loose",
-});
+// mermaid.initialize({
+//   startOnLoad: true,
+//   securityLevel: "loose",
+// });
 
 class MermaidChartComponent extends React.Component {
   componentDidMount() {
