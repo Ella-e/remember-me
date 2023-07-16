@@ -11,7 +11,7 @@ import {
   TextField,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ULID from "../utils/ulid";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -32,10 +32,29 @@ import {
 import { auth, db } from "../firebase-config";
 // import RichText from "./RichText";
 
+// sun editor
+import "suneditor/dist/css/suneditor.min.css";
+// import suneditor from "suneditor";
+import SunEditor from "suneditor-react";
+import SunEditorCore from "suneditor/src/lib/core";
+
+// import image from "suneditor/src/plugins/dialog/link";
+// import list from "suneditor/src/plugins/submenu/list";
+// import { font } from "suneditor/src/plugins";
+
+// How to import language files (default: en)
+
+// end
+
 // import ReactQuill from "react-quill"; // !!!
+// import Tiptap from "./TipTap";
+import { useEditor, EditorContent, Editor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 
 // import "../../../node_modules/react-quill/dist/quill.snow.css";
 // import { FORMATS, MODULES } from "./RichText";
+// const ReactQuill = require("react-quill");
+// const { Quill } = ReactQuill;
 
 // import { Scrollbars } from "react-custom-scrollbars";
 // import { Scrollbars } from "rc-scrollbars";
@@ -44,6 +63,8 @@ import { auth, db } from "../firebase-config";
 
 import "./page.css";
 import { useRouter, useSearchParams } from "next/navigation";
+// import Tiptap from "./TipTap";
+// import Image from "@tiptap/extension-image";
 
 const TreeContent = () => {
   const [editNode, setEditNode] = useState(false);
@@ -56,11 +77,11 @@ const TreeContent = () => {
   const [loading, setLoading] = useState(false);
   const currentUid = auth?.currentUser?.uid;
   const [authWarning, setAuthWarning] = useState(false);
-  const [richTextValue, setRichTextValue] = useState("");
   const [status, setStatus] = useState("alive");
   const [nickName, setNickName] = useState("");
   const [gender, setGender] = useState("male");
   const [otherGender, setOtherGender] = useState("");
+  const [story, setStory] = useState("");
 
   // Initialize memerbList
   const [memberList, setMemberList] = useState(new Array());
@@ -204,12 +225,12 @@ const TreeContent = () => {
   const clearVar = () => {
     setFirstName("");
     setLastName("");
-    setRichTextValue("");
     setNickName("");
     setGender("");
     setOtherGender("");
     setStatus("");
     setSelectedMember(null);
+    setStory("");
   };
 
   /**
@@ -217,6 +238,8 @@ const TreeContent = () => {
    */
   const handleAddMember = (event) => {
     let newMember = {};
+    // set rich text value
+    // const story = editor.getHTML();
     if (firstName === "" || lastName === "") {
       alert("Please enter a first name and a last last name");
     } else {
@@ -233,7 +256,7 @@ const TreeContent = () => {
           gender: gender,
           otherGender: otherGender,
           status: status,
-          story: richTextValue,
+          story: story,
         };
         if (memberList) {
           setMemberList((current) => [...current, newMember]);
@@ -248,6 +271,8 @@ const TreeContent = () => {
         console.log(err.message);
       }
       clearVar();
+      // reset editor value
+      // editor.commands.setContent("");
       setEditNode(false);
     }
   };
@@ -272,6 +297,8 @@ const TreeContent = () => {
    */
   const handleEditMember = () => {
     if (selectedMember) {
+      console.log("selected");
+      console.log(selectedMember);
       setFirstName(selectedMember.firstName);
       setLastName(selectedMember.lastName);
       setNickName(selectedMember.nickName);
@@ -279,7 +306,9 @@ const TreeContent = () => {
       setOtherGender(selectedMember.otherGender);
       setStatus(selectedMember.status);
       setSelectedId(selectedMember.id);
-      setRichTextValue(selectedMember.story);
+      setStory(selectedMember.story);
+      // set editor's value
+      // editor.commands.setContent(selectedMember.story);
       setEditNode(true); // open the page
       setIsEdit(true); // call right submit function
     }
@@ -289,8 +318,8 @@ const TreeContent = () => {
    * handle save editted member information action.
    */
   const handleSaveEditMember = () => {
-    console.log("run save edit");
     let newMember = {};
+    // const story = editor.getHTML();
     if (selectedId) {
       try {
         for (var i = 0; i < memberList.length; i++) {
@@ -304,7 +333,7 @@ const TreeContent = () => {
               gender: gender,
               otherGender: otherGender,
               status: status,
-              story: richTextValue,
+              story: story,
             };
             tempList.splice(i, 1, newMember);
             setMemberList(tempList);
@@ -316,6 +345,8 @@ const TreeContent = () => {
         }
 
         setSelectedId(null);
+        // reset editor value
+        // editor.commands.setContent("");
       } catch (err) {
         console.log(err.message);
       }
@@ -388,6 +419,41 @@ const TreeContent = () => {
         </DialogActions>
       </Dialog>
     );
+  };
+
+  // const editor = useEditor({
+  //   extensions: [StarterKit, Image],
+  //   content: "",
+  // });
+
+  // const showImg = () => {
+  //   // console.log("begin");
+  //   // console.log(document.getElementById("node_pic"));
+  //   var file = document.getElementById("node_pic")?.files[0];
+  //   var re = new FileReader();
+  //   re.readAsDataURL(file);
+  //   re.onload = function (re) {
+  //     var url = re.target.result;
+  //     if (url) {
+  //       editor.chain().focus().setImage({ src: url }).run();
+  //     }
+  //   };
+  // };
+
+  // const createStory = () => {
+  //   suneditor.create(document.getElementById("rich_text") || "rich_text", {
+  //     plugins: [font, image, list],
+  //     buttonList: [["font", "image", "list"]],
+  //   });
+  // };
+
+  const editor = useRef();
+  const getSunEditorInstance = (sunEditor) => {
+    editor.current = sunEditor;
+  };
+
+  const handleStoryChange = (content) => {
+    setStory(content);
   };
 
   return (
@@ -502,13 +568,30 @@ const TreeContent = () => {
             </Select>
             <div className="">
               <h1>Life Story</h1>
-              {/* <ReactQuill
-                modules={MODULES}
-                formats={FORMATS}
-                value={richTextValue}
-                onChange={setRichTextValue}
-                theme="snow"
+              {/* <button onClick={createStory}>Add Story</button> */}
+              {/* <textarea id="rich_text">To be displayed</textarea> */}
+              <SunEditor
+                name="story"
+                setContents={story}
+                getSunEditorInstance={getSunEditorInstance}
+                lang="en"
+                onChange={handleStoryChange}
+                setOptions={{
+                  buttonList: [
+                    ["undo", "redo"],
+                    ["font", "fontSize"],
+                    ["image", "list"],
+                  ],
+                }}
+              />
+              {/* <input
+                type="file"
+                onChange={showImg}
+                id="node_pic"
+                accept=".jpg, .jpeg, .png"
               /> */}
+              {/* <EditorContent editor={editor} /> */}
+              {/* <Tiptap /> */}
             </div>
             <Button
               type="submit"
