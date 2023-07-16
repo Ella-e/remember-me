@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "antd";
+import { Button, Popover } from "antd";
 import React, { useState, useEffect } from "react";
 import Toolbar from "./Toolbar";
 import { observer } from "mobx-react-lite";
@@ -18,10 +18,11 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Input,
 } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import EditModal from "./rename";
+import ShareModal from "../treeProjects/share";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -29,6 +30,8 @@ mermaid.initialize({
 });
 
 const TreeEditor = () => {
+  const [editVisible, setEditVisible] = useState(false);
+  const [shareVisible, setShareVisible] = useState(false);
   const [desc, setDesc] = useState("");
   const [loading, setLoading] = useState(false);
   const [nodeInTree, setNodeInTree] = useState(null);
@@ -50,8 +53,7 @@ const TreeEditor = () => {
   const [pid, setPid] = useState("");
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [projectName, setProjectName] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
+  const [project, setProject] = useState(null);
 
   useEffect(() => {
     if (auth.currentUser) {
@@ -98,8 +100,7 @@ const TreeEditor = () => {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const data = docSnap.data();
-        setProjectName(data.name);
-        console.log(data.name);
+        setProject(data);
       }
     }
   };
@@ -118,22 +119,6 @@ const TreeEditor = () => {
     }
   };
 
-  const updateProject = async () => {
-    const docRef = doc(db, "projects", pid);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      console.log("update");
-      await updateDoc(docRef, {
-        name: projectName,
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (projectName) {
-      updateProject();
-    }
-  }, [projectName]);
 
   const saveTreeToDb = async (desc) => {
     setRelation("Partner");
@@ -246,7 +231,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-            `click ${tempNode.docId} callback`
+          `click ${tempNode.docId} callback`
         );
         updateMemberToDb(tempNode, {
           subgraphId: nodeInTree.docId.slice(0, 10),
@@ -438,7 +423,9 @@ const TreeEditor = () => {
             className="mr-10"
             type="primary"
             onClick={() => {
+              setLoading(true);
               this.refresh();
+              setLoading(false);
             }}
             disabled={!generable}
           >
@@ -488,44 +475,20 @@ const TreeEditor = () => {
       )}
       <div className="flex ">
         <div className="justify-center w-two-third">
-          {projectName &&
-            (isEditing ? (
-              <div className="flex" style={{ justifyContent: "start" }}>
-                <Input
-                  sx={{ width: "70%" }}
-                  defaultValue={projectName}
-                  inputProps={{
-                    maxLength: 15,
-                  }}
-                  onChange={(e) => setProjectName(e.target.value)}
-                  onBlur={() => {
-                    setIsEditing(false);
-                  }}
-                />
-                <Link
-                  className="save"
-                  onClick={() => setIsEditing(false)}
-                  href="
-                #"
-                >
-                  SAVE
-                </Link>
-              </div>
-            ) : (
-              <div className="flex" style={{ justifyContent: "start" }}>
-                <h1 style={{ cursor: "text", maxWidth: "80%" }}>
-                  {projectName}
-                </h1>
-                <Link
-                  className="edit"
-                  onClick={() => setIsEditing(true)}
-                  href="
-                #"
-                >
-                  EDIT
-                </Link>
-              </div>
-            ))}
+          {project && (<div className="flex" style={{ justifyContent: "start" }}>
+            <h1 style={{ cursor: "text", maxWidth: "80%" }}>
+              {project.name}
+            </h1>
+            <Popover onOpenChange={(visible) => setEditVisible(visible)} open={editVisible}
+              placement="bottomLeft" content={<EditModal project={project} onClose={() => { setEditVisible(false); getProject(); }} />} trigger="click">
+              <Link className="edit" href="#" onClick={() => setEditVisible(true)}>EDIT</Link>
+            </Popover>
+            <Popover onOpenChange={(visible) => setShareVisible(visible)} open={shareVisible}
+              placement="bottomLeft" content={<ShareModal project={project} onClose={() => { setShareVisible(false) }} />} trigger="click">
+              <Link className="edit" href="#" onClick={() => setShareVisible(true)}>SHARE</Link>
+            </Popover>
+
+          </div>)}
 
           <Backdrop
             sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -544,6 +507,3 @@ const TreeEditor = () => {
 };
 
 export default observer(TreeEditor);
-// export default TreeEditor;
-
-//FIXME: only project memberlist; input len=0 lost focus

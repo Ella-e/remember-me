@@ -5,3 +5,12 @@
 .ml {
   margin-right: 8px;
 }
+
+.share-modal-overlay {
+  position: relative;
+  width: 33vw;
+  z-index: 9999; /* 设置层级高于其他页面元素 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -23,6 +23,7 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
+import { useSearchParams } from "next/navigation";
 
 const Toolbar = () => {
   const [loading, setLoading] = useState(false);
@@ -42,6 +43,7 @@ const Toolbar = () => {
     refreshMemberList,
     setRefreshMemberList,
   } = treeStore;
+  const searchParams = useSearchParams();
 
   const markUseState = async (member, update) => {
     // check if this person's memberlist exist first
@@ -113,7 +115,7 @@ const Toolbar = () => {
     if (auth.currentUser) {
       const q = query(
         collection(db, "nodes"),
-        where("uid", "==", auth.currentUser.uid)
+        where("pid", "==", searchParams.get("tab").slice(6, 32))
       );
       const querySnapshot = await getDocs(q);
       // const tempMemberList = [...memberList];
@@ -121,7 +123,8 @@ const Toolbar = () => {
       querySnapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
         const docData = doc.data();
-        if (!docData.used) {
+        console.log(docData);
+        if ((!docData.used)) {
           const tempMember = {
             id: docData.id,
             firstName: docData.firstName,
@@ -146,6 +149,7 @@ const Toolbar = () => {
           subgraphId: docData.subgraphId,
         };
         tempMemberList.push(tempMember);
+
       });
       localStorage.setItem("memberList", JSON.stringify(tempMemberList));
     }

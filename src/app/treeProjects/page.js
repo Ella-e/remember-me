@@ -17,7 +17,8 @@ import "./page.css";
 import ULID from "../utils/ulid";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { message } from "antd";
+import { Popover, message } from "antd";
+import ShareModal from "./share";
 
 const TreeProjects = () => {
   const [loading, setLoading] = useState(false);
@@ -27,9 +28,8 @@ const TreeProjects = () => {
   const pid = searchParams.get("pid");
   const [showAlert, setShowAlert] = useState(false);
   const [deleteMember, setDeleteMember] = useState(null);
-  const [shareVisible, setShareVisible] = useState(false);
   const [shareProject, setShareProject] = useState(null);
-  const [shareEmail, setShareEmail] = useState("");
+  const [shareVisible, setShareVisible] = useState(false);
 
   useEffect(() => {
     getProjects();
@@ -121,50 +121,6 @@ const TreeProjects = () => {
     setShareVisible(true);
   }
 
-  const share = async () => {
-    getUsers().then((users) => {
-      let user = users.find((user) => user.email === shareEmail);
-      if (user && shareProject.uids.includes(user.uid)) {
-        message.error("User already in the project!");
-        setShareVisible(false);
-        setShareProject(null);
-      }
-      else if (user) {
-        let tempProject = shareProject;
-        tempProject.uids.push(user.uid);
-        const docRef = doc(db, "projects", tempProject.id);
-        updateDoc(docRef, { uids: tempProject.uids }).then(() => {
-          message.success("Share successfully!");
-          setShareVisible(false);
-          setShareProject(null);
-        });
-      }
-      else {
-        message.error("User not found!");
-      }
-    })
-  };
-
-  const getUsers = async () => {
-    const q = query(
-      collection(db, "users"),
-    );
-    const querySnapshot = await getDocs(q);
-    const tempList = [];
-    querySnapshot.forEach((doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      const docData = doc.data();
-      const user = {
-        uid: docData.uid,
-        email: docData.email,
-      };
-      tempList.push(user);
-    });
-    return tempList;
-  }
-
-
-
   return (
     <div>
       <Backdrop
@@ -179,38 +135,13 @@ const TreeProjects = () => {
         <div className="padding">
           <div style={{ display: "flex" }}>
             <h1 style={{ marginRight: "33vw" }}>Tree Projects</h1>
-            {shareVisible && (
-              <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                <div style={{ display: "flex" }}>
-                  <Input
-                    sx={{ width: '30vw' }}
-                    placeholder="Please enter the recipient‘s email"
-                    onChange={(e) => setShareEmail(e.target.value)}
-                  />
-                  <div style={{ display: "flex", flexDirection: "column", justifyContent: "end" }}>
-                    <div style={{ display: "flex" }}>
-                      <Link style={{ marginLeft: "8px" }}
-                        href="#" onClick={() => {
-                          setShareVisible(false);
-                          setShareProject(null);
-                        }}>CANCEL</Link>
-                      <Link href="#"
-                        style={{ marginLeft: "8px" }}
-                        onClick={() => {
-                          share();
-                        }}>SHARE</Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
           <DeleteAlert />
 
           {projectList.length > 0 &&
             projectList.map((project) => {
               return (
-                <div>
+                <div key={project.id}>
                   <h1>{project.name}</h1>
 
 
@@ -219,7 +150,11 @@ const TreeProjects = () => {
                   >
                     EDIT
                   </Link>
-                  <Link className="ml" href="#" onClick={() => handleShare(project)}>SHARE</Link>
+
+                  <Popover onOpenChange={(visible) => setShareVisible(visible)} open={shareVisible && shareProject && shareProject.id === project.id}
+                    placement="bottomLeft" content={<ShareModal project={shareProject} onClose={() => { setShareVisible(false); setShareProject(null); }} />} trigger="click">
+                    <Link className="ml" href="#" onClick={() => handleShare(project)}>SHARE</Link>
+                  </Popover>
                   <Link className="ml" onClick={() => setDeleteMember(project)} href="#">DELETE</Link>
                 </div>
               );
@@ -236,4 +171,4 @@ const TreeProjects = () => {
 
 export default TreeProjects;
 
-//TODO: add tree graph & disable editable?
+//TODO: add tree graph & disable editable?; if login reload page
