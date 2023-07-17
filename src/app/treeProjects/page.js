@@ -170,5 +170,3 @@ const TreeProjects = () => {
 };
 
 export default TreeProjects;
-
-//TODO: add tree graph & disable editable?; if login reload page

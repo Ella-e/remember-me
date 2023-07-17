@@ -5,18 +5,17 @@ import {
   NotificationOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Breadcrumb, Layout, Menu } from "antd";
+import { Layout, Menu } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
 import TreeContent from "./TreeContent";
 import ViewTree from "./ViewTree";
 import MyHeader from "../myHome/MyHeader";
-import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase-config";
 import TreeEditor from "./TreeEditor";
 import "./page.css";
 
 const EditTree = () => {
-  const { Header, Content, Sider } = Layout;
+  const { Sider } = Layout;
   const [pid, setPid] = useState("");
 
   const router = useRouter();
@@ -25,9 +24,12 @@ const EditTree = () => {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (searchParams.get("tab")) {
+    if (auth.currentUser) {
       setPid(searchParams.get("tab").slice(6, 32));
       setActiveTab(searchParams.get("tab").slice(0, 1));
+
+    } else {
+      router.push("/login");
     }
   }, []);
 
@@ -90,5 +92,3 @@ const EditTree = () => {
 };
 
 export default EditTree;
-
-//TODO: check if uid included

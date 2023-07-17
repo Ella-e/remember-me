@@ -63,23 +63,22 @@ const TreeEditor = () => {
       router.push("/login");
     }
     return () => {
-      setRefreshMemberList(false);
+      // setRefreshMemberList(false);
       const memberList = JSON.parse(localStorage.getItem("memberList"));
       if (pid) {
         const docRef = doc(db, "trees", pid);
-
         getDoc(docRef).then((docSnap) => {
           if (docSnap.exists()) {
-          }
-          for (let i = 0; i < memberList.length; i++) {
-            if (
-              docSnap.data() &&
-              docSnap.data().desc.indexOf(memberList[i].docId) === -1
-            ) {
-              updateMemberToDb(memberList[i], {
-                subgraphId: memberList[i].subgraphId,
-                used: false,
-              });
+            for (let i = 0; i < memberList.length; i++) {
+              if (
+                docSnap.data() &&
+                docSnap.data().desc.indexOf(memberList[i].docId) === -1
+              ) {
+                updateMemberToDb(memberList[i], {
+                  subgraphId: "",
+                  used: false,
+                });
+              }
             }
           }
         });
@@ -113,7 +112,7 @@ const TreeEditor = () => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setDesc(data.desc);
-        setHasNode(true);
+        if (desc) setHasNode(true);
       }
       setLoading(false);
     }
@@ -126,7 +125,6 @@ const TreeEditor = () => {
     setChooseAble(false);
     if (nodeInTree) {
       desc = desc.replace("style " + nodeInTree.docId + " fill:#bbf", "");
-      console.log(desc);
       setDesc(desc);
       setNodeInTree(null);
     }
@@ -174,11 +172,7 @@ const TreeEditor = () => {
       super(props);
 
       this.callBack = (e) => {
-        console.log(e);
-        // setOnRootNode(false);
         const memberList = JSON.parse(localStorage.getItem("memberList"));
-        // select member by id from memberlist
-
         if (nodeInTree && nodeInTree.docId === e) {
           setSelected(false);
           setDesc(desc.replace("style " + e + " fill:#bbf", ""));
@@ -507,3 +501,5 @@ const TreeEditor = () => {
 };
 
 export default observer(TreeEditor);
+
+//TODO: node: parent:[]

@@ -1,15 +1,17 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Dropdown, Space } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase-config";
 import { useRouter } from "next/navigation";
 import "./page.css";
+import { Backdrop, CircularProgress } from "@mui/material";
 
 const MyHeader = () => {
   // check the current login state of the user
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const items = [
     {
@@ -21,6 +23,7 @@ const MyHeader = () => {
       label: (
         <div
           onClick={() => {
+            setLoading(true);
             signOut(auth);
             router.push("/");
           }}
@@ -63,11 +66,15 @@ const MyHeader = () => {
             Login
           </div>
         )}
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
       </div>
     </div>
   );
 };
 
 export default MyHeader;
-
-//TODO: sign out add loading
