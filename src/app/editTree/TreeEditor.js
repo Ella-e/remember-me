@@ -23,6 +23,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import EditModal from "./rename";
 import ShareModal from "../treeProjects/share";
+import { saveAs } from "file-saver";
+import html2canvas from "html2canvas";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -104,6 +106,21 @@ const TreeEditor = () => {
     }
   };
 
+  const download = () => {
+    const chartElement = document.getElementById("mermaid-chart");
+    html2canvas(chartElement).then((canvas) => {
+      canvas.toBlob((blob) => {
+        // Trigger the file download with PNG data
+        saveAs(blob, `${project.name}.png`);
+      });
+    });
+    // const svgData = chartElement.outerHTML;
+    // const svgBlob = new Blob([svgData], {
+    //   type: "image/svg+xml;charset=utf-8",
+    // });
+    // saveAs(svgBlob, "mermaid_chart.svg");
+  };
+
   const getTree = async () => {
     setLoading(true);
     if (pid) {
@@ -112,12 +129,14 @@ const TreeEditor = () => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setDesc(data.desc);
-        if (desc) setHasNode(true);
       }
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (desc) setHasNode(true);
+  }, [desc]);
 
   const saveTreeToDb = async (desc) => {
     setRelation("Partner");
@@ -225,7 +244,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-          `click ${tempNode.docId} callback`
+            `click ${tempNode.docId} callback`
         );
         updateMemberToDb(tempNode, {
           subgraphId: nodeInTree.docId.slice(0, 10),
@@ -369,6 +388,10 @@ const TreeEditor = () => {
       setRefreshMemberList(true);
     }
 
+    download() {
+      download();
+    }
+
     render() {
       // let chart = this.state.description;
       let chart = desc;
@@ -412,7 +435,6 @@ const TreeEditor = () => {
               </Button>
             </DialogActions>
           </Dialog>
-
           <Button
             className="mr-10"
             type="primary"
@@ -439,12 +461,21 @@ const TreeEditor = () => {
           )}
           <Button
             type="primary"
+            className="mr-10"
             onClick={() => {
               this.save();
               // this.render();
             }}
           >
             SAVE
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              this.download();
+            }}
+          >
+            DOWNLOAD
           </Button>
           {desc && (
             <MermaidChartComponent chart={chart} callBack={this.callBack} />
@@ -469,20 +500,58 @@ const TreeEditor = () => {
       )}
       <div className="flex ">
         <div className="justify-center w-two-third">
-          {project && (<div className="flex" style={{ justifyContent: "start" }}>
-            <h1 style={{ cursor: "text", maxWidth: "80%" }}>
-              {project.name}
-            </h1>
-            <Popover onOpenChange={(visible) => setEditVisible(visible)} open={editVisible}
-              placement="bottomLeft" content={<EditModal project={project} onClose={() => { setEditVisible(false); getProject(); }} />} trigger="click">
-              <Link className="edit" href="#" onClick={() => setEditVisible(true)}>EDIT</Link>
-            </Popover>
-            <Popover onOpenChange={(visible) => setShareVisible(visible)} open={shareVisible}
-              placement="bottomLeft" content={<ShareModal project={project} onClose={() => { setShareVisible(false) }} />} trigger="click">
-              <Link className="edit" href="#" onClick={() => setShareVisible(true)}>SHARE</Link>
-            </Popover>
-
-          </div>)}
+          {project && (
+            <div className="flex" style={{ justifyContent: "start" }}>
+              <h1 style={{ cursor: "text", maxWidth: "80%" }}>
+                {project.name}
+              </h1>
+              <Popover
+                onOpenChange={(visible) => setEditVisible(visible)}
+                open={editVisible}
+                placement="bottomLeft"
+                content={
+                  <EditModal
+                    project={project}
+                    onClose={() => {
+                      setEditVisible(false);
+                      getProject();
+                    }}
+                  />
+                }
+                trigger="click"
+              >
+                <Link
+                  className="edit"
+                  href="#"
+                  onClick={() => setEditVisible(true)}
+                >
+                  EDIT
+                </Link>
+              </Popover>
+              <Popover
+                onOpenChange={(visible) => setShareVisible(visible)}
+                open={shareVisible}
+                placement="bottomLeft"
+                content={
+                  <ShareModal
+                    project={project}
+                    onClose={() => {
+                      setShareVisible(false);
+                    }}
+                  />
+                }
+                trigger="click"
+              >
+                <Link
+                  className="edit"
+                  href="#"
+                  onClick={() => setShareVisible(true)}
+                >
+                  SHARE
+                </Link>
+              </Popover>
+            </div>
+          )}
 
           <Backdrop
             sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
