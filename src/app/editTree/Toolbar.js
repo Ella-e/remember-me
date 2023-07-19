@@ -24,6 +24,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useSearchParams } from "next/navigation";
+import { set } from "jodit/types/core/helpers";
 
 const Toolbar = () => {
   const [loading, setLoading] = useState(false);
@@ -45,29 +46,31 @@ const Toolbar = () => {
   } = treeStore;
   const searchParams = useSearchParams();
 
-  const markUseState = async (member, update) => {
+  const markLocalUseState = async (member, update) => {
     // check if this person's memberlist exist first
-    const docRef = doc(db, "nodes", member.id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      // update the doc
-      await updateDoc(docRef, {
-        used: update.used,
-        subgraphId: update.subgraphId,
-      });
+    const tempList = JSON.parse(localStorage.getItem("memberList"));
+    if (tempList) {
+      const index = tempList.findIndex((item) => item.id === member.id);
+      if (index !== -1) {
+        tempList[index].used = update.used;
+        tempList[index].subgraphId = update.subgraphId;
+        localStorage.setItem("memberList", JSON.stringify(tempList));
+      }
     }
-    localStorage.setItem("refresh", JSON.stringify(new Date()));
+    refresh();
+    // localStorage.setItem("refresh", JSON.stringify(new Date()));
   };
+
+  const refresh = () => {
+    const tempList = JSON.parse(localStorage.getItem("memberList"));
+    setMemberList(tempList.filter((item) => !item.used));
+  }
 
   const handleUnChoose = () => {
     const temp = JSON.parse(localStorage.getItem("selectedMember"));
     if (temp) {
-      // document.getElementById("unchoose-button").disabled = true;
-      // document.getElementById("choose-button").disabled = false;
       window.localStorage.removeItem("selectedMember");
-      markUseState(temp, { used: false, subgraphId: "" }).then(() => {
-        getMemberList();
-      });
+      markLocalUseState(temp, { used: false, subgraphId: "" });
     }
     setSelectedMember(null);
     setGenerable(false);
@@ -75,16 +78,11 @@ const Toolbar = () => {
 
   const handleChoose = () => {
     if (selectedMember) {
-      // document.getElementById("choose-button").disabled = true;
-      // document.getElementById("unchoose-button").disabled = false;
       window.localStorage.setItem(
         "selectedMember",
         JSON.stringify(selectedMember)
       );
-      markUseState(selectedMember, { used: true, subgraphId: "" }).then(() => {
-        // set selectedMember to local storage
-        getMemberList();
-      });
+      markLocalUseState(selectedMember, { used: true, subgraphId: "" });
       if (!hasNode) {
         setHasNode(true);
       }
@@ -97,7 +95,6 @@ const Toolbar = () => {
 
   const [memberList, setMemberList] = useState(new Array());
   const columns = [
-    // { field: "id", headerName: "id", width: 100, hide: true },
     { field: "firstName", headerName: "First name", width: 130 },
     { field: "lastName", headerName: "Last name", width: 130 },
   ];
@@ -110,7 +107,7 @@ const Toolbar = () => {
     setChooseAble(true);
   };
 
-  const getMemberList = async () => {
+  const getDbMemberList = async () => {
     setLoading(true);
     if (auth.currentUser) {
       const q = query(
@@ -123,41 +120,24 @@ const Toolbar = () => {
       querySnapshot.forEach((doc) => {
         // doc.data() is never undefined for query doc snapshots
         const docData = doc.data();
-        console.log(docData);
-        if ((!docData.used)) {
-          const tempMember = {
-            id: docData.id,
-            firstName: docData.firstName,
-            lastName: docData.lastName,
-            docId: doc.id,
-            subgraphId: docData.subgraphId,
-            used: docData.used,
-          };
-          tempMemberList.push(tempMember);
-        }
-      });
-      setMemberList(tempMemberList);
-      tempMemberList = new Array();
-      querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        const docData = doc.data();
         const tempMember = {
           id: docData.id,
           firstName: docData.firstName,
           lastName: docData.lastName,
           docId: doc.id,
           subgraphId: docData.subgraphId,
+          used: docData.used,
         };
         tempMemberList.push(tempMember);
-
       });
       localStorage.setItem("memberList", JSON.stringify(tempMemberList));
+      setMemberList(tempMemberList.filter((member) => !member.used));
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    getMemberList();
+    getDbMemberList();
     return () => {
       setRelation("Partner");
       setSelected(false);
@@ -166,14 +146,12 @@ const Toolbar = () => {
 
   useEffect(() => {
     if (refreshMemberList) {
-      getMemberList();
+      refresh();
       setRefreshMemberList(false);
     }
   }, [refreshMemberList]);
 
   return (
-    // <div className="flex justify-between items-center">
-
     <div>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -208,7 +186,6 @@ const Toolbar = () => {
         </div>
       )}
       <h1>Choose Member</h1>
-      {/* <MemberList /> */}
       <div style={{ height: 300, width: "100%" }}>
         <DataGrid
           rows={memberList}
@@ -259,3 +236,5 @@ const Toolbar = () => {
 };
 
 export default observer(Toolbar);
+
+//TODO: after save update to DB?

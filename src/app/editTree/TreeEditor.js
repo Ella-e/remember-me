@@ -110,15 +110,9 @@ const TreeEditor = () => {
     const chartElement = document.getElementById("mermaid-chart");
     html2canvas(chartElement).then((canvas) => {
       canvas.toBlob((blob) => {
-        // Trigger the file download with PNG data
         saveAs(blob, `${project.name}.png`);
       });
     });
-    // const svgData = chartElement.outerHTML;
-    // const svgBlob = new Blob([svgData], {
-    //   type: "image/svg+xml;charset=utf-8",
-    // });
-    // saveAs(svgBlob, "mermaid_chart.svg");
   };
 
   const getTree = async () => {
@@ -244,7 +238,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-            `click ${tempNode.docId} callback`
+          `click ${tempNode.docId} callback`
         );
         updateMemberToDb(tempNode, {
           subgraphId: nodeInTree.docId.slice(0, 10),
