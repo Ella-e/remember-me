@@ -6,13 +6,24 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   query,
   setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
-import { Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Input } from "@mui/material";
+import {
+  Backdrop,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Input,
+} from "@mui/material";
 import "./page.css";
 import ULID from "../utils/ulid";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -36,10 +47,19 @@ const TreeProjects = () => {
   }, []);
 
   const deleteProject = async (member) => {
-    await deleteDoc(doc(db, "projects", member.id)).then(() => {
-      getProjects();
-      setDeleteMember(null);
-    });
+    const docRef = doc(db, "projects", member.id);
+    if (member.uids.length > 1) {
+      member.uids = member.uids.filter((uid) => uid !== auth.currentUser.uid);
+      updateDoc(docRef, { uids: member.uids }).then(() => {
+        getProjects();
+        setDeleteMember(null);
+      });
+    } else {
+      await deleteDoc(doc(db, "projects", member.id)).then(() => {
+        getProjects();
+        setDeleteMember(null);
+      });
+    }
   };
 
   const getProjects = async () => {
@@ -95,9 +115,9 @@ const TreeProjects = () => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            After deletion of project all its tree graph and members will be
-            deleted. Please be aware of the result of this attempt. Click agree
-            to continue deleting the project.
+            After deletion of project all content will be deleted and you will
+            not be able to access the project. Click agree to continue deleting
+            the project.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -119,7 +139,7 @@ const TreeProjects = () => {
   const handleShare = (project) => {
     setShareProject(project);
     setShareVisible(true);
-  }
+  };
 
   return (
     <div>
@@ -144,28 +164,58 @@ const TreeProjects = () => {
                 <div key={project.id}>
                   <h1>{project.name}</h1>
 
-
-                  <Link className="ml"
+                  <Link
+                    className="ml"
                     href={`/editTree?tab=1?pid=${project.id}`}
                   >
                     EDIT
                   </Link>
 
-                  <Popover onOpenChange={(visible) => setShareVisible(visible)} open={shareVisible && shareProject && shareProject.id === project.id}
-                    placement="bottomLeft" content={<ShareModal project={shareProject} onClose={() => { setShareVisible(false); setShareProject(null); }} />} trigger="click">
-                    <Link className="ml" href="#" onClick={() => handleShare(project)}>SHARE</Link>
+                  <Popover
+                    onOpenChange={(visible) => setShareVisible(visible)}
+                    open={
+                      shareVisible &&
+                      shareProject &&
+                      shareProject.id === project.id
+                    }
+                    placement="bottomLeft"
+                    content={
+                      <ShareModal
+                        project={shareProject}
+                        onClose={() => {
+                          setShareVisible(false);
+                          setShareProject(null);
+                        }}
+                      />
+                    }
+                    trigger="click"
+                  >
+                    <Link
+                      className="ml"
+                      href="#"
+                      onClick={() => handleShare(project)}
+                    >
+                      SHARE
+                    </Link>
                   </Popover>
-                  <Link className="ml" onClick={() => setDeleteMember(project)} href="#">DELETE</Link>
+                  <Link
+                    className="ml"
+                    onClick={() => setDeleteMember(project)}
+                    href="#"
+                  >
+                    DELETE
+                  </Link>
                 </div>
               );
             })}
           {projectList.length == 0 && (
-            <Link onClick={handleCreateProject} href="#">Start creating your tree!</Link>
+            <Link onClick={handleCreateProject} href="#">
+              Start creating your tree!
+            </Link>
           )}
         </div>
       </div>
-
-    </div >
+    </div>
   );
 };
 
