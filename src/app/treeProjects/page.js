@@ -101,6 +101,7 @@ const TreeProjects = () => {
       id: tempUid,
       name: "untitled",
       uids: [auth.currentUser.uid],
+      subgraphs: []
     };
     const docRef = doc(db, "projects", tempUid);
     setDoc(docRef, newProject).then(() => {

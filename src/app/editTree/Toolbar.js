@@ -233,5 +233,3 @@ const Toolbar = () => {
 };
 
 export default observer(Toolbar);
-
-//TODO: after save update to DB?
