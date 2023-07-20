@@ -14,8 +14,6 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { LoadingOutlined } from "@ant-design/icons";
-import { Spin } from "antd";
 import {
   Backdrop,
   Card,
@@ -24,7 +22,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import { set } from "jodit/types/core/helpers";
 
 const Toolbar = () => {
   const [loading, setLoading] = useState(false);
@@ -64,7 +61,7 @@ const Toolbar = () => {
   const refresh = () => {
     const tempList = JSON.parse(localStorage.getItem("memberList"));
     setMemberList(tempList.filter((item) => !item.used));
-  }
+  };
 
   const handleUnChoose = () => {
     const temp = JSON.parse(localStorage.getItem("selectedMember"));
