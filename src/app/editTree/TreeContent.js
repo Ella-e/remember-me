@@ -63,6 +63,7 @@ import StarterKit from "@tiptap/starter-kit";
 
 import "./page.css";
 import { useRouter, useSearchParams } from "next/navigation";
+import { LightBlueBtn, ThemeBtn } from "../utils/customBtn";
 // import Tiptap from "./TipTap";
 // import Image from "@tiptap/extension-image";
 
@@ -157,22 +158,6 @@ const TreeContent = () => {
           rowSelection
           onCellClick={handleSelectMember}
         />
-        {/* {memberList?.map((item) => {
-          return (
-            <Box
-              sx={{
-                p: 2,
-                bgcolor: "background.default",
-                display: "grid",
-                gridTemplateColumns: { md: "1fr 1fr" },
-                gap: 2,
-              }}
-            >
-              First Name: {item.firstName}
-              Last Name: {item.lastName}
-            </Box>
-          );
-        })} */}
       </div>
     );
   };
@@ -421,32 +406,6 @@ const TreeContent = () => {
     );
   };
 
-  // const editor = useEditor({
-  //   extensions: [StarterKit, Image],
-  //   content: "",
-  // });
-
-  // const showImg = () => {
-  //   // console.log("begin");
-  //   // console.log(document.getElementById("node_pic"));
-  //   var file = document.getElementById("node_pic")?.files[0];
-  //   var re = new FileReader();
-  //   re.readAsDataURL(file);
-  //   re.onload = function (re) {
-  //     var url = re.target.result;
-  //     if (url) {
-  //       editor.chain().focus().setImage({ src: url }).run();
-  //     }
-  //   };
-  // };
-
-  // const createStory = () => {
-  //   suneditor.create(document.getElementById("rich_text") || "rich_text", {
-  //     plugins: [font, image, list],
-  //     buttonList: [["font", "image", "list"]],
-  //   });
-  // };
-
   const editor = useRef();
   const getSunEditorInstance = (sunEditor) => {
     editor.current = sunEditor;
@@ -470,8 +429,9 @@ const TreeContent = () => {
       )}
       {!editNode && !isEdit && (
         <div>
-          <h1>Add New Member</h1>
-          <Button onClick={() => setEditNode(true)}>Add Member</Button>
+          <LightBlueBtn variant="contained" onClick={() => setEditNode(true)}>
+            Add Member
+          </LightBlueBtn>
           {loading ? (
             <Backdrop
               sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -484,7 +444,7 @@ const TreeContent = () => {
               <MemberList />
             </div>
           )}
-          <h1>Edit Member</h1>
+          <p>Please check your selected member here: </p>
           <Box
             sx={{
               p: 2,
@@ -497,10 +457,14 @@ const TreeContent = () => {
             <div>First Name: {selectedMember?.firstName}</div>
             <div>Last Name: {selectedMember?.lastName}</div>
 
-            <Button variant="text" onClick={handleEditMember}>
+            <ThemeBtn variant="outlined" onClick={handleEditMember}>
               edit
-            </Button>
-            <Button variant="contained" onClick={preDeleteAlert}>
+            </ThemeBtn>
+            <Button
+              style={{ color: "red" }}
+              variant="text"
+              onClick={preDeleteAlert}
+            >
               delete
             </Button>
             <DeleteAlert />
@@ -508,99 +472,101 @@ const TreeContent = () => {
         </div>
       )}
       {editNode && (
-        <div className="border-line-[#E4E6F0] rounded-2xl leading-5 overflow-auto h-[189px] mb-[26px]">
-          <Container maxWidth="sm">
-            <h1>
-              First Name<i style={{ color: "red" }}>*</i>
-            </h1>
-            <Input.TextArea
-              value={firstName}
-              className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-              onChange={(e) => setFirstName(e.target.value)}
-              // placeholder=""
-            ></Input.TextArea>
-            <h1>
-              Last Name<i style={{ color: "red" }}>*</i>
-            </h1>
-            <Input.TextArea
-              value={lastName}
-              className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-              onChange={(e) => setLastName(e.target.value)}
-              // placeholder=""
-            ></Input.TextArea>
-            <h1>Nick Name</h1>
-            <Input.TextArea
-              value={nickName}
-              className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-              onChange={(e) => setNickName(e.target.value)}
-              // placeholder=""
-            ></Input.TextArea>
-            <h1>Gender</h1>
-            <Select
-              className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-              value={gender}
-              onChange={(e) => {
-                setGender(e.target.value);
-                setOtherGender("");
-              }}
-            >
-              <MenuItem value={"male"}>male</MenuItem>
-              <MenuItem value={"female"}>female</MenuItem>
-              <MenuItem value={"other"}>other</MenuItem>
-            </Select>
-            {gender === "other" && (
-              <TextField
-                placeholder="please specify"
-                value={otherGender}
+        <div className="treeContent-bg-outer">
+          <div className="treeContent-bg-inner">
+            <Container maxWidth="sm">
+              <h1>
+                First Name<i style={{ color: "red" }}>*</i>
+              </h1>
+              <Input.TextArea
+                value={firstName}
+                className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+                onChange={(e) => setFirstName(e.target.value)}
+                // placeholder=""
+              ></Input.TextArea>
+              <h1>
+                Last Name<i style={{ color: "red" }}>*</i>
+              </h1>
+              <Input.TextArea
+                value={lastName}
+                className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+                onChange={(e) => setLastName(e.target.value)}
+                // placeholder=""
+              ></Input.TextArea>
+              <h1>Nick Name</h1>
+              <Input.TextArea
+                value={nickName}
+                className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+                onChange={(e) => setNickName(e.target.value)}
+                // placeholder=""
+              ></Input.TextArea>
+              <h1>Gender</h1>
+              <Select
+                className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+                value={gender}
                 onChange={(e) => {
-                  setOtherGender(e.target.value);
+                  setGender(e.target.value);
+                  setOtherGender("");
                 }}
-              ></TextField>
-            )}
-            <h1>Status</h1>
-            <Select
-              className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <MenuItem value={"alive"}>alive</MenuItem>
-              <MenuItem value={"desceased"}>deceased</MenuItem>
-            </Select>
-            <div className="">
-              <h1>Life Story</h1>
-              {/* <button onClick={createStory}>Add Story</button> */}
-              {/* <textarea id="rich_text">To be displayed</textarea> */}
-              <SunEditor
-                name="story"
-                setContents={story}
-                getSunEditorInstance={getSunEditorInstance}
-                lang="en"
-                onChange={handleStoryChange}
-                setOptions={{
-                  buttonList: [
-                    ["undo", "redo"],
-                    ["font", "fontSize"],
-                    ["image", "list"],
-                  ],
-                }}
-              />
-              {/* <input
+              >
+                <MenuItem value={"male"}>male</MenuItem>
+                <MenuItem value={"female"}>female</MenuItem>
+                <MenuItem value={"other"}>other</MenuItem>
+              </Select>
+              {gender === "other" && (
+                <TextField
+                  placeholder="please specify"
+                  value={otherGender}
+                  onChange={(e) => {
+                    setOtherGender(e.target.value);
+                  }}
+                ></TextField>
+              )}
+              <h1>Status</h1>
+              <Select
+                className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <MenuItem value={"alive"}>alive</MenuItem>
+                <MenuItem value={"desceased"}>deceased</MenuItem>
+              </Select>
+              <div className="">
+                <h1>Life Story</h1>
+                {/* <button onClick={createStory}>Add Story</button> */}
+                {/* <textarea id="rich_text">To be displayed</textarea> */}
+                <SunEditor
+                  name="story"
+                  setContents={story}
+                  getSunEditorInstance={getSunEditorInstance}
+                  lang="en"
+                  onChange={handleStoryChange}
+                  setOptions={{
+                    buttonList: [
+                      ["undo", "redo"],
+                      ["font", "fontSize"],
+                      ["image", "list"],
+                    ],
+                  }}
+                />
+                {/* <input
                 type="file"
                 onChange={showImg}
                 id="node_pic"
                 accept=".jpg, .jpeg, .png"
               /> */}
-              {/* <EditorContent editor={editor} /> */}
-              {/* <Tiptap /> */}
-            </div>
-            <Button
-              type="submit"
-              onClick={isEdit ? handleSaveEditMember : handleAddMember}
-            >
-              Save Member
-            </Button>
-            <Button onClick={() => handleCancel("add")}>Cancel</Button>
-          </Container>
+                {/* <EditorContent editor={editor} /> */}
+                {/* <Tiptap /> */}
+              </div>
+              <Button
+                type="submit"
+                onClick={isEdit ? handleSaveEditMember : handleAddMember}
+              >
+                Save Member
+              </Button>
+              <Button onClick={() => handleCancel("add")}>Cancel</Button>
+            </Container>
+          </div>
         </div>
       )}
     </div>

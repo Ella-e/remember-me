@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import {
-  LaptopOutlined,
-  NotificationOutlined,
+  EditOutlined,
+  TeamOutlined,
+  DownloadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
@@ -27,7 +28,6 @@ const EditTree = () => {
     if (auth.currentUser) {
       setPid(searchParams.get("tab").slice(6, 32));
       setActiveTab(searchParams.get("tab").slice(0, 1));
-
     } else {
       router.push("/login");
     }
@@ -46,8 +46,8 @@ const EditTree = () => {
     setActiveTab(key);
   };
 
-  const section = ["Edit Tree", "Edit Member", "View Tree"];
-  const items2 = [UserOutlined, LaptopOutlined, NotificationOutlined].map(
+  const section = ["Mange Tree", "Manage Member", "Download"];
+  const items2 = [EditOutlined, TeamOutlined, DownloadOutlined].map(
     (icon, index) => {
       const key = `sub${index + 1}`;
       return {
@@ -63,7 +63,7 @@ const EditTree = () => {
   return (
     <div className="layout">
       <MyHeader />
-      <div style={{ display: "flex", flex: 1 }}>
+      <div className="middleBlock" style={{ display: "flex", flex: 1 }}>
         <Sider width={200} className="site-layout-background">
           <Menu
             mode="inline"

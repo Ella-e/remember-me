@@ -82,3 +82,18 @@
   white-space: "nowrap";
   overflow: "hidden";
 }
+
+.site-layout-background {
+  background-color: #fff;
+}
+
+.middleBlock {
+  height: 100%;
+  width: 100%;
+  position: absolute; /* The key to set the full width and height. */
+}
+
+.treeContent-bg-inner {
+  width: 80%;
+  margin: auto;
+}

@@ -5,7 +5,7 @@ import { UserOutlined } from "@ant-design/icons";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase-config";
 import { useRouter } from "next/navigation";
-import "./page.css";
+import css from "./page.module.css";
 import { Backdrop, CircularProgress } from "@mui/material";
 
 const MyHeader = () => {
@@ -16,7 +16,15 @@ const MyHeader = () => {
   const items = [
     {
       key: "0",
-      label: "Profile",
+      label: (
+        <div
+          onClick={() => {
+            router.push("/myHome");
+          }}
+        >
+          Home
+        </div>
+      ),
     },
     {
       key: "1",
@@ -35,30 +43,31 @@ const MyHeader = () => {
   ];
 
   return (
-    <div className="header">
-      <div className="toolBar">
+    <div className={css.header}>
+      <div className={css.toolBar}>
         {auth.currentUser ? (
-          <div className="flex">
-            <div className="mr font-20">Welcome, {auth.currentUser?.email}</div>
+          <div className={css.flex}>
+            <div className={css.name}>rememberMe</div>
+            <div className={css.mr}>Welcome, {auth.currentUser?.email}</div>
             <Dropdown menu={{ items }}>
               <a onClick={(e) => e.preventDefault()}>
                 <Space>
-                  <UserOutlined className="mr font-20" />
+                  <UserOutlined className={css.mr} />
                 </Space>
               </a>
             </Dropdown>
-            <div
+            {/* <div
               className="mr font-20"
               onClick={() => {
                 router.push("/myHome");
               }}
             >
               Home
-            </div>
+            </div> */}
           </div>
         ) : (
           <div
-            className="flex mr-40 font-20"
+            className={css.loginBtn}
             onClick={() => {
               router.push("/login");
             }}

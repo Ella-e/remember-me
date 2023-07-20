@@ -1,0 +1,78 @@
+/* .layout {
+  .ant-layout-content {
+    height: "100%";
+  }
+} */
+
+/* html,
+body {
+  height: 100%;
+  margin: 0;
+} */
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  background-image: url("../images/bg_3.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 50vh;
+  background-position: center;
+  background-blend-mode: darken;
+}
+
+.header {
+  height: 70px;
+  display: flex;
+  background-color: rgba(165, 159, 226, 0.8);
+}
+
+.mr {
+  margin-right: 20px;
+  font-size: 20px;
+}
+
+.loginBtn {
+  display: flex;
+  justify-content: end;
+  width: 100%;
+  margin-right: 40px;
+  font-size: 20px;
+}
+
+.mr40 {
+  margin-right: 40px;
+}
+
+.toolBar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.flex {
+  display: flex;
+  justify-content: end;
+  width: 100%;
+}
+
+.justify-end {
+  justify-content: end;
+}
+
+/* .center {
+  display: flex;
+  flex: 110%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin-top: 20vh;
+} */
+
+.name {
+  position: absolute;
+  right: 90%;
+}

@@ -13,8 +13,9 @@ import { Button, Stack, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { AuthContext, AuthProvider } from "../context/AuthContext";
 import Link from "next/link";
-import "./page.css";
+import css from "./page.module.css";
 import { doc, setDoc } from "firebase/firestore";
+import { StartBtn } from "../utils/customBtn";
 
 const SignUpScreen = () => {
   const [email, setEmail] = useState("");
@@ -94,14 +95,14 @@ const SignUpScreen = () => {
   };
 
   return (
-    <div className="out-most">
-      <div className="input-box">
+    <div className={css.outMost}>
+      <div className={css.inputBox}>
         <Stack>
           <h1>Sign Up</h1>
         </Stack>
         <form onSubmit={handleSignUp}>
           <Stack>
-            <Stack className="input-item">
+            <Stack className={css.inputItem}>
               <TextField
                 label="Email"
                 name="email"
@@ -113,7 +114,7 @@ const SignUpScreen = () => {
                 placeholder="Email"
               />
             </Stack>
-            <Stack className="input-item">
+            <Stack className={css.inputItem}>
               <TextField
                 label="Password"
                 name="password"
@@ -127,15 +128,15 @@ const SignUpScreen = () => {
             </Stack>
             {error}
             {infoMsg !== "" && <div>{infoMsg}</div>}
-            <Stack className="input-item">
+            <Stack className={css.inputItem}>
               {loading ? (
                 <LoadingButton loading variant="outlined">
                   <span>Sign up</span>
                 </LoadingButton>
               ) : (
-                <Button fullWidth variant="outlined" type="submit">
+                <StartBtn fullWidth variant="outlined">
                   Sign up
-                </Button>
+                </StartBtn>
               )}
             </Stack>
           </Stack>

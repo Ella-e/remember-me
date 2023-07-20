@@ -3,11 +3,12 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "../firebase-config";
 import MyHeader from "./MyHeader";
-import "./page.css";
+import css from "./page.module.css";
 import Link from "next/link";
 import { doc, setDoc } from "firebase/firestore";
 import ULID from "../utils/ulid";
 import { Backdrop, CircularProgress } from "@mui/material";
+import TreeProjects from "../treeProjects/page";
 
 const MainScreen = () => {
   const [loading, setLoading] = useState(false);
@@ -44,17 +45,16 @@ const MainScreen = () => {
         <CircularProgress color="inherit" />
       </Backdrop>
 
-      <div className="layout">
-        <MyHeader />
-        <div className="center">
-          <h1 className="mt-2">rememberMe</h1>
-          <Link onClick={handleCreateProject} href="#">
+      <MyHeader />
+      <div className={css.layout}>
+        <TreeProjects />
+        {/* <div className="center"> */}
+        {/* <h1 className="mt-2">rememberMe</h1> */}
+        {/* <Link onClick={handleCreateProject} href="#">
             Start a new tree
           </Link>
-          <Link href="/treeProjects">
-            View my trees
-          </Link>
-        </div>
+          <Link href="/treeProjects">View my trees</Link> */}
+        {/* </div> */}
         {
           // <MyHome />
           // <>
