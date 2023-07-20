@@ -16,6 +16,9 @@ import {
 import {
   Backdrop,
   Button,
+  Card,
+  CardActions,
+  CardContent,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -24,12 +27,13 @@ import {
   DialogTitle,
   Input,
 } from "@mui/material";
-import "./page.css";
+import css from "./page.module.css";
 import ULID from "../utils/ulid";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Popover, message } from "antd";
 import ShareModal from "./share";
+// import addIcon from "public/image/purple_sky.jpg";
 
 const TreeProjects = () => {
   const [loading, setLoading] = useState(false);
@@ -83,6 +87,7 @@ const TreeProjects = () => {
         };
         tempList.push(project);
       });
+      tempList.push();
       setProjectList(tempList.reverse());
     }
     setLoading(false);
@@ -149,71 +154,90 @@ const TreeProjects = () => {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-
-      <div>
-        <MyHeader />
-        <div className="padding">
-          <div style={{ display: "flex" }}>
-            <h1 style={{ marginRight: "33vw" }}>Tree Projects</h1>
+      {/* <MyHeader /> */}
+      <div className={css.outMost}>
+        <h1 className={css.title}>Tree Projects</h1>
+        <DeleteAlert />
+        <div className={css.projects}>
+          <div className={css.project}>
+            <Card>
+              <CardContent className={css.cardBg}>
+                Create new project
+                <div className={css.addImg} onClick={handleCreateProject}></div>
+                {/* <img src={require("../images/add_icon_2.png")} /> */}
+              </CardContent>
+              {/* <CardActions className={css.cardActionBg}>
+                <Button onClick={handleCreateProject} href="#">
+                  Start creating your tree!
+                </Button>
+              </CardActions> */}
+            </Card>
           </div>
-          <DeleteAlert />
-
           {projectList.length > 0 &&
             projectList.map((project) => {
               return (
-                <div key={project.id}>
-                  <h1>{project.name}</h1>
+                <div className={css.project} key={project.id}>
+                  <Card variant="outlined" sx={{ minWidth: 275 }}>
+                    <CardContent className={css.cardBg}>
+                      <h5 className={css.text}>
+                        {project.name.length > 25
+                          ? project.name.substring(0, 25) + "..."
+                          : project.name}
+                      </h5>
+                    </CardContent>
+                    <CardActions className={css.cardActionBg}>
+                      <Link
+                        className="ml"
+                        href={`/editTree?tab=1?pid=${project.id}`}
+                      >
+                        EDIT
+                      </Link>
 
-                  <Link
-                    className="ml"
-                    href={`/editTree?tab=1?pid=${project.id}`}
-                  >
-                    EDIT
-                  </Link>
-
-                  <Popover
-                    onOpenChange={(visible) => setShareVisible(visible)}
-                    open={
-                      shareVisible &&
-                      shareProject &&
-                      shareProject.id === project.id
-                    }
-                    placement="bottomLeft"
-                    content={
-                      <ShareModal
-                        project={shareProject}
-                        onClose={() => {
-                          setShareVisible(false);
-                          setShareProject(null);
-                        }}
-                      />
-                    }
-                    trigger="click"
-                  >
-                    <Link
-                      className="ml"
-                      href="#"
-                      onClick={() => handleShare(project)}
-                    >
-                      SHARE
-                    </Link>
-                  </Popover>
-                  <Link
-                    className="ml"
-                    onClick={() => setDeleteMember(project)}
-                    href="#"
-                  >
-                    DELETE
-                  </Link>
+                      <Popover
+                        onOpenChange={(visible) => setShareVisible(visible)}
+                        open={
+                          shareVisible &&
+                          shareProject &&
+                          shareProject.id === project.id
+                        }
+                        placement="bottomLeft"
+                        content={
+                          <ShareModal
+                            project={shareProject}
+                            onClose={() => {
+                              setShareVisible(false);
+                              setShareProject(null);
+                            }}
+                          />
+                        }
+                        trigger="click"
+                      >
+                        <Link
+                          className="ml"
+                          href="#"
+                          onClick={() => handleShare(project)}
+                        >
+                          SHARE
+                        </Link>
+                      </Popover>
+                      <Link
+                        className="ml"
+                        onClick={() => setDeleteMember(project)}
+                        href="#"
+                      >
+                        DELETE
+                      </Link>
+                    </CardActions>
+                  </Card>
                 </div>
               );
             })}
-          {projectList.length == 0 && (
-            <Link onClick={handleCreateProject} href="#">
-              Start creating your tree!
-            </Link>
-          )}
         </div>
+        {/* {projectList.length == 0 && (
+          <Link onClick={handleCreateProject} href="#">
+            Start creating your tree!
+          </Link>
+        )} */}
       </div>
     </div>
   );

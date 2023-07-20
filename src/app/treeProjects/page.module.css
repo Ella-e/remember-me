@@ -1,0 +1,72 @@
+.projects {
+  width: 800px;
+  height: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding-left: 120px;
+}
+
+.project {
+  margin: 20px;
+  font-size: 14px;
+  opacity: 0.8;
+  width: 35vh;
+  height: 20vh;
+}
+
+.cardBg {
+  background-color: rgba(244, 222, 203, 0.6);
+  font-size: 20px;
+}
+
+.cardActionBg {
+  background-color: rgba(244, 222, 203, 0.6);
+}
+
+.outMost {
+  text-align: center;
+}
+
+.addImg {
+  margin-top: 15px;
+  width: 8vh;
+  height: 8vh;
+  margin-left: auto;
+  margin-bottom: auto;
+  margin-right: auto;
+  background-image: url("../images/add_light_bfbfbf.svg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  /* min-height: 50vh; */
+  background-position: center;
+}
+
+.addImg:hover {
+  background-image: url("../images/add_dark.svg");
+}
+
+.addImg:active {
+  background-image: url("../images/add_filled.svg");
+}
+
+.img {
+  src: url("../images/icon_add.svg");
+}
+/* .padding {
+  padding: 20px;
+} */
+
+/* .ml {
+  margin-right: 8px;
+} */
+
+/* .share-modal-overlay {
+  position: relative;
+  width: 33vw;
+  z-index: 9999; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} */
+
+/* 设置层级高于其他页面元素 */

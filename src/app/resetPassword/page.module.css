@@ -1,0 +1,28 @@
+.inputBox {
+  position: absolute;
+  left: 38%;
+  /* display: flex;
+  align-items: center; */
+  margin-top: 180px;
+  width: 15%;
+  padding: 70px;
+  border-radius: 5%;
+  background-color: rgba(165, 159, 226, 0.8);
+}
+
+.inputItem {
+  margin: 10px;
+}
+
+.outMost {
+  background-image: url("../images/bg_2.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 50vh;
+  background-position: center;
+  background-blend-mode: darken;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}

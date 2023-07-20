@@ -3,7 +3,8 @@ import { Button, Stack, TextField } from "@mui/material";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import React, { useState } from "react";
 import { auth } from "../firebase-config";
-import "./page.css";
+import css from "./page.module.css";
+import { StartBtn } from "../utils/customBtn";
 
 const resetPassword = () => {
   const [email, setEmail] = useState("");
@@ -20,11 +21,11 @@ const resetPassword = () => {
   };
 
   return (
-    <div className="out-most">
-      <div className="input-box">
+    <div className={css.outMost}>
+      <div className={css.inputBox}>
         <h1>Reset password</h1>
         <form onSubmit={retrievePwd}>
-          <Stack className="input-item">
+          <Stack className={css.inputItem}>
             <TextField
               fullWidth
               label="Email"
@@ -39,9 +40,9 @@ const resetPassword = () => {
           </Stack>
           {error !== "" && <div>{error}</div>}
           {infoMsg !== "" && <div>{infoMsg}</div>}
-          <Button fullWidth variant="outlined" type="submit">
+          <StartBtn fullWidth variant="outlined" type="submit">
             Send password reset link
-          </Button>
+          </StartBtn>
         </form>
       </div>
     </div>

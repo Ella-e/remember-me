@@ -15,8 +15,9 @@ import {
 import { auth } from "../firebase-config";
 import { Button, Stack, TextField } from "@mui/material";
 import MainScreen from "../myHome/page";
-import "./page.css";
+import css from "./page.module.css";
 import { LoadingButton } from "@mui/lab";
+import { StartBtn } from "../utils/customBtn";
 
 const LoginScreen = () => {
   let user = auth.currentUser;
@@ -36,7 +37,6 @@ const LoginScreen = () => {
         .then((authUser) => {
           user = auth.currentUser;
           if (user.emailVerified) {
-            ;
             router.push("/myHome");
           } else {
             window.confirm(
@@ -74,15 +74,16 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className="out-most">
+    <div className={css.outMost}>
       {/* {error && <div>{error}</div>} */}
-      <div className="input-box">
+      {/* <img src="bg_2_blur.jpg" alt="bg" /> */}
+      <div className={css.inputBox}>
         <Stack>
           <h1 className="title">Login</h1>
         </Stack>
         <form onSubmit={handleLogin}>
           <Stack>
-            <Stack className="input-item">
+            <Stack className={css.inputItem}>
               <TextField
                 fullWidth
                 label="Email"
@@ -95,7 +96,7 @@ const LoginScreen = () => {
                 placeholder="Email"
               />
             </Stack>
-            <Stack className="input-item">
+            <Stack className={css.inputItem}>
               {errMsg === "wrong-password" ? (
                 <TextField
                   error
@@ -121,15 +122,15 @@ const LoginScreen = () => {
               {errMsg !== "" && <div>{errMsg}</div>}
               {infoMsg !== "" && <div>{infoMsg}</div>}
             </Stack>
-            <Stack className="input-item">
+            <Stack className={css.inputItem}>
               {loading ? (
                 <LoadingButton loading variant="outlined">
                   <span>Login</span>
                 </LoadingButton>
               ) : (
-                <Button fullWidth variant="outlined" type="submit">
+                <StartBtn fullWidth variant="outlined" type="submit">
                   Login
-                </Button>
+                </StartBtn>
               )}
             </Stack>
           </Stack>

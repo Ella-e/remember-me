@@ -1,3 +1,31 @@
+.bg {
+  background-image: url("./images/bg_2.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 50vh;
+  background-position: center;
+  background-blend-mode: darken;
+  filter: brightness(90%);
+}
+
+.title {
+  color: white;
+  font-size: 50px;
+  position: absolute;
+  top: 200px;
+}
+
+.subTitle {
+  color: rgb(254, 254, 254);
+  font-size: 24px;
+  font-family: cursive;
+}
+
+.loginBtn {
+  color: white;
+  font-size: 18px;
+}
+
 .main {
   display: flex;
   flex-direction: column;
@@ -97,7 +125,7 @@
 
 .center::before,
 .center::after {
-  content: '';
+  content: "";
   left: 50%;
   position: absolute;
   filter: blur(45px);
