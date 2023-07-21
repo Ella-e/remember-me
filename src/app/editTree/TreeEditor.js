@@ -1,6 +1,6 @@
 "use client";
 import { Button, Popover, message } from "antd";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Toolbar from "./Toolbar";
 import { observer } from "mobx-react-lite";
 import { treeStore } from "./store";
@@ -230,7 +230,9 @@ const TreeEditor = () => {
         end
         click ${tempNode.docId} callback`;
         setDesc(tempDesc);
-        setSubgraphs([{ id: tempNode.docId.slice(0, 10), members: [tempNode.docId] }]);
+        setSubgraphs([
+          { id: tempNode.docId.slice(0, 10), members: [tempNode.docId] },
+        ]);
         const index = memberList.findIndex(
           (member) => member.id === tempNode.id
         );
@@ -243,14 +245,14 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-          `        click ${tempNode.docId} callback`
+            `        click ${tempNode.docId} callback`
         );
-        let index = subgraphs.findIndex((subgraph) => subgraph.id === nodeInTree.subgraphId);
+        let index = subgraphs.findIndex(
+          (subgraph) => subgraph.id === nodeInTree.subgraphId
+        );
         subgraphs[index].members.push(tempNode.docId);
         setSubgraphs(subgraphs);
-        index = memberList.findIndex(
-          (member) => member.id === tempNode.id
-        );
+        index = memberList.findIndex((member) => member.id === tempNode.id);
         memberList[index].subgraphId = nodeInTree.subgraphId;
         // updateMemberToDb(tempNode, {
         //   subgraphId: nodeInTree.docId.slice(0, 10),
@@ -270,7 +272,10 @@ const TreeEditor = () => {
             )}`
           ) + `        click ${tempNode.docId} callback`
         );
-        subgraphs.push({ id: tempNode.docId.slice(0, 10), members: [tempNode.docId] });
+        subgraphs.push({
+          id: tempNode.docId.slice(0, 10),
+          members: [tempNode.docId],
+        });
         setSubgraphs(subgraphs);
         const index = memberList.findIndex(
           (member) => member.id === tempNode.id
@@ -292,7 +297,10 @@ const TreeEditor = () => {
             )}`
           ) + `        click ${tempNode.docId} callback`
         );
-        subgraphs.push({ id: tempNode.docId.slice(0, 10), members: [tempNode.docId] });
+        subgraphs.push({
+          id: tempNode.docId.slice(0, 10),
+          members: [tempNode.docId],
+        });
         setSubgraphs(subgraphs);
         const index = memberList.findIndex(
           (member) => member.id === tempNode.id
@@ -313,20 +321,69 @@ const TreeEditor = () => {
       updateMemberToDb();
     }
 
+    delete(subgraphId) {
+      const memberList = JSON.parse(localStorage.getItem("memberList"));
+      const index = subgraphs.findIndex(
+        (subgraph) => subgraph.id === nodeInTree.subgraphId
+      );
+      let tempDesc = desc;
+      const members = [];
+      const subgraphMembers = subgraphs[index].members;
+      for (let i = 0; i < subgraphMembers.length; i++) {
+        const id = subgraphMembers[i];
+        tempDesc = tempDesc.replace(`click ${id} callback`, "");
+        const memberIndex = memberList.findIndex((member) => member.id === id);
+        memberList[memberIndex].subgraphId = "";
+        console.log("hi", memberList[memberIndex].firstName);
+        memberList[memberIndex].used = false;
+        members.push({
+          id: id,
+          firstName: memberList[memberIndex].firstName,
+          lastName: memberList[memberIndex].lastName,
+        });
+      }
+      subgraphs.splice(index, 1);
+      tempDesc = tempDesc.replace(
+        "style " + nodeInTree.docId + " fill:#bbf",
+        ""
+      );
+      const parentIndex = tempDesc.indexOf(` --- ${subgraphId}`);
+      if (parentIndex !== -1) {
+        const parentId = tempDesc.slice(parentIndex - 10, parentIndex);
+        tempDesc = tempDesc.replace(`${parentId} --- ${subgraphId}`, "");
+      }
+      if (members.length === 1) {
+        const replace = `        subgraph ${subgraphId}[ ]\n        direction LR\n        ${members[0].id}((${members[0].firstName} ${members[0].lastName}))\n        end`;
+        tempDesc = tempDesc.replace(replace, "");
+      } else {
+        tempDesc = tempDesc.replace(
+          `        subgraph ${subgraphId}[ ]\n        direction LR\n        ${members[0].id}((${members[0].firstName} ${members[0].lastName})) --- ${members[1].id}((${members[1].firstName} ${members[1].lastName}))\n        end`,
+          ""
+        );
+      }
+      setDesc(tempDesc);
+      setSubgraphs(subgraphs);
+      localStorage.setItem("memberList", JSON.stringify(memberList));
+      setRefreshMemberList(true);
+    }
+
     handleDelete() {
-      const index = subgraphs.findIndex((subgraph) => subgraph.id === nodeInTree.subgraphId)
+      const index = subgraphs.findIndex(
+        (subgraph) => subgraph.id === nodeInTree.subgraphId
+      );
       const memberList = JSON.parse(localStorage.getItem("memberList"));
       if (subgraphs[index].members.length > 1) {
-        let tempDesc = desc.replace(
-          `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- `,
-          ""
-        ).replace(
-          ` --- ${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))`, ""
-        ).replace(
-          `click ${nodeInTree.docId} callback`, ""
-        ).replace(
-          "style " + nodeInTree.docId + " fill:#bbf", ""
-        );
+        let tempDesc = desc
+          .replace(
+            `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- `,
+            ""
+          )
+          .replace(
+            ` --- ${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))`,
+            ""
+          )
+          .replace(`click ${nodeInTree.docId} callback`, "")
+          .replace("style " + nodeInTree.docId + " fill:#bbf", "");
         setDesc(tempDesc);
         subgraphs[index].members.splice(
           subgraphs[index].members.indexOf(nodeInTree.docId),
@@ -338,205 +395,64 @@ const TreeEditor = () => {
         );
         memberList[memberIndex].subgraphId = "";
         memberList[memberIndex].used = false;
+        localStorage.setItem("memberList", JSON.stringify(memberList));
+      } else {
+        this.delete(nodeInTree.subgraphId);
+
+        // //FIXME: multiple children
+        // while (tempDesc.indexOf(`${subgraphId} ---`) !== -1) {
+        //   let sub = desc.slice(
+        //     desc.indexOf(`${subgraphId} ---`) + 15,
+        //     desc.indexOf(`${subgraphId} ---`) + 25
+        //   );
+        //   const subgraphIndex = subgraphs.findIndex(
+        //     (subgraph) => subgraph.id === sub
+        //   );
+        //   const members = [];
+        //   for (const id in subgraphs[subgraphIndex].members) {
+        //     tempDesc = tempDesc.replace(`click ${id} callback`, "");
+        //     const memberIndex = memberList.findIndex(
+        //       (member) => member.id === id
+        //     );
+        //     memberList[memberIndex].subgraphId = "";
+        //     memberList[memberIndex].used = false;
+        //     members.push({
+        //       id: id,
+        //       firstName: memberList[memberIndex].firstName,
+        //       lastName: memberList[memberIndex].lastName,
+        //     });
+        //   }
+
+        //   tempDesc = tempDesc.replace(`${subgraphId} --- ${sub}`, "");
+        //   if (members.length === 1) {
+        //     tempDesc = tempDesc.replace(
+        //       `subgraph ${sub}[ ]
+        //     direction LR
+        //     ${members[0].id}((${members[0].firstName} ${members[0].lastName}))
+        //     end`,
+        //       ""
+        //     );
+        //   } else {
+        //     tempDesc = tempDesc.replace(
+        //       `subgraph ${sub}[ ]
+        //       direction LR
+        //       ${members[0].id}((${members[0].firstName} ${members[0].lastName})) --- ${members[1].id}((${members[1].firstName} ${members[1].lastName}))
+        //       end`,
+        //       ""
+        //     );
+        //   }
+        //   subgraphs.splice(subgraphIndex, 1);
+        //   subgraphId = sub;
+        // }
       }
-      else {
-        let tempDesc = desc;
-        const members = [];
-        const subgraphMembers = subgraphs[index].members;
-        for (let i = 0; i < subgraphMembers.length; i++) {
-          const id = subgraphMembers[i];
-          tempDesc = tempDesc.replace(
-            `click ${id} callback`, ""
-          )
-          const memberIndex = memberList.findIndex(
-            (member) => member.id === id
-          );
-          memberList[memberIndex].subgraphId = "";
-          memberList[memberIndex].used = false;
-          members.push({ id: id, firstName: memberList[memberIndex].firstName, lastName: memberList[memberIndex].lastName });
-        }
-        tempDesc = tempDesc.replace(
-          "style " + nodeInTree.docId + " fill:#bbf", ""
-        ).replace(
-          ` --- ${nodeInTree.subgraphId}`, ""
-        );
-        if (members.length === 1) {
-          console.log(`subgraph ${nodeInTree.subgraphId}[ ]
-          direction LR
-          ${members[0].id}((${members[0].firstName} ${members[0].lastName}))
-          end`);
-          console.log(`subgraph ${nodeInTree.subgraphId}[ ]
-          direction LR
-          ${members[0].id}((${members[0].firstName} ${members[0].lastName}))
-          end` === `subgraph 01H5SZ69JW[ ]
-          direction LR
-          01H5SZ69JWE737Z276JX1AX5Z9((3 3))
-          end`);
-          console.log("want to replace:", `subgraph ${nodeInTree.subgraphId}[ ]
-          direction LR
-          ${members[0].id}((${members[0].firstName} ${members[0].lastName}))
-          end`);
-          tempDesc = tempDesc.replace(
-            `subgraph ${nodeInTree.subgraphId}[ ]
-            direction LR
-            ${members[0].id}((${members[0].firstName} ${members[0].lastName}))
-            end`, ""
-          );
-        }
-        else {
-          tempDesc = tempDesc.replace(
-            `subgraph ${nodeInTree.subgraphId}[ ]
-             direction LR
-             ${members[0].id}((${members[0].firstName} ${members[0].lastName})) --- ${members[1].id}((${members[1].firstName} ${members[1].lastName}))
-             end`, ""
-          );
-        }
-        let subgraphId = nodeInTree.subgraphId;
-        //FIXME: multiple children
-        while (tempDesc.indexOf(`${subgraphId} ---`) !== -1) {
-          console.log("subgraphId", subgraphId);
-          let sub = desc.slice(
-            desc.indexOf(`${subgraphId} ---`) + 15,
-            desc.indexOf(`${subgraphId} ---`) + 25
-          );
-          const subgraphIndex = subgraphs.findIndex((subgraph) => subgraph.id === sub);
-          const members = [];
-          for (const id in subgraphs[subgraphIndex].members) {
-            tempDesc = tempDesc.replace(
-              `click ${id} callback`, ""
-            )
-            const memberIndex = memberList.findIndex(
-              (member) => member.id === id
-            );
-            memberList[memberIndex].subgraphId = "";
-            memberList[memberIndex].used = false;
-            members.push({ id: id, firstName: memberList[memberIndex].firstName, lastName: memberList[memberIndex].lastName });
-          }
-          tempDesc = tempDesc.replace(
-            `${subgraphId} --- ${sub}`, ""
-          );
-          if (members.length === 1) {
-            tempDesc = tempDesc.replace(
-              `subgraph ${sub}[ ]
-            direction LR
-            ${members[0].id}((${members[0].firstName} ${members[0].lastName}))
-            end`, ""
-            );
-          }
-          else {
-            tempDesc = tempDesc.replace(
-              `subgraph ${sub}[ ]
-              direction LR
-              ${members[0].id}((${members[0].firstName} ${members[0].lastName})) --- ${members[1].id}((${members[1].firstName} ${members[1].lastName}))
-              end`, ""
-            );
-          }
-          subgraphs.splice(subgraphIndex, 1);
-          subgraphId = sub;
-        }
-        setDesc(tempDesc);
-        setSubgraphs(subgraphs);
-      }
-      localStorage.setItem("memberList", JSON.stringify(memberList));
+
       setNodeInTree(null);
       setSelected(false);
       setRefreshMemberList(true);
-
-
-
-
-      // function deleteChildren(desc, subgraphId, updateList) {
-      //   while (desc.indexOf(`${subgraphId} ---`) !== -1) {
-      //     console.log("recurse");
-      //     let sub = desc.slice(
-      //       desc.indexOf(`${subgraphId} ---`) + 15,
-      //       desc.indexOf(`${subgraphId} ---`) + 25
-      //     );
-      //     console.log(sub);
-      //     desc = desc
-      //       .replace(`${subgraphId} --- ${sub}`, "")
-      //       .replace(`subgraph ${sub}\ndirection LR\n` + /.*/ + `\nend`, "");
-      //   }
-      //   return { desc: desc, update: updateList };
-      // }
-      // let description = desc.replace(
-      //   "style " + nodeInTree.docId + " fill:#bbf",
-      //   ""
-      // );
-      // let update = [
-      //   {
-      //     docId: nodeInTree.docId,
-      //     subgraphId: nodeInTree.docId.slice(0, 10),
-      //     id: nodeInTree.id,
-      //   },
-      // ];
-      // const memberList = JSON.parse(localStorage.getItem("memberList"));
-      // console.log(memberList);
-      // //FIXME: 有的时候即使是相等的也会判断false
-      // if (nodeInTree.subgraphId == nodeInTree.docId.slice(0, 10)) {
-      //   console.log("1");
-      //   let subgraphID = nodeInTree.subgraphId;
-      //   description = description.replace(
-      //     `click ${nodeInTree.docId} callback`,
-      //     ""
-      //   );
-      //   if (
-      //     description.indexOf(
-      //       `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) ---`
-      //     ) === -1
-      //   ) {
-      //     console.log("2");
-      //     console.log(`subgraph ${nodeInTree.subgraphId}[ ]
-      //     direction LR
-      //     ${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))
-      //     end`);
-      //     description = description.replace(
-      //       `subgraph ${nodeInTree.subgraphId}[ ]\ndirection LR\n${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))\nend`,
-      //       ""
-      //     );
-      //     if (
-      //       description.indexOf("subgraph", description.indexOf("subgraph") + 8)
-      //     ) {
-      //       description = "";
-      //       setDesc("");
-      //     }
-      //   } else {
-      //     console.log("3");
-      //     const index = description.indexOf(
-      //       `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) ---`
-      //     );
-      //     const len =
-      //       36 + nodeInTree.firstName.length + nodeInTree.lastName.length;
-      //     const subId = description.slice(index + len, index + len + 10);
-      //     description = description
-      //       .replace(`subgraph ${nodeInTree.subgraphId}`, `subgraph ${subId}`)
-      //       .replace(
-      //         `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- `,
-      //         ""
-      //       );
-      //   }
-
-      //   if (description.indexOf(`${subgraphID} ---`) !== -1) {
-      //     description = deleteChildren(description, subgraphID, update).desc;
-      //     update = deleteChildren(description, subgraphID, update).update;
-      //   }
-      // } else {
-      //   //TODO: see if it has partner
-      // }
-      // memberList.forEach((member) => {
-      //   const index = update.findIndex((item) => item.docId === member.docId);
-      //   if (index !== -1) {
-      //     member.subgraphId = update[index].subgraphId;
-      //   }
-      // });
-      // localStorage.setItem("memberList", JSON.stringify(memberList));
-      // update.forEach((item) => {
-      //   updateMemberToDb(item, { subgraphId: item.subgraphId, used: false });
-      // });
-      // setDesc(description);
-      // setSelected(false);
-      // setNodeInTree(null);
-      // setRefreshMemberList(true);
+      if (subgraphs.length === 0) {
+        setDesc("");
+        setHasNode(false);
+      }
     }
 
     download() {
@@ -616,7 +532,6 @@ const TreeEditor = () => {
             disabled={generable}
             onClick={() => {
               this.save();
-              // this.render();
             }}
           >
             SAVE
@@ -629,7 +544,7 @@ const TreeEditor = () => {
           >
             DOWNLOAD
           </Button>
-          {desc && (
+          {desc && hasNode && (
             <MermaidChartComponent chart={chart} callBack={this.callBack} />
           )}
         </div>
@@ -711,7 +626,8 @@ const TreeEditor = () => {
           >
             <CircularProgress color="inherit" />
           </Backdrop>
-          {hasNode && <App />}
+          <App />
+          {/* {hasNode && <App/>} */}
         </div>
         <div className=" bg-white mr-10">
           <Toolbar />
