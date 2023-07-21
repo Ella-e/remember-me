@@ -1,7 +1,11 @@
 "use client";
 import { Button, Stack, TextField } from "@mui/material";
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
-import React, { useState } from "react";
+import {
+  getAuth,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+} from "firebase/auth";
+import React, { useEffect, useState } from "react";
 import { auth } from "../firebase-config";
 import css from "./page.module.css";
 import { StartBtn } from "../utils/customBtn";
@@ -10,8 +14,19 @@ const resetPassword = () => {
   const [email, setEmail] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
   const [error, setError] = useState("");
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      }
+    });
+  });
+
   const retrievePwd = () => {
-    sendPasswordResetEmail(auth, email)
+    sendPasswordResetEmail(user.auth, email)
       .then(() => {
         setInfoMsg("Password Reset link send to your email");
       })

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import css from "./page.module.css";
 import { Button } from "@mui/material";
@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation";
 import { styled } from "@mui/material/styles";
 import { purple } from "@mui/material/colors";
 import { StartBtn } from "./utils/customBtn";
+import Cookies from "js-cookie";
+import MainScreen from "./myHome/page";
+import LoginScreen from "./login/page";
 
 export default function Home() {
   // const StartBtn = styled(Button)(({ theme }) => ({
@@ -16,7 +19,6 @@ export default function Home() {
   //     backgroundColor: purple[700],
   //   },
   // }));
-
   const router = useRouter();
   const handleLogin = () => {
     router.push("/login");

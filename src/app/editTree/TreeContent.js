@@ -64,6 +64,7 @@ import StarterKit from "@tiptap/starter-kit";
 import "./page.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LightBlueBtn, ThemeBtn } from "../utils/customBtn";
+import { onAuthStateChanged } from "firebase/auth";
 // import Tiptap from "./TipTap";
 // import Image from "@tiptap/extension-image";
 
@@ -76,7 +77,6 @@ const TreeContent = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [loading, setLoading] = useState(false);
-  const currentUid = auth?.currentUser?.uid;
   const [authWarning, setAuthWarning] = useState(false);
   const [status, setStatus] = useState("alive");
   const [nickName, setNickName] = useState("");
@@ -92,9 +92,34 @@ const TreeContent = () => {
 
   const searchParams = useSearchParams();
 
-  const getMemberList = async () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      if (user) {
+        setAuthWarning(false);
+        setPid(searchParams.get("tab").slice(6, 32));
+        // getMemberList(user);
+      } else {
+        router.push("/login");
+      }
+    });
+  });
+
+  useEffect(() => {
+    if (pid) {
+      getMemberList(user);
+    }
+  }, [pid]);
+
+  useEffect(() => {
+    setMemberList(memberList);
+  }, [memberList]);
+
+  const getMemberList = async (myUser) => {
     setLoading(true);
-    if (auth.currentUser) {
+    if (myUser) {
       const q = query(collection(db, "nodes"), where("pid", "==", pid));
       const querySnapshot = await getDocs(q);
       const tempMemberList = [...memberList];
@@ -118,25 +143,6 @@ const TreeContent = () => {
     }
     setLoading(false);
   };
-
-  useEffect(() => {
-    if (auth.currentUser) {
-      setAuthWarning(false);
-      setPid(searchParams.get("tab").slice(6, 32));
-    } else {
-      router.push("/login");
-    }
-  }, []);
-
-  useEffect(() => {
-    if (pid) {
-      getMemberList();
-    }
-  }, [pid]);
-
-  useEffect(() => {
-    setMemberList(memberList);
-  }, [memberList]);
 
   const MemberList = () => {
     const columns = [
@@ -359,7 +365,7 @@ const TreeContent = () => {
             let tempList = [...memberList];
             tempList.splice(i, 1);
             // delete member in the database
-            if (currentUid) {
+            if (user) {
               deleteMemberFromDb(memberList[i]);
             }
             // update memberList

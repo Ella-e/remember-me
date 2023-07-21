@@ -1,17 +1,23 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dropdown, Space } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import { signOut } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 import { auth } from "../firebase-config";
 import { useRouter } from "next/navigation";
 import css from "./page.module.css";
 import { Backdrop, CircularProgress } from "@mui/material";
+import Cookies from "js-cookie";
 
 const MyHeader = () => {
   // check the current login state of the user
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
 
   const items = [
     {
@@ -42,13 +48,21 @@ const MyHeader = () => {
     },
   ];
 
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      }
+    });
+  });
+
   return (
     <div className={css.header}>
       <div className={css.toolBar}>
-        {auth.currentUser ? (
+        {user ? (
           <div className={css.flex}>
             <div className={css.name}>rememberMe</div>
-            <div className={css.mr}>Welcome, {auth.currentUser?.email}</div>
+            <div className={css.mr}>Welcome, {user?.email}</div>
             <Dropdown menu={{ items }}>
               <a onClick={(e) => e.preventDefault()}>
                 <Space>

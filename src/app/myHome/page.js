@@ -9,17 +9,46 @@ import { doc, setDoc } from "firebase/firestore";
 import ULID from "../utils/ulid";
 import { Backdrop, CircularProgress } from "@mui/material";
 import TreeProjects from "../treeProjects/page";
+import Cookies from "js-cookie";
+import LoginScreen from "../login/page";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 
 const MainScreen = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  useEffect(() => {
-    if (auth.currentUser) {
-      router.push("/myHome");
-    } else {
-      router.push("/login");
-    }
-  }, []);
+  const [user, setUser] = useState(null);
+  // const [token, setToken] = useState(null);
+  // const [hashPwd, setHashPwd] = useState("");
+
+  // useEffect(() => {
+  //   setToken(JSON.parse(Cookies.get("token")));
+  //   setHashPwd(Cookies.get("hashPwd"));
+  // }, []);
+  // if (!token) {
+  //   return <LoginScreen />;
+  // } else if (token && !auth.currentUser) {
+  //   console.log(token.email);
+  //   console.log(hashPwd);
+  //   signInWithEmailAndPassword(auth, token.email, hashPwd).then((authUser) => {
+  //     if (!auth.currentUser.emailVerified) {
+  //       window.confirm("please click the link in your email to verify first");
+  //       signOut(auth);
+  //       router.push("/login");
+  //     }
+  //   });
+  // }
+
+  // useEffect(() => {
+  //   if (auth.currentUser) {
+  //     router.push("/myHome");
+  //   } else {
+  //     router.push("/login");
+  //   }
+  // }, []);
 
   const handleCreateProject = async () => {
     setLoading(true);
@@ -35,6 +64,12 @@ const MainScreen = () => {
       router.push(`/editTree?tab=1?pid=${newProject.id}`);
     });
   };
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+  });
 
   return (
     <div>

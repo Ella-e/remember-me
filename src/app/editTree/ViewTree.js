@@ -6,9 +6,10 @@ import Toolbar from "./Toolbar";
 import mermaid from "mermaid";
 import MermaidChartComponent from "./Mermaid";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase-config";
+import { auth, db } from "../firebase-config";
 import { useSearchParams } from "next/navigation";
 import { Backdrop, CircularProgress } from "@mui/material";
+import { onAuthStateChanged } from "firebase/auth";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -22,9 +23,14 @@ const ViewTree = () => {
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
 
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
     getTree();
-  }, [])
+    onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+  }, []);
 
   const getTree = async () => {
     setLoading(true);
@@ -36,7 +42,6 @@ const ViewTree = () => {
       setDesc(data.desc);
     }
     setLoading(false);
-
   };
   class App extends React.Component {
     constructor(props) {

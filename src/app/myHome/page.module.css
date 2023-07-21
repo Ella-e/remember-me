@@ -16,7 +16,10 @@ body {
   background-image: url("../images/bg_3.jpg");
   background-size: cover;
   background-repeat: no-repeat;
-  min-height: 50vh;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  /* min-height: 50vh; */
   background-position: center;
   background-blend-mode: darken;
 }
