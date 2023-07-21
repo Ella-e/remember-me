@@ -9,10 +9,15 @@ class TreeStore {
   description = "";
   chooseAble = false;
   refreshMemberList = false;
+  nodeInTree = null;
 
   constructor() {
     makeAutoObservable(this);
   }
+
+  setNodeInTree = (node) => {
+    this.nodeInTree = node;
+  };
 
   setRefreshMemberList = (bool) => {
     this.refreshMemberList = bool;

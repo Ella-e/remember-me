@@ -1,6 +1,6 @@
 "use client";
 import { Button, Popover, message } from "antd";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Toolbar from "./Toolbar";
 import { observer } from "mobx-react-lite";
 import { treeStore } from "./store";
@@ -36,10 +36,11 @@ const TreeEditor = () => {
   const [shareVisible, setShareVisible] = useState(false);
   const [desc, setDesc] = useState("");
   const [loading, setLoading] = useState(false);
-  const [nodeInTree, setNodeInTree] = useState(null);
   const [authWarning, setAuthWarning] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const {
+    nodeInTree,
+    setNodeInTree,
     hasNode,
     setHasNode,
     setSelected,
@@ -67,26 +68,6 @@ const TreeEditor = () => {
     }
     return () => {
       localStorage.removeItem("memberList");
-      // setRefreshMemberList(false);
-      // const memberList = JSON.parse(localStorage.getItem("memberList"));
-      // if (pid) {
-      //   const docRef = doc(db, "trees", pid);
-      //   getDoc(docRef).then((docSnap) => {
-      //     if (docSnap.exists()) {
-      //       for (let i = 0; i < memberList.length; i++) {
-      //         if (
-      //           docSnap.data() &&
-      //           docSnap.data().desc.indexOf(memberList[i].docId) === -1
-      //         ) {
-      //           updateMemberToDb(memberList[i], {
-      //             subgraphId: "",
-      //             used: false,
-      //           });
-      //         }
-      //       }
-      //     }
-      //   });
-      // }
     };
   }, []);
 
@@ -245,7 +226,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-            `        click ${tempNode.docId} callback`
+          `        click ${tempNode.docId} callback`
         );
         let index = subgraphs.findIndex(
           (subgraph) => subgraph.id === nodeInTree.subgraphId
@@ -254,9 +235,6 @@ const TreeEditor = () => {
         setSubgraphs(subgraphs);
         index = memberList.findIndex((member) => member.id === tempNode.id);
         memberList[index].subgraphId = nodeInTree.subgraphId;
-        // updateMemberToDb(tempNode, {
-        //   subgraphId: nodeInTree.docId.slice(0, 10),
-        // });
       } else if (relation == "Children") {
         setDesc(
           desc?.replace("style " + nodeInTree.docId + " fill:#bbf", "").replace(
@@ -281,7 +259,6 @@ const TreeEditor = () => {
           (member) => member.id === tempNode.id
         );
         memberList[index].subgraphId = tempNode.docId.slice(0, 10);
-        // updateMemberToDb(tempNode, { subgraphId: tempNode.docId.slice(0, 10) });
       } else {
         setDesc(
           desc?.replace("style " + nodeInTree.docId + " fill:#bbf", "").replace(
@@ -306,7 +283,6 @@ const TreeEditor = () => {
           (member) => member.id === tempNode.id
         );
         memberList[index].subgraphId = tempNode.docId.slice(0, 10);
-        // updateMemberToDb(tempNode, { subgraphId: tempNode.docId.slice(0, 10) });
       }
       localStorage.setItem("memberList", JSON.stringify(memberList));
       setRelation("Partner");
@@ -324,7 +300,7 @@ const TreeEditor = () => {
     delete(subgraphId) {
       const memberList = JSON.parse(localStorage.getItem("memberList"));
       const index = subgraphs.findIndex(
-        (subgraph) => subgraph.id === nodeInTree.subgraphId
+        (subgraph) => subgraph.id === subgraphId
       );
       let tempDesc = desc;
       const members = [];
@@ -334,7 +310,6 @@ const TreeEditor = () => {
         tempDesc = tempDesc.replace(`click ${id} callback`, "");
         const memberIndex = memberList.findIndex((member) => member.id === id);
         memberList[memberIndex].subgraphId = "";
-        console.log("hi", memberList[memberIndex].firstName);
         memberList[memberIndex].used = false;
         members.push({
           id: id,
@@ -343,10 +318,6 @@ const TreeEditor = () => {
         });
       }
       subgraphs.splice(index, 1);
-      tempDesc = tempDesc.replace(
-        "style " + nodeInTree.docId + " fill:#bbf",
-        ""
-      );
       const parentIndex = tempDesc.indexOf(` --- ${subgraphId}`);
       if (parentIndex !== -1) {
         const parentId = tempDesc.slice(parentIndex - 10, parentIndex);
@@ -371,6 +342,7 @@ const TreeEditor = () => {
       const index = subgraphs.findIndex(
         (subgraph) => subgraph.id === nodeInTree.subgraphId
       );
+      setDesc(desc.replace("style " + nodeInTree.docId + " fill:#bbf", ""))
       const memberList = JSON.parse(localStorage.getItem("memberList"));
       if (subgraphs[index].members.length > 1) {
         let tempDesc = desc
@@ -397,55 +369,30 @@ const TreeEditor = () => {
         memberList[memberIndex].used = false;
         localStorage.setItem("memberList", JSON.stringify(memberList));
       } else {
-        this.delete(nodeInTree.subgraphId);
-
-        // //FIXME: multiple children
-        // while (tempDesc.indexOf(`${subgraphId} ---`) !== -1) {
-        //   let sub = desc.slice(
-        //     desc.indexOf(`${subgraphId} ---`) + 15,
-        //     desc.indexOf(`${subgraphId} ---`) + 25
-        //   );
-        //   const subgraphIndex = subgraphs.findIndex(
-        //     (subgraph) => subgraph.id === sub
-        //   );
-        //   const members = [];
-        //   for (const id in subgraphs[subgraphIndex].members) {
-        //     tempDesc = tempDesc.replace(`click ${id} callback`, "");
-        //     const memberIndex = memberList.findIndex(
-        //       (member) => member.id === id
-        //     );
-        //     memberList[memberIndex].subgraphId = "";
-        //     memberList[memberIndex].used = false;
-        //     members.push({
-        //       id: id,
-        //       firstName: memberList[memberIndex].firstName,
-        //       lastName: memberList[memberIndex].lastName,
-        //     });
-        //   }
-
-        //   tempDesc = tempDesc.replace(`${subgraphId} --- ${sub}`, "");
-        //   if (members.length === 1) {
-        //     tempDesc = tempDesc.replace(
-        //       `subgraph ${sub}[ ]
-        //     direction LR
-        //     ${members[0].id}((${members[0].firstName} ${members[0].lastName}))
-        //     end`,
-        //       ""
-        //     );
-        //   } else {
-        //     tempDesc = tempDesc.replace(
-        //       `subgraph ${sub}[ ]
-        //       direction LR
-        //       ${members[0].id}((${members[0].firstName} ${members[0].lastName})) --- ${members[1].id}((${members[1].firstName} ${members[1].lastName}))
-        //       end`,
-        //       ""
-        //     );
-        //   }
-        //   subgraphs.splice(subgraphIndex, 1);
-        //   subgraphId = sub;
-        // }
+        let subgraphId = nodeInTree.subgraphId
+        this.delete(subgraphId);
+        let tempDesc = desc;
+        let indexes = [];
+        let index = tempDesc.indexOf(`${subgraphId} ---`);
+        while (index !== -1) {
+          indexes.push(index);
+          index = tempDesc.indexOf(`${subgraphId} ---`, index + 1);
+        }
+        while (indexes.length > 0) {
+          let tempDesc = desc;
+          let sub = tempDesc.slice(
+            indexes[0] + 15,
+            indexes[0] + 25
+          );
+          let index = tempDesc.indexOf(`${sub} ---`);
+          while (index !== -1) {
+            indexes.push(index);
+            index = tempDesc.indexOf(`${subgraphId} ---`, index + 1);
+          }
+          this.delete(sub);
+          indexes = indexes.slice(1, indexes.length + 1);
+        }
       }
-
       setNodeInTree(null);
       setSelected(false);
       setRefreshMemberList(true);

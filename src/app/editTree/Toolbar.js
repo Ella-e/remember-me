@@ -7,11 +7,8 @@ import { DataGrid } from "@mui/x-data-grid";
 import { auth, db } from "../firebase-config";
 import {
   collection,
-  doc,
-  getDoc,
   getDocs,
   query,
-  updateDoc,
   where,
 } from "firebase/firestore";
 import {
@@ -29,8 +26,7 @@ const Toolbar = () => {
   const {
     hasNode,
     setHasNode,
-    onRootNode,
-    setOnRootNode,
+    nodeInTree,
     selected,
     setSelected,
     setRelation,
@@ -201,7 +197,7 @@ const Toolbar = () => {
         id="choose-button"
         type="primary"
         onClick={handleChoose}
-        disabled={!chooseAble}
+        disabled={!chooseAble || (hasNode && !nodeInTree)}
         className="mt-10 mr-10"
       >
         CHOOSE
