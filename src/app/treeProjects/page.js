@@ -95,7 +95,7 @@ const TreeProjects = () => {
         };
         tempList.push(project);
       });
-      tempList.push();
+      tempList.push({ type: "create New Project" })
       setProjectList(tempList.reverse());
     }
     setLoading(false);
@@ -169,86 +169,97 @@ const TreeProjects = () => {
         <DeleteAlert />
         <div className={css.projects}>
           <div className={css.project}>
-            <Card>
-              <CardContent className={css.cardBg}>
+            {/* <Card> */}
+            {/* <CardContent className={css.cardBg}>
                 Create new project
-                <div className={css.addImg} onClick={handleCreateProject}></div>
-                {/* <img src={require("../images/add_icon_2.png")} /> */}
-              </CardContent>
-              {/* <CardActions className={css.cardActionBg}>
+                <div className={css.addImg} onClick={handleCreateProject}></div> */}
+            {/* <img src={require("../images/add_icon_2.png")} /> */}
+            {/* </CardContent> */}
+            {/* <CardActions className={css.cardActionBg}>
                 <Button onClick={handleCreateProject} href="#">
                   Start creating your tree!
                 </Button>
               </CardActions> */}
-            </Card>
+            {/* </Card> */}
           </div>
           {projectList.length > 0 &&
             projectList.map((project) => {
-              return (
-                <div className={css.project} key={project.id}>
-                  <Card variant="outlined" sx={{ minWidth: 275 }}>
-                    <CardContent className={css.cardBg}>
-                      <h5 className={css.text}>
-                        {project.name.length > 25
-                          ? project.name.substring(0, 25) + "..."
-                          : project.name}
-                      </h5>
-                    </CardContent>
-                    <CardActions className={css.cardActionBg}>
-                      <Link
-                        className="ml"
-                        href={`/editTree?tab=1?pid=${project.id}`}
-                      >
-                        EDIT
-                      </Link>
-
-                      <Popover
-                        onOpenChange={(visible) => setShareVisible(visible)}
-                        open={
-                          shareVisible &&
-                          shareProject &&
-                          shareProject.id === project.id
-                        }
-                        placement="bottomLeft"
-                        content={
-                          <ShareModal
-                            project={shareProject}
-                            onClose={() => {
-                              setShareVisible(false);
-                              setShareProject(null);
-                            }}
-                          />
-                        }
-                        trigger="click"
-                      >
+              if (project.id) {
+                return (
+                  <div className={css.project} key={project.id}>
+                    <Card variant="outlined" sx={{ minWidth: 275 }}>
+                      <CardContent className={css.cardBg}>
+                        <h5 className={css.text}>
+                          {project.name.length > 25
+                            ? project.name.substring(0, 25) + "..."
+                            : project.name}
+                        </h5>
+                      </CardContent>
+                      <CardActions className={css.cardActionBg}>
                         <Link
                           className="ml"
-                          href="#"
-                          onClick={() => handleShare(project)}
+                          href={`/editTree?tab=1?pid=${project.id}`}
                         >
-                          SHARE
+                          EDIT
                         </Link>
-                      </Popover>
-                      <Link
-                        className="ml"
-                        onClick={() => setDeleteMember(project)}
-                        href="#"
-                      >
-                        DELETE
-                      </Link>
-                    </CardActions>
-                  </Card>
-                </div>
-              );
+
+                        <Popover
+                          onOpenChange={(visible) => setShareVisible(visible)}
+                          open={
+                            shareVisible &&
+                            shareProject &&
+                            shareProject.id === project.id
+                          }
+                          placement="bottomLeft"
+                          content={
+                            <ShareModal
+                              project={shareProject}
+                              onClose={() => {
+                                setShareVisible(false);
+                                setShareProject(null);
+                              }}
+                            />
+                          }
+                          trigger="click"
+                        >
+                          <Link
+                            className="ml"
+                            href="#"
+                            onClick={() => handleShare(project)}
+                          >
+                            SHARE
+                          </Link>
+                        </Popover>
+                        <Link
+                          className="ml"
+                          onClick={() => setDeleteMember(project)}
+                          href="#"
+                        >
+                          DELETE
+                        </Link>
+                      </CardActions>
+                    </Card>
+                  </div>
+                );
+              }
+              else {
+                return (
+                  <div className={css.project}>
+                    <Card variant="outlined" sx={{ minWidth: 275 }}>
+                      <CardContent className={css.cardBg} >
+                        <h5 className={css.container} style={{ marginTop: '24px' }}>
+                          Create new project
+                        </h5>
+                        <div className={css.addImg} onClick={handleCreateProject}></div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )
+              }
             })}
         </div>
-        {/* {projectList.length == 0 && (
-          <Link onClick={handleCreateProject} href="#">
-            Start creating your tree!
-          </Link>
-        )} */}
       </div>
-    </div>
+    </div >
   );
 };
 

@@ -27,8 +27,13 @@
   text-align: center;
 }
 
+.container {
+  margin: 0;
+  padding: 0;
+}
+
 .addImg {
-  margin-top: 15px;
+  /* margin-top: 15px; */
   width: 8vh;
   height: 8vh;
   margin-left: auto;
