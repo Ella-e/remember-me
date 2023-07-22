@@ -375,17 +375,6 @@ const TreeEditor = () => {
           )
           .replace(`click ${nodeInTree.docId} callback`, "")
           .replace("style " + nodeInTree.docId + " fill:#bbf", "");
-        let tempDesc = desc
-          .replace(
-            `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- `,
-            ""
-          )
-          .replace(
-            ` --- ${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))`,
-            ""
-          )
-          .replace(`click ${nodeInTree.docId} callback`, "")
-          .replace("style " + nodeInTree.docId + " fill:#bbf", "");
         setDesc(tempDesc);
         subgraphs[index].members.splice(
           subgraphs[index].members.indexOf(nodeInTree.docId),
