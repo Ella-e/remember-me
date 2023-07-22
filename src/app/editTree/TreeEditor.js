@@ -25,6 +25,7 @@ import EditModal from "./rename";
 import ShareModal from "../treeProjects/share";
 import { saveAs } from "file-saver";
 import html2canvas from "html2canvas";
+import { onAuthStateChanged } from "firebase/auth";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -59,13 +60,19 @@ const TreeEditor = () => {
   const [project, setProject] = useState(null);
   const [subgraphs, setSubgraphs] = useState([]);
 
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
-    if (auth.currentUser) {
-      setAuthWarning(false);
-      setPid(searchParams.get("tab").slice(6, 32));
-    } else {
-      router.push("/login");
-    }
+    onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      if (user) {
+        setAuthWarning(false);
+        setPid(searchParams.get("tab").slice(6, 32));
+      } else {
+        router.push("/login");
+      }
+    });
+
     return () => {
       localStorage.removeItem("memberList");
     };
@@ -214,6 +221,9 @@ const TreeEditor = () => {
         setSubgraphs([
           { id: tempNode.docId.slice(0, 10), members: [tempNode.docId] },
         ]);
+        setSubgraphs([
+          { id: tempNode.docId.slice(0, 10), members: [tempNode.docId] },
+        ]);
         const index = memberList.findIndex(
           (member) => member.id === tempNode.id
         );
@@ -226,13 +236,14 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-          `        click ${tempNode.docId} callback`
+            `        click ${tempNode.docId} callback`
         );
         let index = subgraphs.findIndex(
           (subgraph) => subgraph.id === nodeInTree.subgraphId
         );
         subgraphs[index].members.push(tempNode.docId);
         setSubgraphs(subgraphs);
+        index = memberList.findIndex((member) => member.id === tempNode.id);
         index = memberList.findIndex((member) => member.id === tempNode.id);
         memberList[index].subgraphId = nodeInTree.subgraphId;
       } else if (relation == "Children") {
@@ -250,6 +261,10 @@ const TreeEditor = () => {
             )}`
           ) + `        click ${tempNode.docId} callback`
         );
+        subgraphs.push({
+          id: tempNode.docId.slice(0, 10),
+          members: [tempNode.docId],
+        });
         subgraphs.push({
           id: tempNode.docId.slice(0, 10),
           members: [tempNode.docId],
@@ -274,6 +289,10 @@ const TreeEditor = () => {
             )}`
           ) + `        click ${tempNode.docId} callback`
         );
+        subgraphs.push({
+          id: tempNode.docId.slice(0, 10),
+          members: [tempNode.docId],
+        });
         subgraphs.push({
           id: tempNode.docId.slice(0, 10),
           members: [tempNode.docId],
@@ -342,9 +361,20 @@ const TreeEditor = () => {
       const index = subgraphs.findIndex(
         (subgraph) => subgraph.id === nodeInTree.subgraphId
       );
-      setDesc(desc.replace("style " + nodeInTree.docId + " fill:#bbf", ""))
+      setDesc(desc.replace("style " + nodeInTree.docId + " fill:#bbf", ""));
       const memberList = JSON.parse(localStorage.getItem("memberList"));
       if (subgraphs[index].members.length > 1) {
+        let tempDesc = desc
+          .replace(
+            `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- `,
+            ""
+          )
+          .replace(
+            ` --- ${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))`,
+            ""
+          )
+          .replace(`click ${nodeInTree.docId} callback`, "")
+          .replace("style " + nodeInTree.docId + " fill:#bbf", "");
         let tempDesc = desc
           .replace(
             `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- `,
@@ -369,7 +399,7 @@ const TreeEditor = () => {
         memberList[memberIndex].used = false;
         localStorage.setItem("memberList", JSON.stringify(memberList));
       } else {
-        let subgraphId = nodeInTree.subgraphId
+        let subgraphId = nodeInTree.subgraphId;
         this.delete(subgraphId);
         let tempDesc = desc;
         let indexes = [];
@@ -380,10 +410,7 @@ const TreeEditor = () => {
         }
         while (indexes.length > 0) {
           let tempDesc = desc;
-          let sub = tempDesc.slice(
-            indexes[0] + 15,
-            indexes[0] + 25
-          );
+          let sub = tempDesc.slice(indexes[0] + 15, indexes[0] + 25);
           let index = tempDesc.indexOf(`${sub} ---`);
           while (index !== -1) {
             indexes.push(index);

@@ -16,6 +16,7 @@ import Link from "next/link";
 import css from "./page.module.css";
 import { doc, setDoc } from "firebase/firestore";
 import { StartBtn } from "../utils/customBtn";
+import bscrypt from "bcryptjs";
 
 const SignUpScreen = () => {
   const [email, setEmail] = useState("");
@@ -46,13 +47,16 @@ const SignUpScreen = () => {
     setLoading(true);
     // Email link verification
     window.localStorage.setItem("email", email);
-    createUserWithEmailAndPassword(auth, email, password)
+    // hash the pwd
+    const hashPwd = bscrypt.hashSync(password, 10);
+    console.log(hashPwd);
+    createUserWithEmailAndPassword(auth, email, hashPwd)
       .then(async (authUser) => {
         user = auth.currentUser;
         // add user into the database
         await setDoc(doc(db, "users", authUser.user.uid), {
           email: email,
-          password: password,
+          hashPwd: hashPwd,
           uid: authUser.user.uid,
         });
         // send email verification
@@ -134,7 +138,7 @@ const SignUpScreen = () => {
                   <span>Sign up</span>
                 </LoadingButton>
               ) : (
-                <StartBtn fullWidth variant="outlined">
+                <StartBtn type="submit" fullWidth variant="outlined">
                   Sign up
                 </StartBtn>
               )}

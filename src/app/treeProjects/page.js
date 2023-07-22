@@ -33,6 +33,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Popover, message } from "antd";
 import ShareModal from "./share";
+import { onAuthStateChanged } from "firebase/auth";
 // import addIcon from "public/image/purple_sky.jpg";
 
 const TreeProjects = () => {
@@ -45,33 +46,40 @@ const TreeProjects = () => {
   const [deleteMember, setDeleteMember] = useState(null);
   const [shareProject, setShareProject] = useState(null);
   const [shareVisible, setShareVisible] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    getProjects();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+        // get projects
+        getProjects(user);
+      }
+    });
   }, []);
 
   const deleteProject = async (member) => {
     const docRef = doc(db, "projects", member.id);
     if (member.uids.length > 1) {
-      member.uids = member.uids.filter((uid) => uid !== auth.currentUser.uid);
+      member.uids = member.uids.filter((uid) => uid !== user.uid);
       updateDoc(docRef, { uids: member.uids }).then(() => {
-        getProjects();
+        getProjects(user);
         setDeleteMember(null);
       });
     } else {
       await deleteDoc(doc(db, "projects", member.id)).then(() => {
-        getProjects();
+        getProjects(user);
         setDeleteMember(null);
       });
     }
   };
 
-  const getProjects = async () => {
+  const getProjects = async (myUser) => {
     setLoading(true);
-    if (auth.currentUser) {
+    if (myUser) {
       const q = query(
         collection(db, "projects"),
-        where("uids", "array-contains", auth.currentUser.uid)
+        where("uids", "array-contains", myUser.uid)
       );
       const querySnapshot = await getDocs(q);
       const tempList = [];
@@ -100,8 +108,8 @@ const TreeProjects = () => {
     const newProject = {
       id: tempUid,
       name: "untitled",
-      uids: [auth.currentUser.uid],
-      subgraphs: []
+      uids: [user.uid],
+      subgraphs: [],
     };
     const docRef = doc(db, "projects", tempUid);
     setDoc(docRef, newProject).then(() => {

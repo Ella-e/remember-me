@@ -14,6 +14,7 @@ import MyHeader from "../myHome/MyHeader";
 import { auth } from "../firebase-config";
 import TreeEditor from "./TreeEditor";
 import "./page.css";
+import { onAuthStateChanged } from "firebase/auth";
 
 const EditTree = () => {
   const { Sider } = Layout;
@@ -24,13 +25,18 @@ const EditTree = () => {
 
   const searchParams = useSearchParams();
 
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
-    if (auth.currentUser) {
-      setPid(searchParams.get("tab").slice(6, 32));
-      setActiveTab(searchParams.get("tab").slice(0, 1));
-    } else {
-      router.push("/login");
-    }
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+        setPid(searchParams.get("tab").slice(6, 32));
+        setActiveTab(searchParams.get("tab").slice(0, 1));
+      } else {
+        router.push("/login");
+      }
+    });
   }, []);
 
   const [activeTab, setActiveTab] = useState("1");

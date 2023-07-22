@@ -1,23 +1,28 @@
 "use client";
-import React, { Suspense, useContext, useState } from "react";
+import React, { Suspense, useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthContext, AuthProvider } from "../context/AuthContext";
 import {
+  browserLocalPersistence,
   isSignInWithEmailLink,
   sendEmailVerification,
   sendPasswordResetEmail,
   sendSignInLinkToEmail,
+  setPersistence,
   signInWithEmailAndPassword,
   signInWithEmailLink,
   signOut,
 } from "firebase/auth";
-import { auth } from "../firebase-config";
+import { auth, db } from "../firebase-config";
 import { Button, Stack, TextField } from "@mui/material";
 import MainScreen from "../myHome/page";
 import css from "./page.module.css";
 import { LoadingButton } from "@mui/lab";
 import { StartBtn } from "../utils/customBtn";
+import Cookies from "js-cookie";
+import bscrypt from "bcryptjs";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 const LoginScreen = () => {
   let user = auth.currentUser;
@@ -29,27 +34,65 @@ const LoginScreen = () => {
   const [errMsg, setErrMsg] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
 
-  const handleLogin = (event) => {
+  // const [token, setToken] = useState(null);
+  // const [passPwdCheck, setPassPwdCheck] = useState(false);
+
+  // useEffect(() => {
+  //   setToken(Cookies.get("token"));
+  // }, []);
+
+  // const handleSaveToken = (token, hashPwd) => {
+  //   Cookies.set("token", token, {
+  //     expires: 7,
+  //     sameSite: "strict",
+  //   });
+  //   Cookies.set("hashPwd", hashPwd, {
+  //     expires: 7,
+  //     sameSite: "strict",
+  //   });
+  // };
+
+  const handleLogin = async (event) => {
     event.preventDefault();
     try {
       setLoading(true);
-      signInWithEmailAndPassword(auth, email, password)
-        .then((authUser) => {
-          user = auth.currentUser;
-          if (user.emailVerified) {
-            router.push("/myHome");
+      // compare the pwd
+      // check if user is in the database && get the hashed pwd from database
+      const q = query(collection(db, "users"), where("email", "==", email));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        const docData = doc.data();
+        bscrypt.compare(password, docData.hashPwd, function (err, isMatch) {
+          if (err) {
+            setErrMsg(err.message);
+          } else if (!isMatch) {
+            //password incorrect
+            setErrMsg("password incorrect");
           } else {
-            window.confirm(
-              "please click the link in your email to verify first"
-            );
-            setLoading(false);
-            signOut(auth);
-            router.push("/login");
+            // password match
+            setPersistence(auth, browserLocalPersistence).then(() => {
+              signInWithEmailAndPassword(auth, email, docData.hashPwd)
+                .then((authUser) => {
+                  user = auth.currentUser;
+                  if (user.emailVerified) {
+                    // handleSaveToken(JSON.stringify(user), docData.hashPwd);
+                    router.push("/myHome");
+                  } else {
+                    window.confirm(
+                      "please click the link in your email to verify first"
+                    );
+                    setLoading(false);
+                    signOut(auth);
+                    router.push("/login");
+                  }
+                })
+                .catch((error) => {
+                  handleError(error.message);
+                });
+            });
           }
-        })
-        .catch((error) => {
-          handleError(error.message);
         });
+      });
     } catch (error) {
       handleError(error.message);
     }
@@ -64,7 +107,7 @@ const LoginScreen = () => {
     } else if (msg?.indexOf("too-many-request") != -1) {
       setErrMsg("too-many-request");
     } else {
-      setErrMsg("other");
+      setErrMsg(msg);
     }
     setLoading(false);
   };

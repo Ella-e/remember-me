@@ -19,6 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useSearchParams } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
 
 const Toolbar = () => {
   const [loading, setLoading] = useState(false);
@@ -38,6 +39,25 @@ const Toolbar = () => {
     setRefreshMemberList,
   } = treeStore;
   const searchParams = useSearchParams();
+
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+        getDbMemberList(user);
+        setRelation("Partner");
+        setSelected(false);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (refreshMemberList) {
+      refresh();
+      setRefreshMemberList(false);
+    }
+  }, [refreshMemberList]);
 
   const markLocalUseState = async (member, update) => {
     // check if this person's memberlist exist first
@@ -100,9 +120,9 @@ const Toolbar = () => {
     setChooseAble(true);
   };
 
-  const getDbMemberList = async () => {
+  const getDbMemberList = async (myUser) => {
     setLoading(true);
-    if (auth.currentUser) {
+    if (myUser) {
       const q = query(
         collection(db, "nodes"),
         where("pid", "==", searchParams.get("tab").slice(6, 32))
@@ -128,21 +148,6 @@ const Toolbar = () => {
     }
     setLoading(false);
   };
-
-  useEffect(() => {
-    getDbMemberList();
-    return () => {
-      setRelation("Partner");
-      setSelected(false);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (refreshMemberList) {
-      refresh();
-      setRefreshMemberList(false);
-    }
-  }, [refreshMemberList]);
 
   return (
     <div>
