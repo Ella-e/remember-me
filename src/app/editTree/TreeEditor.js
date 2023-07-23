@@ -26,6 +26,7 @@ import ShareModal from "../treeProjects/share";
 import { saveAs } from "file-saver";
 import html2canvas from "html2canvas";
 import { onAuthStateChanged } from "firebase/auth";
+import { LightBlueBtn } from "../utils/customBtn";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -96,15 +97,6 @@ const TreeEditor = () => {
     }
   };
 
-  const download = () => {
-    const chartElement = document.getElementById("mermaid-chart");
-    html2canvas(chartElement).then((canvas) => {
-      canvas.toBlob((blob) => {
-        saveAs(blob, `${project.name}.png`);
-      });
-    });
-  };
-
   const getTree = async () => {
     setLoading(true);
     if (pid) {
@@ -121,6 +113,9 @@ const TreeEditor = () => {
 
   useEffect(() => {
     if (desc) setHasNode(true);
+    else {
+      setHasNode(false);
+    }
   }, [desc]);
 
   const saveTreeToDb = async (desc) => {
@@ -236,7 +231,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
             .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
-            `        click ${tempNode.docId} callback`
+          `        click ${tempNode.docId} callback`
         );
         let index = subgraphs.findIndex(
           (subgraph) => subgraph.id === nodeInTree.subgraphId
@@ -418,10 +413,6 @@ const TreeEditor = () => {
       }
     }
 
-    download() {
-      download();
-    }
-
     render() {
       // let chart = this.state.description;
       let chart = desc;
@@ -465,48 +456,31 @@ const TreeEditor = () => {
               </Button>
             </DialogActions>
           </Dialog>
-          <Button
+          <LightBlueBtn variant="contained" onClick={() => {
+            setLoading(true);
+            this.refresh();
+            setLoading(false);
+          }}
             className="mr-10"
-            type="primary"
-            onClick={() => {
-              setLoading(true);
-              this.refresh();
-              setLoading(false);
-            }}
-            disabled={!generable}
-          >
+            disabled={!generable}>
             GENERATE TREE
-          </Button>
+          </LightBlueBtn>
+
           {selected && (
-            <Button
-              id="delete-button"
-              className="mr-10"
-              type="primary"
-              onClick={() => {
-                setShowAlert(true);
-              }}
-            >
+            <LightBlueBtn variant="contained" className="mr-10" onClick={() => {
+              setShowAlert(true);
+            }}>
               REMOVE MEMBER
-            </Button>
+            </LightBlueBtn>
           )}
-          <Button
-            type="primary"
-            className="mr-10"
+          <LightBlueBtn variant="contained" className="mr-10"
             disabled={generable}
             onClick={() => {
               this.save();
-            }}
-          >
+            }}>
             SAVE
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => {
-              this.download();
-            }}
-          >
-            DOWNLOAD
-          </Button>
+          </LightBlueBtn>
+
           {desc && hasNode && (
             <MermaidChartComponent chart={chart} callBack={this.callBack} />
           )}

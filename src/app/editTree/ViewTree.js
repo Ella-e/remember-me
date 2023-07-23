@@ -10,6 +10,9 @@ import { auth, db } from "../firebase-config";
 import { useSearchParams } from "next/navigation";
 import { Backdrop, CircularProgress } from "@mui/material";
 import { onAuthStateChanged } from "firebase/auth";
+import html2canvas from "html2canvas";
+import saveAs from "file-saver";
+import { LightBlueBtn } from "../utils/customBtn";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -19,22 +22,33 @@ mermaid.initialize({
 const ViewTree = () => {
   const [desc, setDesc] = useState("");
   const [nodeInTree, setNodeInTree] = useState(null);
-  const [selected, setSelected] = useState(false);
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
+  const [projectName, setProjectName] = useState("");
 
-  const [user, setUser] = useState(null);
+
+  const download = () => {
+    const chartElement = document.getElementById("mermaid-chart");
+    html2canvas(chartElement).then((canvas) => {
+      canvas.toBlob((blob) => {
+        saveAs(blob, `${projectName}.png`);
+      });
+    });
+  };
 
   useEffect(() => {
     getTree();
     onAuthStateChanged(auth, (user) => {
-      setUser(user);
+      // setUser(user);
     });
   }, []);
 
   const getTree = async () => {
     setLoading(true);
-
+    const projectRef = doc(db, "projects", searchParams.get("tab").slice(6, 32));
+    const projectSnap = await getDoc(projectRef);
+    const project = projectSnap.data();
+    setProjectName(project.name);
     const docRef = doc(db, "trees", searchParams.get("tab").slice(6, 32));
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
@@ -51,7 +65,7 @@ const ViewTree = () => {
         console.log(e);
         const memberList = JSON.parse(localStorage.getItem("memberList"));
         if (nodeInTree && nodeInTree.docId === e) {
-          setSelected(false);
+          // setSelected(false);
           setDesc(desc.replace("style " + e + " fill:#bbf", ""));
           setNodeInTree(null);
         } else {
@@ -70,9 +84,13 @@ const ViewTree = () => {
               setNodeInTree(memberList[i]);
             }
           }
-          setSelected(true);
+          // setSelected(true);
         }
       };
+    }
+
+    download() {
+      download();
     }
 
     render() {
@@ -80,6 +98,12 @@ const ViewTree = () => {
 
       return (
         <div className="App">
+          <LightBlueBtn variant="contained"
+            onClick={() => {
+              this.download();
+            }}>
+            DOWNLOAD
+          </LightBlueBtn>
           {desc && (
             <MermaidChartComponent chart={chart} callBack={this.callBack} />
           )}

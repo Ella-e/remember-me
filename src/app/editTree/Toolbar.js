@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
+import { LightBlueBtn } from "../utils/customBtn";
 
 const Toolbar = () => {
   const [loading, setLoading] = useState(false);
@@ -198,24 +199,12 @@ const Toolbar = () => {
           onCellClick={handleSelectMember}
         />
       </div>
-      <Button
-        id="choose-button"
-        type="primary"
-        onClick={handleChoose}
-        disabled={!chooseAble || (hasNode && !nodeInTree)}
-        className="mt-10 mr-10"
-      >
+      <LightBlueBtn className="mt-10 mr-10" variant="contained" onClick={handleChoose} disabled={!chooseAble || (hasNode && !nodeInTree)}>
         CHOOSE
-      </Button>
-      <Button
-        id="unchoose-button"
-        type="primary"
-        disabled={!generable}
-        onClick={handleUnChoose}
-        className="mt-10"
-      >
+      </LightBlueBtn>
+      <LightBlueBtn className="mt-10" variant="contained" onClick={handleUnChoose} disabled={!generable}>
         UNCHOOSE
-      </Button>
+      </LightBlueBtn>
       <h1>Chosen Member</h1>
       <Card sx={{ minWidth: 275 }}>
         <CardContent>
