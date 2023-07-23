@@ -123,7 +123,7 @@ const TreeEditor = () => {
     setSelected(false);
     setChooseAble(false);
     if (nodeInTree) {
-      desc = desc.replace("style " + nodeInTree.docId + " fill:#bbf", "");
+      desc = desc.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "");
       setDesc(desc);
       setNodeInTree(null);
     }
@@ -173,16 +173,16 @@ const TreeEditor = () => {
         const memberList = JSON.parse(localStorage.getItem("memberList"));
         if (nodeInTree && nodeInTree.docId === e) {
           setSelected(false);
-          setDesc(desc.replace("style " + e + " fill:#bbf", ""));
+          setDesc(desc.replace("style " + e + " color:#fff,stroke-dasharray: 5 5", ""));
           setNodeInTree(null);
         } else {
           if (!nodeInTree) {
-            setDesc(desc + `\nstyle ${e} fill:#bbf`);
+            setDesc(desc + `\nstyle ${e} color:#fff,stroke-dasharray: 5 5`);
           } else {
             setDesc(
               desc.replace(
-                "style " + nodeInTree.docId + " fill:#bbf",
-                "style " + e + " fill:#bbf"
+                "style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5",
+                "style " + e + " color:#fff,stroke-dasharray: 5 5"
               )
             );
           }
@@ -211,6 +211,7 @@ const TreeEditor = () => {
         direction LR
         ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
         end
+        classDef default fill:#bbf,stroke:#333,stroke-width:3px;
         click ${tempNode.docId} callback`;
         setDesc(tempDesc);
         setSubgraphs([
@@ -230,7 +231,7 @@ const TreeEditor = () => {
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))`,
               `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
             )
-            .replace("style " + nodeInTree.docId + " fill:#bbf", "") +
+            .replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "") +
           `        click ${tempNode.docId} callback`
         );
         let index = subgraphs.findIndex(
@@ -243,7 +244,7 @@ const TreeEditor = () => {
         memberList[index].subgraphId = nodeInTree.subgraphId;
       } else if (relation == "Children") {
         setDesc(
-          desc?.replace("style " + nodeInTree.docId + " fill:#bbf", "").replace(
+          desc?.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "").replace(
             `graph TD`,
             `graph TD
         subgraph ${tempNode.docId.slice(0, 10)}[ ]
@@ -271,7 +272,7 @@ const TreeEditor = () => {
         memberList[index].subgraphId = tempNode.docId.slice(0, 10);
       } else {
         setDesc(
-          desc?.replace("style " + nodeInTree.docId + " fill:#bbf", "").replace(
+          desc?.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "").replace(
             `graph TD`,
             `graph TD
         subgraph ${tempNode.docId.slice(0, 10)}[ ]
@@ -356,7 +357,7 @@ const TreeEditor = () => {
       const index = subgraphs.findIndex(
         (subgraph) => subgraph.id === nodeInTree.subgraphId
       );
-      setDesc(desc.replace("style " + nodeInTree.docId + " fill:#bbf", ""));
+      setDesc(desc.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", ""));
       const memberList = JSON.parse(localStorage.getItem("memberList"));
       if (subgraphs[index].members.length > 1) {
         let tempDesc = desc
@@ -369,7 +370,7 @@ const TreeEditor = () => {
             ""
           )
           .replace(`click ${nodeInTree.docId} callback`, "")
-          .replace("style " + nodeInTree.docId + " fill:#bbf", "");
+          .replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "");
         setDesc(tempDesc);
         subgraphs[index].members.splice(
           subgraphs[index].members.indexOf(nodeInTree.docId),
