@@ -37,6 +37,7 @@ const ViewTree = () => {
   };
 
   useEffect(() => {
+    setLoading(true);
     getTree();
     onAuthStateChanged(auth, (user) => {
       // setUser(user);
@@ -44,7 +45,7 @@ const ViewTree = () => {
   }, []);
 
   const getTree = async () => {
-    setLoading(true);
+
     const projectRef = doc(db, "projects", searchParams.get("tab").slice(6, 32));
     const projectSnap = await getDoc(projectRef);
     const project = projectSnap.data();

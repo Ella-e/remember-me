@@ -23,8 +23,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import EditModal from "./rename";
 import ShareModal from "../treeProjects/share";
-import { saveAs } from "file-saver";
-import html2canvas from "html2canvas";
 import { onAuthStateChanged } from "firebase/auth";
 import { LightBlueBtn } from "../utils/customBtn";
 
@@ -354,10 +352,13 @@ const TreeEditor = () => {
     }
 
     handleDelete() {
+      console.log("hi");
       const index = subgraphs.findIndex(
         (subgraph) => subgraph.id === nodeInTree.subgraphId
       );
+      console.log(desc)
       setDesc(desc.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", ""));
+      console.log(desc)
       const memberList = JSON.parse(localStorage.getItem("memberList"));
       if (subgraphs[index].members.length > 1) {
         let tempDesc = desc
@@ -463,18 +464,19 @@ const TreeEditor = () => {
             setLoading(false);
           }}
             className="mr-10"
+            style={{ marginRight: "10px" }}
             disabled={!generable}>
             GENERATE TREE
           </LightBlueBtn>
 
           {selected && (
-            <LightBlueBtn variant="contained" className="mr-10" onClick={() => {
+            <LightBlueBtn variant="contained" className="mr-10" style={{ marginRight: "10px" }} onClick={() => {
               setShowAlert(true);
             }}>
               REMOVE MEMBER
             </LightBlueBtn>
           )}
-          <LightBlueBtn variant="contained" className="mr-10"
+          <LightBlueBtn variant="contained" className="mr-10" style={{ marginRight: "10px" }}
             disabled={generable}
             onClick={() => {
               this.save();
