@@ -1,4 +1,4 @@
-import { action, makeAutoObservable } from "mobx";
+import { makeAutoObservable } from "mobx";
 class TreeStore {
   generable = false;
   hasNode = false;
@@ -7,7 +7,6 @@ class TreeStore {
   selected = false;
   relation = "Partner";
   description = "";
-  chooseAble = false;
   refreshMemberList = false;
   nodeInTree = null;
 
@@ -21,10 +20,6 @@ class TreeStore {
 
   setRefreshMemberList = (bool) => {
     this.refreshMemberList = bool;
-  };
-
-  setChooseAble = (bool) => {
-    this.chooseAble = bool;
   };
 
   setGenerable = (bool) => {

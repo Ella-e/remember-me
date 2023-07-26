@@ -49,7 +49,6 @@ const TreeEditor = () => {
     setDescription,
     generable,
     setGenerable,
-    setChooseAble,
     selected,
     setRefreshMemberList,
   } = treeStore;
@@ -119,7 +118,6 @@ const TreeEditor = () => {
   const saveTreeToDb = async (desc) => {
     setRelation("Partner");
     setSelected(false);
-    setChooseAble(false);
     if (nodeInTree) {
       desc = desc.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "");
       setDesc(desc);
@@ -215,9 +213,6 @@ const TreeEditor = () => {
         setSubgraphs([
           { id: tempNode.docId.slice(0, 10), members: [tempNode.docId] },
         ]);
-        setSubgraphs([
-          { id: tempNode.docId.slice(0, 10), members: [tempNode.docId] },
-        ]);
         const index = memberList.findIndex(
           (member) => member.id === tempNode.id
         );
@@ -259,10 +254,6 @@ const TreeEditor = () => {
           id: tempNode.docId.slice(0, 10),
           members: [tempNode.docId],
         });
-        subgraphs.push({
-          id: tempNode.docId.slice(0, 10),
-          members: [tempNode.docId],
-        });
         setSubgraphs(subgraphs);
         const index = memberList.findIndex(
           (member) => member.id === tempNode.id
@@ -287,10 +278,6 @@ const TreeEditor = () => {
           id: tempNode.docId.slice(0, 10),
           members: [tempNode.docId],
         });
-        subgraphs.push({
-          id: tempNode.docId.slice(0, 10),
-          members: [tempNode.docId],
-        });
         setSubgraphs(subgraphs);
         const index = memberList.findIndex(
           (member) => member.id === tempNode.id
@@ -310,17 +297,16 @@ const TreeEditor = () => {
       updateMemberToDb();
     }
 
-    delete(subgraphId) {
+    delete(subgraphId, description, tempSubgraphs) {
       const memberList = JSON.parse(localStorage.getItem("memberList"));
-      const index = subgraphs.findIndex(
+      const index = tempSubgraphs.findIndex(
         (subgraph) => subgraph.id === subgraphId
       );
-      let tempDesc = desc;
       const members = [];
-      const subgraphMembers = subgraphs[index].members;
+      const subgraphMembers = tempSubgraphs[index].members;
       for (let i = 0; i < subgraphMembers.length; i++) {
         const id = subgraphMembers[i];
-        tempDesc = tempDesc.replace(`click ${id} callback`, "");
+        description = description.replace(`click ${id} callback`, "");
         const memberIndex = memberList.findIndex((member) => member.id === id);
         memberList[memberIndex].subgraphId = "";
         memberList[memberIndex].used = false;
@@ -330,38 +316,35 @@ const TreeEditor = () => {
           lastName: memberList[memberIndex].lastName,
         });
       }
-      subgraphs.splice(index, 1);
-      const parentIndex = tempDesc.indexOf(` --- ${subgraphId}`);
+      tempSubgraphs.splice(index, 1);
+      const parentIndex = description.indexOf(` --- ${subgraphId}\n`);
       if (parentIndex !== -1) {
-        const parentId = tempDesc.slice(parentIndex - 10, parentIndex);
-        tempDesc = tempDesc.replace(`${parentId} --- ${subgraphId}`, "");
+        const parentId = description.slice(parentIndex - 10, parentIndex);
+        description = description.replace(`${parentId} --- ${subgraphId}`, "");
       }
       if (members.length === 1) {
         const replace = `        subgraph ${subgraphId}[ ]\n        direction LR\n        ${members[0].id}((${members[0].firstName} ${members[0].lastName}))\n        end`;
-        tempDesc = tempDesc.replace(replace, "");
+        description = description.replace(replace, "");
       } else {
-        tempDesc = tempDesc.replace(
+        description = description.replace(
           `        subgraph ${subgraphId}[ ]\n        direction LR\n        ${members[0].id}((${members[0].firstName} ${members[0].lastName})) --- ${members[1].id}((${members[1].firstName} ${members[1].lastName}))\n        end`,
           ""
         );
       }
-      setDesc(tempDesc);
-      setSubgraphs(subgraphs);
       localStorage.setItem("memberList", JSON.stringify(memberList));
       setRefreshMemberList(true);
+      return { description, tempSubgraphs };
     }
 
     handleDelete() {
-      console.log("hi");
+      let description = desc.slice(0, desc.indexOf(`style ${nodeInTree.docId} color:#fff,stroke-dasharray: 5 5`));
       const index = subgraphs.findIndex(
         (subgraph) => subgraph.id === nodeInTree.subgraphId
       );
-      console.log(desc)
-      setDesc(desc.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", ""));
-      console.log(desc)
+      let tempSubgraphs = subgraphs;
       const memberList = JSON.parse(localStorage.getItem("memberList"));
-      if (subgraphs[index].members.length > 1) {
-        let tempDesc = desc
+      if (tempSubgraphs[index].members.length > 1) {
+        description = description
           .replace(
             `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- `,
             ""
@@ -372,12 +355,10 @@ const TreeEditor = () => {
           )
           .replace(`click ${nodeInTree.docId} callback`, "")
           .replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "");
-        setDesc(tempDesc);
-        subgraphs[index].members.splice(
-          subgraphs[index].members.indexOf(nodeInTree.docId),
+        tempSubgraphs[index].members.splice(
+          tempSubgraphs[index].members.indexOf(nodeInTree.docId),
           1
         );
-        setSubgraphs(subgraphs);
         const memberIndex = memberList.findIndex(
           (member) => member.id === nodeInTree.id
         );
@@ -386,33 +367,37 @@ const TreeEditor = () => {
         localStorage.setItem("memberList", JSON.stringify(memberList));
       } else {
         let subgraphId = nodeInTree.subgraphId;
-        this.delete(subgraphId);
-        let tempDesc = desc;
+        const result = this.delete(subgraphId, description, tempSubgraphs);
+        description = result.description;
+        tempSubgraphs = result.tempSubgraphs;
         let indexes = [];
-        let index = tempDesc.indexOf(`${subgraphId} ---`);
+        let index = description.indexOf(`${subgraphId} ---`);
         while (index !== -1) {
-          indexes.push(index);
-          index = tempDesc.indexOf(`${subgraphId} ---`, index + 1);
+          indexes.push(description.slice(index + 15, index + 25))
+          index = description.indexOf(`${subgraphId} ---`, index + 1);
         }
         while (indexes.length > 0) {
-          let tempDesc = desc;
-          let sub = tempDesc.slice(indexes[0] + 15, indexes[0] + 25);
-          let index = tempDesc.indexOf(`${sub} ---`);
+          let sub = indexes[0];
+          let index = description.indexOf(`${sub} ---`);
           while (index !== -1) {
-            indexes.push(index);
-            index = tempDesc.indexOf(`${subgraphId} ---`, index + 1);
+            indexes.push(description.slice(index + 15, index + 25));
+            index = description.indexOf(`${sub} ---`, index + 1);
           }
-          this.delete(sub);
-          indexes = indexes.slice(1, indexes.length + 1);
+          const result = this.delete(sub, description, tempSubgraphs);
+          description = result.description;
+          tempSubgraphs = result.tempSubgraphs;
+          indexes.splice(0, 1);
         }
       }
+      setDesc(description);
       setNodeInTree(null);
       setSelected(false);
       setRefreshMemberList(true);
-      if (subgraphs.length === 0) {
+      if (tempSubgraphs.length === 0) {
         setDesc("");
         setHasNode(false);
       }
+      setSubgraphs(tempSubgraphs);
     }
 
     render() {
@@ -567,7 +552,6 @@ const TreeEditor = () => {
             <CircularProgress color="inherit" />
           </Backdrop>
           <App />
-          {/* {hasNode && <App/>} */}
         </div>
         <div className=" bg-white mr-10">
           <Toolbar />

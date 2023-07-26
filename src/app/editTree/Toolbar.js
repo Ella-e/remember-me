@@ -34,8 +34,6 @@ const Toolbar = () => {
     setRelation,
     setGenerable,
     generable,
-    chooseAble,
-    setChooseAble,
     refreshMemberList,
     setRefreshMemberList,
   } = treeStore;
@@ -100,8 +98,8 @@ const Toolbar = () => {
       if (!hasNode) {
         setHasNode(true);
       }
-      setChooseAble(false);
       setGenerable(true);
+      setSelectedMember(null);
     } else {
       alert("please choose a member from table on the right");
     }
@@ -118,7 +116,6 @@ const Toolbar = () => {
   };
   const handleSelectMember = (event) => {
     setSelectedMember(event.row);
-    setChooseAble(true);
   };
 
   const getDbMemberList = async (myUser) => {
@@ -199,10 +196,10 @@ const Toolbar = () => {
           onCellClick={handleSelectMember}
         />
       </div>
-      <LightBlueBtn className="mt-10 mr-10" style={{ marginRight: "10px" }} variant="contained" onClick={handleChoose} disabled={!chooseAble || (hasNode && !nodeInTree)}>
+      <LightBlueBtn className="mt-10 mr-10" style={{ marginRight: "10px", marginTop: "10px" }} variant="contained" onClick={handleChoose} disabled={!selectedMember || (hasNode && !nodeInTree)}>
         CHOOSE
       </LightBlueBtn>
-      <LightBlueBtn className="mt-10" variant="contained" onClick={handleUnChoose} disabled={!generable}>
+      <LightBlueBtn className="mt-10" style={{ marginTop: "10px" }} variant="contained" onClick={handleUnChoose} disabled={!generable}>
         UNCHOOSE
       </LightBlueBtn>
       <h1>Chosen Member</h1>
