@@ -64,10 +64,10 @@ const LoginScreen = () => {
         const docData = doc.data();
         bscrypt.compare(password, docData.hashPwd, function (err, isMatch) {
           if (err) {
-            setErrMsg(err.message);
+            handleError(err.message);
           } else if (!isMatch) {
             //password incorrect
-            setErrMsg("password incorrect");
+            handleError("password incorrect");
           } else {
             // password match
             setPersistence(auth, browserLocalPersistence).then(() => {
@@ -100,6 +100,7 @@ const LoginScreen = () => {
 
   const handleError = (msg) => {
     setErrMsg(msg);
+    setLoading(false);
     if (msg?.indexOf("wrong-password") != -1) {
       setErrMsg("wrong-password");
     } else if (msg?.indexOf("invalid-email") != -1) {
@@ -109,7 +110,6 @@ const LoginScreen = () => {
     } else {
       setErrMsg(msg);
     }
-    setLoading(false);
   };
 
   const resetError = () => {
