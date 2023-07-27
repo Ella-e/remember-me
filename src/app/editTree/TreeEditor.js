@@ -449,19 +449,19 @@ const TreeEditor = () => {
             setLoading(false);
           }}
             className="mr-10"
-            style={{ marginRight: "10px" }}
+            style={{ marginRight: "10px", marginBottom: "10px" }}
             disabled={!generable}>
             GENERATE TREE
           </LightBlueBtn>
 
           {selected && (
-            <LightBlueBtn variant="contained" className="mr-10" style={{ marginRight: "10px" }} onClick={() => {
+            <LightBlueBtn variant="contained" className="mr-10" style={{ marginRight: "10px", marginBottom: "10px" }} onClick={() => {
               setShowAlert(true);
             }}>
               REMOVE MEMBER
             </LightBlueBtn>
           )}
-          <LightBlueBtn variant="contained" className="mr-10" style={{ marginRight: "10px" }}
+          <LightBlueBtn variant="contained" className="mr-10" style={{ marginRight: "10px", marginBottom: "10px" }}
             disabled={generable}
             onClick={() => {
               this.save();
@@ -491,7 +491,7 @@ const TreeEditor = () => {
         </Alert>
       )}
       <div className="flex ">
-        <div className="justify-center w-two-third">
+        <div className="justify-center w-two-third" style={{ marginRight: "10px" }}>
           {project && (
             <div className="flex" style={{ justifyContent: "start" }}>
               <h1 style={{ cursor: "text", maxWidth: "80%" }}>

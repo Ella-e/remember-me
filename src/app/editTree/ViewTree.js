@@ -100,6 +100,7 @@ const ViewTree = () => {
       return (
         <div className="App">
           <LightBlueBtn variant="contained"
+            style={{ marginBottom: "10px" }}
             onClick={() => {
               this.download();
             }}>

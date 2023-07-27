@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import mermaid from "mermaid";
+import "./page.css";
 
 // mermaid.initialize({
 //   startOnLoad: true,
@@ -27,11 +28,12 @@ class MermaidChartComponent extends React.Component {
     return (
       <div
         id="mermaid-chart"
-        className="mermaid"
-        style={{ width: "fit-content", height: "fit-content" }}
+        className="mermaid mermaidJS"
+        style={{ maxWidth: "100%", maxHeight: "100px" }}
+      // style={{ width: "fit-content", height: "100vh" }}
       >
         {this.props.chart}
-      </div>
+      </div >
     );
   }
 }

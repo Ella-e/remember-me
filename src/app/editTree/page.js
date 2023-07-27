@@ -69,7 +69,8 @@ const EditTree = () => {
   return (
     <div className="layout">
       <MyHeader />
-      <div className="middleBlock" style={{ display: "flex", flex: 1 }}>
+      {/* <div className="middleBlock" style={{ display: "flex", flex: 1 }}> */}
+      <div style={{ display: "flex", flex: 1 }}>
         <Sider width={200} className="site-layout-background">
           <Menu
             mode="inline"

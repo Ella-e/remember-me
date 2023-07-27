@@ -1,4 +1,4 @@
-import { Button, Select } from "antd";
+import { Select } from "antd";
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { treeStore } from "./store";
@@ -39,11 +39,9 @@ const Toolbar = () => {
   } = treeStore;
   const searchParams = useSearchParams();
 
-  const [user, setUser] = useState(null);
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUser(user);
         getDbMemberList(user);
         setRelation("Partner");
         setSelected(false);
@@ -107,6 +105,7 @@ const Toolbar = () => {
 
   const [memberList, setMemberList] = useState(new Array());
   const columns = [
+    { field: "id", headerName: "ID", width: 150 },
     { field: "firstName", headerName: "First name", width: 130 },
     { field: "lastName", headerName: "Last name", width: 130 },
   ];
@@ -182,7 +181,7 @@ const Toolbar = () => {
         </div>
       )}
       <h1>Choose Member</h1>
-      <div style={{ height: 300, width: "100%" }}>
+      <div style={{ height: 300, maxWidth: "420px", display: "flex", flex: 1 }}>
         <DataGrid
           rows={memberList}
           columns={columns}
