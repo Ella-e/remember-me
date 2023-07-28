@@ -2,6 +2,23 @@
 import React from "react";
 import mermaid from "mermaid";
 import "./page.css";
+import {
+  TransformWrapper,
+  TransformComponent,
+  useControls
+} from "react-zoom-pan-pinch";
+import Link from "next/link";
+
+const Controls = () => {
+  const { zoomIn, zoomOut, resetTransform } = useControls();
+  return (
+    <>
+      <Link onClick={() => zoomIn()} href="" style={{ marginRight: "10px" }}>ZOOM IN</Link>
+      <Link onClick={() => zoomOut()} href="" style={{ marginRight: "10px" }}>ZOOM OUT</Link>
+      <Link onClick={() => resetTransform()} href="">RESET</Link>
+    </>
+  );
+};
 
 // mermaid.initialize({
 //   startOnLoad: true,
@@ -26,14 +43,19 @@ class MermaidChartComponent extends React.Component {
 
   render() {
     return (
-      <div
-        id="mermaid-chart"
-        className="mermaid mermaidJS"
-        style={{ maxWidth: "100%", maxHeight: "100px" }}
-      // style={{ width: "fit-content", height: "100vh" }}
-      >
-        {this.props.chart}
-      </div >
+      <div className="react-transform-wrapper">
+        <TransformWrapper centerOnInit initialScale={1.8}>
+          <TransformComponent>
+            <div
+              id="mermaid-chart"
+              className="mermaid mermaidJS"
+            >
+              {this.props.chart}
+            </div >
+          </TransformComponent>
+          <Controls />
+        </TransformWrapper>
+      </div>
     );
   }
 }

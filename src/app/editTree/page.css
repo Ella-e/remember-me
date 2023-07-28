@@ -99,6 +99,13 @@
 }
 
 .mermaidJS svg {
+  display: flex;
+  flex-direction: column;
   max-width: 100% !important;
   max-height: 470px !important;
+}
+
+.react-transform-wrapper {
+  width: 100% !important;
+  height: 440px !important;
 }
