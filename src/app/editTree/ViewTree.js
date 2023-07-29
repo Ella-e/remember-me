@@ -2,10 +2,9 @@
 import { Button } from "antd";
 import MermaidChart from "./Mermaid";
 import React, { useEffect, useState } from "react";
-import Toolbar from "./Toolbar";
 import mermaid from "mermaid";
 import MermaidChartComponent from "./Mermaid";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { auth, db } from "../firebase-config";
 import { useSearchParams } from "next/navigation";
 import { Backdrop, CircularProgress } from "@mui/material";
@@ -13,6 +12,9 @@ import { onAuthStateChanged } from "firebase/auth";
 import html2canvas from "html2canvas";
 import saveAs from "file-saver";
 import { LightBlueBtn } from "../utils/customBtn";
+import "./page.css";
+import "suneditor/dist/css/suneditor.min.css";
+import SunEditor from "suneditor-react";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -25,6 +27,7 @@ const ViewTree = () => {
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const [projectName, setProjectName] = useState("");
+  const [memberList, setMemberList] = useState(null);
 
 
   const download = () => {
@@ -39,13 +42,40 @@ const ViewTree = () => {
   useEffect(() => {
     setLoading(true);
     getTree();
+    getMember();
     onAuthStateChanged(auth, (user) => {
       // setUser(user);
     });
   }, []);
 
-  const getTree = async () => {
+  const getMember = async () => {
+    const q = query(
+      collection(db, "nodes"),
+      where("pid", "==", searchParams.get("tab").slice(6, 32))
+    );
+    const querySnapshot = await getDocs(q);
+    let tempMemberList = new Array();
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      const docData = doc.data();
+      const tempMember = {
+        id: docData.id,
+        firstName: docData.firstName,
+        lastName: docData.lastName,
+        nickName: docData.nickName,
+        gender: docData.gender,
+        otherGender: docData.otherGender,
+        status: docData.status,
+        story: docData.story,
+        docId: doc.id,
+      };
+      tempMemberList.push(tempMember);
+    });
+    setMemberList(tempMemberList);
+    setLoading(false);
+  }
 
+  const getTree = async () => {
     const projectRef = doc(db, "projects", searchParams.get("tab").slice(6, 32));
     const projectSnap = await getDoc(projectRef);
     const project = projectSnap.data();
@@ -56,7 +86,6 @@ const ViewTree = () => {
       const data = docSnap.data();
       setDesc(data.desc);
     }
-    setLoading(false);
   };
   class App extends React.Component {
     constructor(props) {
@@ -64,19 +93,18 @@ const ViewTree = () => {
 
       this.callBack = (e) => {
         console.log(e);
-        const memberList = JSON.parse(localStorage.getItem("memberList"));
         if (nodeInTree && nodeInTree.docId === e) {
           // setSelected(false);
-          setDesc(desc.replace("style " + e + " fill:#bbf", ""));
+          setDesc(desc.replace("style " + e + " color:#fff,stroke-dasharray: 5 5", ""));
           setNodeInTree(null);
         } else {
           if (!nodeInTree) {
-            setDesc(desc + `\nstyle ${e} fill:#bbf`);
+            setDesc(desc + "\nstyle " + e + " color:#fff,stroke-dasharray: 5 5");
           } else {
             setDesc(
               desc.replace(
-                "style " + nodeInTree.docId + " fill:#bbf",
-                "style " + e + " fill:#bbf"
+                "style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5",
+                "style " + e + " color:#fff,stroke-dasharray: 5 5"
               )
             );
           }
@@ -120,38 +148,46 @@ const ViewTree = () => {
     }
   }
 
-  // useEffect(() => {
-  //   const clickOnNode = () => {
-  //     console.log("node clicked");
-  //   };
-  //   window.addEventListener("graphDiv", clickOnNode);
-  //   return () => {
-  //     window.removeEventListener("graphDiv", clickOnNode);
-  //   };
-  // }, []);
-
-  // // Example of using the bindFunctions
-  // const drawDiagram = async function () {
-  //   const element = document.querySelector(".graphDiv");
-  //   // const graphDefinition = "graph TB\na-->b";
-  //   const graphDefinition = testContent;
-  //   const { svg, bindFunctions } = await mermaid.render(
-  //     "graphDiv",
-  //     graphDefinition
-  //   );
-  //   element.innerHTML = svg;
-  //   // This can also be written as `bindFunctions?.(element);` using the `?` shorthand.
-  //   console.log(bindFunctions);
-  //   if (bindFunctions) {
-  //     console.log("run Bind function");
-  //     bindFunctions(element);
-  //   }
-  // };
-
   return (
-    <div>
-      {/* <MermaidChart chartDefinition={testContent} callBack={undefined} /> */}
-      {desc && <App />}
+
+    <div className="flex ">
+      <div className="justify-center w-two-third">
+        {desc && <App />}
+      </div>
+      <div className=" bg-white" style={{ minWidth: "490px" }}>
+        <h2>Member Details</h2>
+        {!nodeInTree && (<h3 style={{ color: "#bbf" }}>{`Click a member on the left\nand view his/her life stories!`}</h3>)}
+        {nodeInTree && (
+          <div>
+            <h3 style={{ color: "#bbf" }}>Name</h3>
+            <h3>{nodeInTree.firstName + " " + nodeInTree.lastName}</h3>
+            {nodeInTree.nickName && (<div>
+              <h3 style={{ color: "#bbf" }}>Nick Name</h3>
+              <h3>{nodeInTree.nickName}</h3>
+            </div>)}
+            {nodeInTree.gender && (<div>
+              <h3 style={{ color: "#bbf" }}>Gender</h3>
+              <h3>{nodeInTree.gender === "other" ? (nodeInTree.otherGender ? nodeInTree.otherGender : "other") : nodeInTree.gender}</h3>
+            </div>)
+            }
+            {nodeInTree.status && (<div>
+              <h3 style={{ color: "#bbf" }}>Status</h3>
+              <h3>{nodeInTree.status}</h3>
+            </div>)
+            }
+            {nodeInTree.story && (<div>
+              <h3 style={{ color: "#bbf" }}>Life Story</h3>
+              <SunEditor
+                disable
+                disableToolbar
+                setContents={nodeInTree.story}
+              />
+            </div>)
+            }
+          </div>
+        )}
+      </div>
+
     </div>
   );
 };

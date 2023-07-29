@@ -52,7 +52,7 @@ const EditTree = () => {
     setActiveTab(key);
   };
 
-  const section = ["Manage Tree", "Manage Member", "Download"];
+  const section = ["Manage Tree", "Manage Member", "View & Download"];
   const items2 = [EditOutlined, TeamOutlined, DownloadOutlined].map(
     (icon, index) => {
       const key = `sub${index + 1}`;
