@@ -135,6 +135,7 @@ const TreeContent = () => {
           otherGender: docData.otherGender,
           status: docData.status,
           story: docData.story,
+          used: docData.used,
         };
         tempMemberList.push(tempMember);
         console.log(doc.id, " => ", doc.data());
@@ -187,6 +188,26 @@ const TreeContent = () => {
         status: member.status,
         story: member.story,
       });
+      if (member.used) {
+        const treeRef = doc(db, "trees", pid);
+        const tree = await getDoc(treeRef);
+        const treeData = tree.data();
+        let desc = treeData.desc;
+        let index = desc.indexOf(`${member.id}((`);
+        const indexes = [];
+        while (index !== -1) {
+          indexes.push(index);
+          index = desc.indexOf(`${member.id}((`, index + 1);
+        }
+        for (let i = indexes.length - 1; i >= 0; i--) {
+          const startIndex = indexes[i];
+          const endIndex = desc.indexOf("))", startIndex + 1);
+          desc = desc.slice(0, startIndex) + `${member.id}((${member.firstName} ${member.lastName}))` + desc.slice(endIndex + 2);
+        }
+        updateDoc(treeRef, {
+          desc: desc,
+        });
+      }
     } else {
       await setDoc(docRef, {
         id: member.id,
@@ -325,6 +346,7 @@ const TreeContent = () => {
               otherGender: otherGender,
               status: status,
               story: story,
+              used: memberList[i].used
             };
             tempList.splice(i, 1, newMember);
             setMemberList(tempList);
