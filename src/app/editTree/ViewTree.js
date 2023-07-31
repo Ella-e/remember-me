@@ -179,6 +179,7 @@ const ViewTree = () => {
                 disable
                 disableToolbar
                 setContents={nodeInTree.story}
+                hideToolbar
               />
             </div>)
             }

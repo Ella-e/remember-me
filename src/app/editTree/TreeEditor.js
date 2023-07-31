@@ -474,9 +474,11 @@ const TreeEditor = () => {
           </LightBlueBtn>
 
           {selected && (
-            <LightBlueBtn variant="contained" className="mr-10" style={{ marginRight: "10px", marginBottom: "10px" }} onClick={() => {
-              setShowAlert(true);
-            }}>
+            <LightBlueBtn
+              disabled={generable}
+              variant="contained" className="mr-10" style={{ marginRight: "10px", marginBottom: "10px" }} onClick={() => {
+                setShowAlert(true);
+              }}>
               REMOVE MEMBER
             </LightBlueBtn>
           )}

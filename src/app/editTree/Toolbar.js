@@ -207,7 +207,7 @@ const Toolbar = () => {
           onCellClick={handleSelectMember}
         />
       </div>
-      <LightBlueBtn className="mt-10 mr-10" style={{ marginRight: "10px", marginTop: "10px" }} variant="contained" onClick={handleChoose} disabled={!selectedMember || (hasNode && !nodeInTree)}>
+      <LightBlueBtn className="mt-10 mr-10" style={{ marginRight: "10px", marginTop: "10px" }} variant="contained" onClick={handleChoose} disabled={generable || !selectedMember || (hasNode && !nodeInTree)}>
         CHOOSE
       </LightBlueBtn>
       <LightBlueBtn className="mt-10" style={{ marginTop: "10px" }} variant="contained" onClick={handleUnChoose} disabled={!generable}>
