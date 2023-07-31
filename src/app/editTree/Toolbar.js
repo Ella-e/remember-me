@@ -50,6 +50,12 @@ const Toolbar = () => {
         setSelected(false);
       }
     });
+    return () => {
+      console.log("hi");
+      localStorage.removeItem("selectedMember");
+      setSelectedMember(null);
+      setGenerable(false);
+    }
   }, []);
 
   useEffect(() => {

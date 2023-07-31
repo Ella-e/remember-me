@@ -154,8 +154,9 @@ const ViewTree = () => {
       </div>
       <div className=" bg-white" style={{ minWidth: "490px" }}>
         <h2>Member Details</h2>
-        {!nodeInTree && (<h3 style={{ color: "#bbf" }}>{`Click a member on the left\nand view his/her life stories!`}</h3>)}
-        {nodeInTree && (
+        {!desc && (<h3 style={{ color: "#bbf" }}>Please add a member to the tree!</h3>)}
+        {desc && !nodeInTree && (<h3 style={{ color: "#bbf" }}>{`Click a member on the left\nand view his/her life stories!`}</h3>)}
+        {desc && nodeInTree && (
           <div>
             <h3 style={{ color: "#bbf" }}>Name</h3>
             <h3>{nodeInTree.firstName + " " + nodeInTree.lastName}</h3>
