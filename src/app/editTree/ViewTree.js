@@ -1,6 +1,4 @@
 "use client";
-import { Button } from "antd";
-import MermaidChart from "./Mermaid";
 import React, { useEffect, useState } from "react";
 import mermaid from "mermaid";
 import MermaidChartComponent from "./Mermaid";

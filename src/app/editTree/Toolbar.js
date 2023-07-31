@@ -22,10 +22,13 @@ import { useSearchParams } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { LightBlueBtn } from "../utils/customBtn";
 
+
 const Toolbar = () => {
   const [loading, setLoading] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const {
+    unchoose,
+    setUnchoose,
     hasNode,
     setHasNode,
     nodeInTree,
@@ -85,6 +88,15 @@ const Toolbar = () => {
     setSelectedMember(null);
     setGenerable(false);
   };
+
+  useEffect(() => {
+    if (unchoose) {
+      handleUnChoose();
+      setSelected(false);
+      setUnchoose(null);
+    }
+
+  }, [unchoose])
 
   const handleChoose = () => {
     if (selectedMember) {

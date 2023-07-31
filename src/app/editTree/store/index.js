@@ -9,10 +9,15 @@ class TreeStore {
   description = "";
   refreshMemberList = false;
   nodeInTree = null;
+  unchoose = null;
 
   constructor() {
     makeAutoObservable(this);
   }
+
+  setUnchoose = (member) => {
+    this.unchoose = member;
+  };
 
   setNodeInTree = (node) => {
     this.nodeInTree = node;

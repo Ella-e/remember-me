@@ -39,6 +39,7 @@ const TreeEditor = () => {
   const [authWarning, setAuthWarning] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const {
+    setUnchoose,
     nodeInTree,
     setNodeInTree,
     hasNode,
@@ -157,6 +158,7 @@ const TreeEditor = () => {
           });
         }
       }
+      setLoading(false);
       message.success("Save successfully!");
     }
   };
@@ -260,29 +262,45 @@ const TreeEditor = () => {
         );
         memberList[index].subgraphId = tempNode.docId.slice(0, 10);
       } else {
-        setDesc(
-          desc?.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "").replace(
-            `graph TD`,
-            `graph TD
+        let indexes = [];
+        let index = desc.indexOf(`--- ${nodeInTree.subgraphId}`);
+        while (index !== -1) {
+          indexes.push(index);
+          index = desc.indexOf(`--- ${nodeInTree.subgraphId}`, index + 1);
+        }
+        if (indexes.length > 1) {
+          message.error("Two parents already!");
+          setUnchoose(nodeInTree);
+          setDesc(desc.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", ""));
+          setRelation("Partner");
+          setNodeInTree(null);
+          return;
+        }
+        else {
+          setDesc(
+            desc?.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "").replace(
+              `graph TD`,
+              `graph TD
         subgraph ${tempNode.docId.slice(0, 10)}[ ]
         direction LR
         ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
         end
         ${tempNode.docId.slice(0, 10)} --- ${nodeInTree.subgraphId.slice(
-              0,
-              10
-            )}`
-          ) + `        click ${tempNode.docId} callback`
-        );
-        subgraphs.push({
-          id: tempNode.docId.slice(0, 10),
-          members: [tempNode.docId],
-        });
-        setSubgraphs(subgraphs);
-        const index = memberList.findIndex(
-          (member) => member.id === tempNode.id
-        );
-        memberList[index].subgraphId = tempNode.docId.slice(0, 10);
+                0,
+                10
+              )}`
+            ) + `        click ${tempNode.docId} callback`
+          );
+          subgraphs.push({
+            id: tempNode.docId.slice(0, 10),
+            members: [tempNode.docId],
+          });
+          setSubgraphs(subgraphs);
+          const index = memberList.findIndex(
+            (member) => member.id === tempNode.id
+          );
+          memberList[index].subgraphId = tempNode.docId.slice(0, 10);
+        }
       }
       localStorage.setItem("memberList", JSON.stringify(memberList));
       setRelation("Partner");
@@ -293,6 +311,7 @@ const TreeEditor = () => {
     }
 
     save() {
+      setLoading(true);
       saveTreeToDb(desc);
       updateMemberToDb();
     }
