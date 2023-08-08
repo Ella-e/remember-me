@@ -276,7 +276,7 @@ const TreeContent = () => {
         };
         if (memberList) {
           setMemberList((current) => [...current, newMember]);
-          saveStory(tempUid);
+          // saveStory(tempUid);
         } else {
           setMemberList([newMember]);
         }
@@ -354,8 +354,8 @@ const TreeContent = () => {
       setOtherGender(selectedMember.otherGender);
       setStatus(selectedMember.status);
       setSelectedId(selectedMember.id);
-      // setStory(selectedMember.story);
-      getStory(selectedMember.id);
+      setStory(selectedMember.story);
+      // getStory(selectedMember.id);
       // set editor's value
       // editor.commands.setContent(selectedMember.story);
       setEditNode(true); // open the page
