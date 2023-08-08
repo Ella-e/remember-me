@@ -51,7 +51,6 @@ const Toolbar = () => {
       }
     });
     return () => {
-      console.log("hi");
       localStorage.removeItem("selectedMember");
       setSelectedMember(null);
       setGenerable(false);
@@ -215,9 +214,6 @@ const Toolbar = () => {
       </div>
       <LightBlueBtn className="mt-10 mr-10" style={{ marginRight: "10px", marginTop: "10px" }} variant="contained" onClick={handleChoose} disabled={generable || !selectedMember || (hasNode && !nodeInTree)}>
         CHOOSE
-      </LightBlueBtn>
-      <LightBlueBtn className="mt-10" style={{ marginTop: "10px" }} variant="contained" onClick={handleUnChoose} disabled={!generable}>
-        UNCHOOSE
       </LightBlueBtn>
       <h1>Chosen Member</h1>
       <Card sx={{ minWidth: 275 }}>

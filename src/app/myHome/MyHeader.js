@@ -10,7 +10,7 @@ import {
 import { auth } from "../firebase-config";
 import { useRouter } from "next/navigation";
 import css from "./page.module.css";
-import { Backdrop, CircularProgress } from "@mui/material";
+import { Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import Cookies from "js-cookie";
 
 const MyHeader = () => {
@@ -18,6 +18,7 @@ const MyHeader = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
+  const [showSaveAlert, setShowAlert] = useState(false);
 
   const items = [
     {
@@ -25,7 +26,15 @@ const MyHeader = () => {
       label: (
         <div
           onClick={() => {
-            router.push("/myHome");
+            if (localStorage.getItem("unsavedChanges")) {
+              console.log("unsaved changes");
+              setShowAlert(true);
+
+            }
+            else {
+              router.push("/myHome");
+              localStorage.removeItem("unsavedChanges");
+            }
           }}
         >
           Home
@@ -37,9 +46,15 @@ const MyHeader = () => {
       label: (
         <div
           onClick={() => {
-            setLoading(true);
-            signOut(auth);
-            router.push("/");
+            if (localStorage.getItem("unsavedChanges")) {
+              setShowAlert(true);
+            }
+            else {
+              setLoading(true);
+              signOut(auth);
+              router.push("/");
+              localStorage.removeItem("unsavedChanges");
+            }
           }}
         >
           Sign Out
@@ -95,6 +110,38 @@ const MyHeader = () => {
         >
           <CircularProgress color="inherit" />
         </Backdrop>
+        <Dialog
+          open={showSaveAlert}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"Are you sure to leave without saving?"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Your changes have not been saved. Do you want to leave without saving?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setShowAlert(false);
+              }}
+            >
+              No
+            </Button>
+            <Button
+              onClick={() => {
+                setShowAlert(false);
+                router.push("/myHome");
+              }}
+              autoFocus
+            >
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   );

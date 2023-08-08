@@ -44,7 +44,7 @@ class MermaidChartComponent extends React.Component {
   render() {
     return (
       <div className="react-transform-wrapper">
-        <TransformWrapper centerOnInit initialScale={1}>
+        <TransformWrapper centerOnInit>
           <TransformComponent>
             <div
               id="mermaid-chart"

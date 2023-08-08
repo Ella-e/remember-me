@@ -11,10 +11,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import TreeContent from "./TreeContent";
 import ViewTree from "./ViewTree";
 import MyHeader from "../myHome/MyHeader";
-import { auth } from "../firebase-config";
+import { auth, db } from "../firebase-config";
 import TreeEditor from "./TreeEditor";
 import "./page.css";
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 const EditTree = () => {
   const { Sider } = Layout;
@@ -39,6 +40,21 @@ const EditTree = () => {
     });
   }, []);
 
+  // useEffect(() => {
+  //   if (pid) {
+  //     getTree();
+  //   }
+  // }, [pid])
+
+  // const getTree = async () => {
+  //   const docRef = doc(db, "trees", pid);
+  //   const docSnap = await getDoc(docRef);
+  //   if (docSnap.exists()) {
+  //     const data = docSnap.data();
+  //     localStorage.setItem("desc", data.desc);
+  //   }
+  // }
+
   const [activeTab, setActiveTab] = useState("1");
   useEffect(() => {
     if (pid) {
@@ -52,7 +68,7 @@ const EditTree = () => {
     setActiveTab(key);
   };
 
-  const section = ["Manage Tree", "Manage Member", "View & Download"];
+  const section = ["Manage Member", "Manage Tree", "View & Download"];
   const items2 = [EditOutlined, TeamOutlined, DownloadOutlined].map(
     (icon, index) => {
       const key = `sub${index + 1}`;
@@ -86,9 +102,10 @@ const EditTree = () => {
 
         <div style={{ flex: 1, padding: "20px" }}>
           {activeTab == "1" ? (
-            <TreeEditor />
-          ) : activeTab == "2" ? (
             <TreeContent />
+
+          ) : activeTab == "2" ? (
+            <TreeEditor />
           ) : (
             <ViewTree />
           )}
