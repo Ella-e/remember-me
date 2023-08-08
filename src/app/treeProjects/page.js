@@ -102,19 +102,23 @@ const TreeProjects = () => {
   };
 
   const handleCreateProject = async () => {
-    setLoading(true);
-    let generator = ULID();
-    let tempUid = generator();
-    const newProject = {
-      id: tempUid,
-      name: "untitled",
-      uids: [user.uid],
-      subgraphs: [],
-    };
-    const docRef = doc(db, "projects", tempUid);
-    setDoc(docRef, newProject).then(() => {
-      router.push(`/editTree?tab=1?pid=${newProject.id}`);
-    });
+    if (projectList.length >= 11) {
+      window.confirm("Maximum project number reached");
+    } else {
+      setLoading(true);
+      let generator = ULID();
+      let tempUid = generator();
+      const newProject = {
+        id: tempUid,
+        name: "untitled",
+        uids: [user.uid],
+        subgraphs: [],
+      };
+      const docRef = doc(db, "projects", tempUid);
+      setDoc(docRef, newProject).then(() => {
+        router.push(`/editTree?tab=1?pid=${newProject.id}`);
+      });
+    }
   };
 
   const DeleteAlert = () => {
