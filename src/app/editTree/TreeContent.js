@@ -29,7 +29,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { auth, db } from "../firebase-config";
+import { auth, db, storage } from "../firebase-config";
 // import RichText from "./RichText";
 
 // sun editor
@@ -65,6 +65,7 @@ import "./page.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LightBlueBtn, ThemeBtn } from "../utils/customBtn";
 import { onAuthStateChanged } from "firebase/auth";
+import { getDownloadURL, ref, uploadString } from "firebase/storage";
 // import Tiptap from "./TipTap";
 // import Image from "@tiptap/extension-image";
 
@@ -147,9 +148,9 @@ const TreeContent = () => {
 
   const MemberList = () => {
     const columns = [
-      { field: "id", headerName: "id", width: 150 },
-      { field: "firstName", headerName: "First name", width: 130 },
-      { field: "lastName", headerName: "Last name", width: 130 },
+      { field: "firstName", headerName: "First Name", width: 130 },
+      { field: "lastName", headerName: "Last Name", width: 130 },
+      { field: "nickName", headerName: "Nick Name", width: 130 },
     ];
     return (
       <div style={{ height: 400, width: "100%" }}>
@@ -202,7 +203,10 @@ const TreeContent = () => {
         for (let i = indexes.length - 1; i >= 0; i--) {
           const startIndex = indexes[i];
           const endIndex = desc.indexOf("))", startIndex + 1);
-          desc = desc.slice(0, startIndex) + `${member.id}((${member.firstName} ${member.lastName}))` + desc.slice(endIndex + 2);
+          desc =
+            desc.slice(0, startIndex) +
+            `${member.id}((${member.firstName} ${member.lastName}))` +
+            desc.slice(endIndex + 2);
         }
         updateDoc(treeRef, {
           desc: desc,
@@ -272,6 +276,7 @@ const TreeContent = () => {
         };
         if (memberList) {
           setMemberList((current) => [...current, newMember]);
+          saveStory(tempUid);
         } else {
           setMemberList([newMember]);
         }
@@ -304,6 +309,37 @@ const TreeContent = () => {
     setSelectedMember(event.row);
   };
 
+  const getStory = (uid) => {
+    getDownloadURL(ref(storage, pid + "/" + uid)).then((url) => {
+      window.open(url);
+      // const xhr = new XMLHttpRequest();
+      // xhr.open("GET", url);
+      // xhr.responseType = "blob";
+      // xhr.onload = (event) => {
+      //   window.confirm("aha");
+      //   const blob = xhr.response;
+      //   setStory(blob);
+      //   console.log("event");
+      //   console.log(event);
+      //   console.log("blob");
+      //   console.log(blob);
+      // };
+      // xhr.send();
+      // console.log("xhr send");
+
+      // fetch(url)
+      //   .then((response) => response.blob())
+      //   .then((blob) => {
+      //     // create new file reader instance
+      //     const reader = new FileReader();
+      //     reader.addEventListener("load", () => {
+      //       const text = reader.result;
+      //       console.log(reader.result);
+      //     });
+      //     reader.readAsText(blob);
+      //   });
+    });
+  };
   /**
    * called when user click the edit button in the home page
    */
@@ -318,12 +354,20 @@ const TreeContent = () => {
       setOtherGender(selectedMember.otherGender);
       setStatus(selectedMember.status);
       setSelectedId(selectedMember.id);
-      setStory(selectedMember.story);
+      // setStory(selectedMember.story);
+      getStory(selectedMember.id);
       // set editor's value
       // editor.commands.setContent(selectedMember.story);
       setEditNode(true); // open the page
       setIsEdit(true); // call right submit function
     }
+  };
+
+  const saveStory = (uid) => {
+    const storageRef = ref(storage, pid + "/" + uid);
+    uploadString(storageRef, story).then(() => {
+      console.log("upload a raw string");
+    });
   };
 
   /**
@@ -346,7 +390,7 @@ const TreeContent = () => {
               otherGender: otherGender,
               status: status,
               story: story,
-              used: memberList[i].used
+              used: memberList[i].used,
             };
             tempList.splice(i, 1, newMember);
             setMemberList(tempList);
@@ -510,7 +554,7 @@ const TreeContent = () => {
                 value={firstName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setFirstName(e.target.value)}
-              // placeholder=""
+                // placeholder=""
               ></Input.TextArea>
               <h1>
                 Last Name<i style={{ color: "red" }}>*</i>
@@ -519,14 +563,14 @@ const TreeContent = () => {
                 value={lastName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setLastName(e.target.value)}
-              // placeholder=""
+                // placeholder=""
               ></Input.TextArea>
               <h1>Nick Name</h1>
               <Input.TextArea
                 value={nickName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setNickName(e.target.value)}
-              // placeholder=""
+                // placeholder=""
               ></Input.TextArea>
               <h1>Gender</h1>
               <Select
