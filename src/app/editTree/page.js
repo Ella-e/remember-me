@@ -57,6 +57,11 @@ const EditTree = () => {
 
   const [activeTab, setActiveTab] = useState("1");
   useEffect(() => {
+    // console.log(localStorage.getItem("unsavedChanges"));
+    // if (localStorage.getItem("unsavedChanges") == "true") {
+    //   window.confirm("please save your change");
+    // }
+
     if (pid) {
       {
         router.replace(`/editTree?tab=${activeTab}?pid=${pid}`);
@@ -103,7 +108,6 @@ const EditTree = () => {
         <div style={{ flex: 1, padding: "20px" }}>
           {activeTab == "1" ? (
             <TreeContent />
-
           ) : activeTab == "2" ? (
             <TreeEditor />
           ) : (

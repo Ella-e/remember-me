@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Button, Popover, message } from "antd";
 import React, { useState, useEffect } from "react";
 import { treeStore } from "./store";
@@ -81,7 +81,7 @@ const App = () => {
     return () => {
       console.log("hi");
       //FIXME: why not saving
-      saveTreeToDb(desc);
+      saveTreeToDb(desc, subgraphs);
       updateMemberToDb();
       console.log("over");
       localStorage.removeItem("memberList");
@@ -128,15 +128,18 @@ const App = () => {
       refresh();
       setLoading(false);
     }
-  }, [generable])
+  }, [generable]);
 
-  const saveTreeToDb = async (desc) => {
+  const saveTreeToDb = async (desc, subgraphs) => {
     setUnsavedChanges(false);
     setOriginalDesc(desc);
     setRelation("Partner");
     setSelected(false);
     if (nodeInTree) {
-      desc = desc.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "");
+      desc = desc.replace(
+        "style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5",
+        ""
+      );
       setDesc(desc);
       setNodeInTree(null);
     }
@@ -179,12 +182,13 @@ const App = () => {
     }
   };
 
-
   const callBack = (e) => {
     const memberList = JSON.parse(localStorage.getItem("memberList"));
     if (nodeInTree && nodeInTree.docId === e) {
       setSelected(false);
-      setDesc(desc.replace("style " + e + " color:#fff,stroke-dasharray: 5 5", ""));
+      setDesc(
+        desc.replace("style " + e + " color:#fff,stroke-dasharray: 5 5", "")
+      );
       setNodeInTree(null);
     } else {
       if (!nodeInTree) {
@@ -228,9 +232,7 @@ const App = () => {
       setSubgraphs([
         { id: tempNode.docId.slice(0, 10), members: [tempNode.docId] },
       ]);
-      const index = memberList.findIndex(
-        (member) => member.id === tempNode.id
-      );
+      const index = memberList.findIndex((member) => member.id === tempNode.id);
       memberList[index].subgraphId = tempNode.docId.slice(0, 10);
     } else if (relation == "Partner") {
       setDesc(
@@ -239,8 +241,10 @@ const App = () => {
             `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))`,
             `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))`
           )
-          .replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "") +
-        `        click ${tempNode.docId} callback`
+          .replace(
+            "style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5",
+            ""
+          ) + `        click ${tempNode.docId} callback`
       );
       let index = subgraphs.findIndex(
         (subgraph) => subgraph.id === nodeInTree.subgraphId
@@ -252,27 +256,27 @@ const App = () => {
       memberList[index].subgraphId = nodeInTree.subgraphId;
     } else if (relation == "Children") {
       setDesc(
-        desc?.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "").replace(
-          `graph TD`,
-          `graph TD
+        desc
+          ?.replace(
+            "style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5",
+            ""
+          )
+          .replace(
+            `graph TD`,
+            `graph TD
       subgraph ${tempNode.docId.slice(0, 10)}[ ]
       direction LR
       ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
       end
-      ${nodeInTree.subgraphId.slice(0, 10)} --- ${tempNode.docId.slice(
-            0,
-            10
-          )}`
-        ) + `        click ${tempNode.docId} callback`
+      ${nodeInTree.subgraphId.slice(0, 10)} --- ${tempNode.docId.slice(0, 10)}`
+          ) + `        click ${tempNode.docId} callback`
       );
       subgraphs.push({
         id: tempNode.docId.slice(0, 10),
         members: [tempNode.docId],
       });
       setSubgraphs(subgraphs);
-      const index = memberList.findIndex(
-        (member) => member.id === tempNode.id
-      );
+      const index = memberList.findIndex((member) => member.id === tempNode.id);
       memberList[index].subgraphId = tempNode.docId.slice(0, 10);
     } else {
       let indexes = [];
@@ -284,25 +288,31 @@ const App = () => {
       if (indexes.length > 1) {
         message.error("Two parents already!");
         setUnchoose(nodeInTree);
-        setDesc(desc.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", ""));
+        setDesc(
+          desc.replace(
+            "style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5",
+            ""
+          )
+        );
         setRelation("Partner");
         setNodeInTree(null);
         return;
-      }
-      else {
+      } else {
         setDesc(
-          desc?.replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "").replace(
-            `graph TD`,
-            `graph TD
+          desc
+            ?.replace(
+              "style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5",
+              ""
+            )
+            .replace(
+              `graph TD`,
+              `graph TD
       subgraph ${tempNode.docId.slice(0, 10)}[ ]
       direction LR
       ${tempNode.docId}((${tempNode.firstName} ${tempNode.lastName}))
       end
-      ${tempNode.docId.slice(0, 10)} --- ${nodeInTree.subgraphId.slice(
-              0,
-              10
-            )}`
-          ) + `        click ${tempNode.docId} callback`
+      ${tempNode.docId.slice(0, 10)} --- ${nodeInTree.subgraphId.slice(0, 10)}`
+            ) + `        click ${tempNode.docId} callback`
         );
         subgraphs.push({
           id: tempNode.docId.slice(0, 10),
@@ -321,13 +331,13 @@ const App = () => {
     localStorage.removeItem("selectedMember");
     setNodeInTree(null);
     setSelected(false);
-  }
+  };
 
   const save = () => {
     setLoading(true);
-    saveTreeToDb(desc);
+    saveTreeToDb(desc, subgraphs);
     updateMemberToDb();
-  }
+  };
 
   const handleDeleteAction = (subgraphId, description, tempSubgraphs) => {
     const memberList = JSON.parse(localStorage.getItem("memberList"));
@@ -366,10 +376,13 @@ const App = () => {
     localStorage.setItem("memberList", JSON.stringify(memberList));
     setRefreshMemberList(true);
     return { description, tempSubgraphs };
-  }
+  };
 
   const handleDelete = () => {
-    let description = desc.slice(0, desc.indexOf(`style ${nodeInTree.docId} color:#fff,stroke-dasharray: 5 5`));
+    let description = desc.slice(
+      0,
+      desc.indexOf(`style ${nodeInTree.docId} color:#fff,stroke-dasharray: 5 5`)
+    );
     const index = subgraphs.findIndex(
       (subgraph) => subgraph.id === nodeInTree.subgraphId
     );
@@ -386,7 +399,10 @@ const App = () => {
           ""
         )
         .replace(`click ${nodeInTree.docId} callback`, "")
-        .replace("style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5", "");
+        .replace(
+          "style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5",
+          ""
+        );
       tempSubgraphs[index].members.splice(
         tempSubgraphs[index].members.indexOf(nodeInTree.docId),
         1
@@ -405,7 +421,7 @@ const App = () => {
       let indexes = [];
       let index = description.indexOf(`${subgraphId} ---`);
       while (index !== -1) {
-        indexes.push(description.slice(index + 15, index + 25))
+        indexes.push(description.slice(index + 15, index + 25));
         index = description.indexOf(`${subgraphId} ---`, index + 1);
       }
       while (indexes.length > 0) {
@@ -430,9 +446,13 @@ const App = () => {
       setHasNode(false);
     }
     setSubgraphs(tempSubgraphs);
-  }
 
+    // localStorage.setItem("unsavedChanges", "true");
 
+    // // save to db now
+    // saveTreeToDb(description, tempSubgraphs);
+    // updateMemberToDb();
+  };
 
   return (
     <div className="App">
@@ -453,8 +473,8 @@ const App = () => {
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             After removal of member all its sub-relation in the tree will be
-            removed. Please be aware of the result of this attempt. Click
-            agree to continue removing the member.
+            removed. Please be aware of the result of this attempt. Click agree
+            to continue removing the member.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -480,26 +500,34 @@ const App = () => {
       {selected && (
         <LightBlueBtn
           disabled={generable}
-          variant="contained" className="mr-10" style={{ marginRight: "10px", marginBottom: "10px" }} onClick={() => {
+          variant="contained"
+          className="mr-10"
+          style={{ marginRight: "10px", marginBottom: "10px" }}
+          onClick={() => {
             setShowAlert(true);
-          }}>
+          }}
+        >
           REMOVE MEMBER
         </LightBlueBtn>
       )}
-      <LightBlueBtn variant="contained" className="mr-10" style={{ marginRight: "10px", marginBottom: "10px" }}
+      <LightBlueBtn
+        variant="contained"
+        className="mr-10"
+        style={{ marginRight: "10px", marginBottom: "10px" }}
         disabled={generable}
         onClick={() => {
           save();
-        }}>
+        }}
+      >
         SAVE
       </LightBlueBtn>
+      <span>Notice: please save your changes before switching tab</span>
 
       {desc && hasNode && (
         <MermaidChartComponent chart={desc} callBack={callBack} />
       )}
     </div>
-  )
-}
-
+  );
+};
 
 export default observer(App);

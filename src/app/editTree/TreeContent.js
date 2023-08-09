@@ -65,7 +65,13 @@ import "./page.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LightBlueBtn, ThemeBtn } from "../utils/customBtn";
 import { onAuthStateChanged } from "firebase/auth";
-import { getDownloadURL, ref, uploadString } from "firebase/storage";
+import {
+  getBytes,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+  uploadString,
+} from "firebase/storage";
 // import Tiptap from "./TipTap";
 // import Image from "@tiptap/extension-image";
 
@@ -271,12 +277,12 @@ const TreeContent = () => {
           nickName: nickName,
           gender: gender,
           otherGender: otherGender,
+          story: tempUid + "/" + pid,
           status: status,
-          story: story,
         };
         if (memberList) {
           setMemberList((current) => [...current, newMember]);
-          // saveStory(tempUid);
+          saveStory(tempUid);
         } else {
           setMemberList([newMember]);
         }
@@ -310,35 +316,45 @@ const TreeContent = () => {
   };
 
   const getStory = (uid) => {
-    getDownloadURL(ref(storage, pid + "/" + uid)).then((url) => {
-      window.open(url);
-      // const xhr = new XMLHttpRequest();
-      // xhr.open("GET", url);
-      // xhr.responseType = "blob";
-      // xhr.onload = (event) => {
-      //   window.confirm("aha");
-      //   const blob = xhr.response;
-      //   setStory(blob);
-      //   console.log("event");
-      //   console.log(event);
-      //   console.log("blob");
-      //   console.log(blob);
-      // };
-      // xhr.send();
-      // console.log("xhr send");
+    getBytes(ref(storage, pid + "/" + uid))
+      .then((bytes) => {
+        var decoder = new TextDecoder("utf-8");
+        const decoded_story = decoder.decode(bytes);
+        setStory(decoded_story);
+      })
+      .catch((err) => {
+        window.confirm(
+          "Error occur due to updates, please ignore and solve the problem by resaving the member."
+        );
+      });
+    // getDownloadURL(ref(storage, pid + "/" + uid)).then((url) => {
 
-      // fetch(url)
-      //   .then((response) => response.blob())
-      //   .then((blob) => {
-      //     // create new file reader instance
-      //     const reader = new FileReader();
-      //     reader.addEventListener("load", () => {
-      //       const text = reader.result;
-      //       console.log(reader.result);
-      //     });
-      //     reader.readAsText(blob);
-      //   });
-    });
+    //   // const xhr = new XMLHttpRequest();
+    //   // xhr.open("GET", url);
+    //   // xhr.responseType = "blob";
+    //   // xhr.onload = (event) => {
+    //   //   window.confirm("aha");
+    //   //   const blob = xhr.response;
+    //   //   setStory(blob);
+    //   //   console.log("event");
+    //   //   console.log(event);
+    //   //   console.log("blob");
+    //   //   console.log(blob);
+    //   // };
+    //   // xhr.send();
+    //   // console.log("xhr send");
+    //   // fetch(url)
+    //   //   .then((response) => response.blob())
+    //   //   .then((blob) => {
+    //   //     // create new file reader instance
+    //   //     const reader = new FileReader();
+    //   //     reader.addEventListener("load", () => {
+    //   //       const text = reader.result;
+    //   //       console.log(reader.result);
+    //   //     });
+    //   //     reader.readAsText(blob);
+    //   //   });
+    // });
   };
   /**
    * called when user click the edit button in the home page
@@ -354,8 +370,8 @@ const TreeContent = () => {
       setOtherGender(selectedMember.otherGender);
       setStatus(selectedMember.status);
       setSelectedId(selectedMember.id);
-      setStory(selectedMember.story);
-      // getStory(selectedMember.id);
+      // setStory(selectedMember.story);
+      getStory(selectedMember.id);
       // set editor's value
       // editor.commands.setContent(selectedMember.story);
       setEditNode(true); // open the page
@@ -365,9 +381,11 @@ const TreeContent = () => {
 
   const saveStory = (uid) => {
     const storageRef = ref(storage, pid + "/" + uid);
-    uploadString(storageRef, story).then(() => {
-      console.log("upload a raw string");
-    });
+    const file = new File([story], pid + "/" + uid);
+    // uploadString(storageRef, story).then(() => {
+    //   console.log("upload a raw string");
+    // });
+    uploadBytes(storageRef, file).then((snapshot) => {});
   };
 
   /**
@@ -389,7 +407,7 @@ const TreeContent = () => {
               gender: gender,
               otherGender: otherGender,
               status: status,
-              story: story,
+              story: selectedId + "/" + pid,
               used: memberList[i].used,
             };
             tempList.splice(i, 1, newMember);
@@ -399,6 +417,7 @@ const TreeContent = () => {
         // save memberlist to the databse
         if (pid) {
           saveMemberToDb(newMember);
+          saveStory(selectedId);
         }
 
         setSelectedId(null);
@@ -617,7 +636,7 @@ const TreeContent = () => {
                     buttonList: [
                       ["undo", "redo"],
                       ["font", "fontSize"],
-                      ["image", "list"],
+                      ["list"],
                     ],
                   }}
                 />
