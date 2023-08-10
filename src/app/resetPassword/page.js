@@ -1,10 +1,6 @@
 "use client";
-import { Button, Stack, TextField } from "@mui/material";
-import {
-  getAuth,
-  onAuthStateChanged,
-  sendPasswordResetEmail,
-} from "firebase/auth";
+import { Stack, TextField } from "@mui/material";
+import { onAuthStateChanged, sendPasswordResetEmail } from "firebase/auth";
 import React, { useEffect, useState } from "react";
 import { auth } from "../firebase-config";
 import css from "./page.module.css";

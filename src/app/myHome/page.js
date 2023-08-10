@@ -4,13 +4,10 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "../firebase-config";
 import MyHeader from "./MyHeader";
 import css from "./page.module.css";
-import Link from "next/link";
 import { doc, setDoc } from "firebase/firestore";
 import ULID from "../utils/ulid";
 import { Backdrop, CircularProgress } from "@mui/material";
 import TreeProjects from "../treeProjects/page";
-import Cookies from "js-cookie";
-import LoginScreen from "../login/page";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,

@@ -2,16 +2,20 @@
 import React, { useEffect, useState } from "react";
 import { Dropdown, Space } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase-config";
 import { useRouter } from "next/navigation";
 import css from "./page.module.css";
-import { Backdrop, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import Cookies from "js-cookie";
+import {
+  Backdrop,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 
 const MyHeader = () => {
   // check the current login state of the user
@@ -29,9 +33,7 @@ const MyHeader = () => {
             if (localStorage.getItem("unsavedChanges")) {
               console.log("unsaved changes");
               setShowAlert(true);
-
-            }
-            else {
+            } else {
               router.push("/myHome");
               localStorage.removeItem("unsavedChanges");
             }
@@ -48,8 +50,7 @@ const MyHeader = () => {
           onClick={() => {
             if (localStorage.getItem("unsavedChanges")) {
               setShowAlert(true);
-            }
-            else {
+            } else {
               setLoading(true);
               signOut(auth);
               router.push("/");
@@ -120,7 +121,8 @@ const MyHeader = () => {
           </DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
-              Your changes have not been saved. Do you want to leave without saving?
+              Your changes have not been saved. Do you want to leave without
+              saving?
             </DialogContentText>
           </DialogContent>
           <DialogActions>

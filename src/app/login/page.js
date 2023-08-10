@@ -2,25 +2,17 @@
 import React, { Suspense, useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AuthContext, AuthProvider } from "../context/AuthContext";
 import {
   browserLocalPersistence,
-  isSignInWithEmailLink,
-  sendEmailVerification,
-  sendPasswordResetEmail,
-  sendSignInLinkToEmail,
   setPersistence,
   signInWithEmailAndPassword,
-  signInWithEmailLink,
   signOut,
 } from "firebase/auth";
 import { auth, db } from "../firebase-config";
-import { Button, Stack, TextField } from "@mui/material";
-import MainScreen from "../myHome/page";
+import { Stack, TextField } from "@mui/material";
 import css from "./page.module.css";
 import { LoadingButton } from "@mui/lab";
 import { StartBtn } from "../utils/customBtn";
-import Cookies from "js-cookie";
 import bscrypt from "bcryptjs";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
@@ -179,10 +171,7 @@ const LoginScreen = () => {
           </Stack>
         </form>
         <Stack>
-          No Account?{" "}
-          <AuthProvider>
-            <Link href={"/signUp"}>Sign Up</Link>
-          </AuthProvider>
+          No Account? <Link href={"/signUp"}>Sign Up</Link>
         </Stack>
         <Stack>
           Forget Password? <Link href={"/resetPassword"}>Reset password</Link>

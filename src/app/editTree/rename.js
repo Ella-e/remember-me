@@ -1,5 +1,4 @@
-import { message } from "antd";
-import { collection, doc, getDocs, query, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../firebase-config";
 import { Input } from "@mui/material";
@@ -15,12 +14,6 @@ const EditModal = ({ project, onClose }) => {
       setUser(user);
     });
   }, []);
-
-  // useEffect(() => {
-  //   return () => {
-  //     setName('');
-  //   }
-  // }, [])
 
   const save = async () => {
     const docRef = doc(db, "projects", project.id);

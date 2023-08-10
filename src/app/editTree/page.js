@@ -4,18 +4,16 @@ import {
   EditOutlined,
   TeamOutlined,
   DownloadOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
 import TreeContent from "./TreeContent";
 import ViewTree from "./ViewTree";
 import MyHeader from "../myHome/MyHeader";
-import { auth, db } from "../firebase-config";
+import { auth } from "../firebase-config";
 import TreeEditor from "./TreeEditor";
 import "./page.css";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 
 const EditTree = () => {
   const { Sider } = Layout;
@@ -40,28 +38,8 @@ const EditTree = () => {
     });
   }, []);
 
-  // useEffect(() => {
-  //   if (pid) {
-  //     getTree();
-  //   }
-  // }, [pid])
-
-  // const getTree = async () => {
-  //   const docRef = doc(db, "trees", pid);
-  //   const docSnap = await getDoc(docRef);
-  //   if (docSnap.exists()) {
-  //     const data = docSnap.data();
-  //     localStorage.setItem("desc", data.desc);
-  //   }
-  // }
-
   const [activeTab, setActiveTab] = useState("1");
   useEffect(() => {
-    // console.log(localStorage.getItem("unsavedChanges"));
-    // if (localStorage.getItem("unsavedChanges") == "true") {
-    //   window.confirm("please save your change");
-    // }
-
     if (pid) {
       {
         router.replace(`/editTree?tab=${activeTab}?pid=${pid}`);
@@ -90,7 +68,6 @@ const EditTree = () => {
   return (
     <div className="layout">
       <MyHeader />
-      {/* <div className="middleBlock" style={{ display: "flex", flex: 1 }}> */}
       <div style={{ display: "flex", flex: 1 }}>
         <Sider width={200} className="site-layout-background">
           <Menu

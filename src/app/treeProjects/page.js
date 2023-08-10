@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import MyHeader from "../myHome/MyHeader";
 import { auth, db } from "../firebase-config";
 import {
   collection,

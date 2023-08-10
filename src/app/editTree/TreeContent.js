@@ -30,51 +30,17 @@ import {
   where,
 } from "firebase/firestore";
 import { auth, db, storage } from "../firebase-config";
-// import RichText from "./RichText";
 
 // sun editor
 import "suneditor/dist/css/suneditor.min.css";
 // import suneditor from "suneditor";
 import SunEditor from "suneditor-react";
-import SunEditorCore from "suneditor/src/lib/core";
-
-// import image from "suneditor/src/plugins/dialog/link";
-// import list from "suneditor/src/plugins/submenu/list";
-// import { font } from "suneditor/src/plugins";
-
-// How to import language files (default: en)
-
-// end
-
-// import ReactQuill from "react-quill"; // !!!
-// import Tiptap from "./TipTap";
-import { useEditor, EditorContent, Editor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-
-// import "../../../node_modules/react-quill/dist/quill.snow.css";
-// import { FORMATS, MODULES } from "./RichText";
-// const ReactQuill = require("react-quill");
-// const { Quill } = ReactQuill;
-
-// import { Scrollbars } from "react-custom-scrollbars";
-// import { Scrollbars } from "rc-scrollbars";
-// import * as Scroll from "react-scroll";
-// import { Element } from "react-scroll";
 
 import "./page.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LightBlueBtn, ThemeBtn } from "../utils/customBtn";
 import { onAuthStateChanged } from "firebase/auth";
-import {
-  getBytes,
-  getDownloadURL,
-  ref,
-  uploadBytes,
-  uploadBytesResumable,
-  uploadString,
-} from "firebase/storage";
-// import Tiptap from "./TipTap";
-// import Image from "@tiptap/extension-image";
+import { getBytes, ref, uploadBytes } from "firebase/storage";
 
 const TreeContent = () => {
   const [editNode, setEditNode] = useState(false);
@@ -198,6 +164,7 @@ const TreeContent = () => {
         otherGender: member.otherGender,
         status: member.status,
         story: member.story,
+        profileImage: member.profileImage,
       });
       if (member.used) {
         const treeRef = doc(db, "trees", pid);
@@ -235,6 +202,7 @@ const TreeContent = () => {
         used: false,
         subgraphId: "",
         story: member.story,
+        profileImage: member.profileImage,
       });
     }
   };
@@ -288,13 +256,6 @@ const TreeContent = () => {
         if (memberList) {
           setMemberList((current) => [...current, newMember]);
           saveStory(tempUid);
-          // save image to storage
-          // if (profileImage && imgPath != "") {
-          //   const storageRef = ref(storage, imgPath);
-          //   uploadBytes(storageRef, profileImage).then((snapshot) => {
-          //     window.confirm("success upload");
-          //   });
-          // }
         } else {
           setMemberList([newMember]);
         }
@@ -306,8 +267,6 @@ const TreeContent = () => {
         console.log(err.message);
       }
       clearVar();
-      // reset editor value
-      // editor.commands.setContent("");
       setEditNode(false);
     }
   };
@@ -316,11 +275,6 @@ const TreeContent = () => {
     clearVar();
     setIsEdit(false);
     setEditNode(false);
-    // if (str === "edit") {
-    //   setIsEdit(false);
-    // } else {
-    //   setEditNode(false);
-    // }
   };
   const handleSelectMember = (event) => {
     console.log(event);
@@ -366,14 +320,6 @@ const TreeContent = () => {
       // setStory(selectedMember.story);
       getStory(selectedMember.id);
       setProfileImage(selectedMember.profileImage);
-      // if (selectedMember.profileImage) {
-      //   // document.getElementById("upload").src = selectedMember.profileImage;
-      // }
-      // initialize profile image
-      // setImgPath(selectedMember.profileImage);
-      // getImage(selectedMember.profileImage);
-      // set editor's value
-      // editor.commands.setContent(selectedMember.story);
       setEditNode(true); // open the page
       setIsEdit(true); // call right submit function
     }
@@ -384,9 +330,6 @@ const TreeContent = () => {
     setStoryPath("stories/" + pid + "_" + uid);
     const storageRef = ref(storage, story_path);
     const file = new File([story], story_path);
-    // uploadString(storageRef, story).then(() => {
-    //   console.log("upload a raw string");
-    // });
     uploadBytes(storageRef, file).then((snapshot) => {});
   };
 
@@ -421,20 +364,11 @@ const TreeContent = () => {
         if (pid) {
           saveMemberToDb(newMember);
           saveStory(selectedId);
-          // save image to storage
-          // if (profileImage && imgPath != "") {
-          //   const storageRef = ref(storage, imgPath);
-          //   uploadBytes(storageRef, profileImage).then((snapshot) => {
-          //     window.confirm("success upload");
-          //   });
-          // }
         }
 
         setSelectedId(null);
-        // reset editor value
-        // editor.commands.setContent("");
       } catch (err) {
-        console.log(err.message);
+        window.confirm("An error has occur, please contact the team");
       }
     }
     setIsEdit(false);

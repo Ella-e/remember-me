@@ -1,17 +1,15 @@
 "use client";
-import React, { createContext, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   createUserWithEmailAndPassword,
   deleteUser,
-  isSignInWithEmailLink,
   sendEmailVerification,
   signOut,
 } from "firebase/auth";
 import { auth, db } from "../firebase-config";
-import { Button, Stack, TextField } from "@mui/material";
+import { Stack, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { AuthContext, AuthProvider } from "../context/AuthContext";
 import Link from "next/link";
 import css from "./page.module.css";
 import { doc, setDoc } from "firebase/firestore";
@@ -146,10 +144,7 @@ const SignUpScreen = () => {
           </Stack>
         </form>
         <Stack>
-          Already has an account?{" "}
-          <AuthProvider>
-            <Link href={"/login"}>Login</Link>
-          </AuthProvider>
+          Already has an account? <Link href={"/login"}>Login</Link>
         </Stack>
       </div>
     </div>
