@@ -70,6 +70,7 @@ import {
   getDownloadURL,
   ref,
   uploadBytes,
+  uploadBytesResumable,
   uploadString,
 } from "firebase/storage";
 // import Tiptap from "./TipTap";
@@ -90,6 +91,9 @@ const TreeContent = () => {
   const [gender, setGender] = useState("male");
   const [otherGender, setOtherGender] = useState("");
   const [story, setStory] = useState("");
+  const [storyPath, setStoryPath] = useState("");
+  const [imgPath, setImgPath] = useState("");
+  const [profileImage, setProfileImage] = useState(null);
 
   // Initialize memerbList
   const [memberList, setMemberList] = useState(new Array());
@@ -277,12 +281,20 @@ const TreeContent = () => {
           nickName: nickName,
           gender: gender,
           otherGender: otherGender,
-          story: tempUid + "/" + pid,
+          story: "stories/" + pid + "_" + tempUid,
+          profileImage: profileImage,
           status: status,
         };
         if (memberList) {
           setMemberList((current) => [...current, newMember]);
           saveStory(tempUid);
+          // save image to storage
+          // if (profileImage && imgPath != "") {
+          //   const storageRef = ref(storage, imgPath);
+          //   uploadBytes(storageRef, profileImage).then((snapshot) => {
+          //     window.confirm("success upload");
+          //   });
+          // }
         } else {
           setMemberList([newMember]);
         }
@@ -316,7 +328,7 @@ const TreeContent = () => {
   };
 
   const getStory = (uid) => {
-    getBytes(ref(storage, pid + "/" + uid))
+    getBytes(ref(storage, "stories/" + pid + "_" + uid))
       .then((bytes) => {
         var decoder = new TextDecoder("utf-8");
         const decoded_story = decoder.decode(bytes);
@@ -327,35 +339,16 @@ const TreeContent = () => {
           "Error occur due to updates, please ignore and solve the problem by resaving the member."
         );
       });
-    // getDownloadURL(ref(storage, pid + "/" + uid)).then((url) => {
-
-    //   // const xhr = new XMLHttpRequest();
-    //   // xhr.open("GET", url);
-    //   // xhr.responseType = "blob";
-    //   // xhr.onload = (event) => {
-    //   //   window.confirm("aha");
-    //   //   const blob = xhr.response;
-    //   //   setStory(blob);
-    //   //   console.log("event");
-    //   //   console.log(event);
-    //   //   console.log("blob");
-    //   //   console.log(blob);
-    //   // };
-    //   // xhr.send();
-    //   // console.log("xhr send");
-    //   // fetch(url)
-    //   //   .then((response) => response.blob())
-    //   //   .then((blob) => {
-    //   //     // create new file reader instance
-    //   //     const reader = new FileReader();
-    //   //     reader.addEventListener("load", () => {
-    //   //       const text = reader.result;
-    //   //       console.log(reader.result);
-    //   //     });
-    //   //     reader.readAsText(blob);
-    //   //   });
-    // });
   };
+
+  const getImage = (imgPath) => {
+    getBytes(ref(storage, imgPath)).then((bytes) => {
+      var decoder = new TextDecoder("utf-8");
+      const decoded_img = decoder.decode(bytes);
+      document.getElementById("upload").src = decoded_img;
+    });
+  };
+
   /**
    * called when user click the edit button in the home page
    */
@@ -372,6 +365,13 @@ const TreeContent = () => {
       setSelectedId(selectedMember.id);
       // setStory(selectedMember.story);
       getStory(selectedMember.id);
+      setProfileImage(selectedMember.profileImage);
+      // if (selectedMember.profileImage) {
+      //   // document.getElementById("upload").src = selectedMember.profileImage;
+      // }
+      // initialize profile image
+      // setImgPath(selectedMember.profileImage);
+      // getImage(selectedMember.profileImage);
       // set editor's value
       // editor.commands.setContent(selectedMember.story);
       setEditNode(true); // open the page
@@ -380,8 +380,10 @@ const TreeContent = () => {
   };
 
   const saveStory = (uid) => {
-    const storageRef = ref(storage, pid + "/" + uid);
-    const file = new File([story], pid + "/" + uid);
+    const story_path = "stories/" + pid + "_" + uid;
+    setStoryPath("stories/" + pid + "_" + uid);
+    const storageRef = ref(storage, story_path);
+    const file = new File([story], story_path);
     // uploadString(storageRef, story).then(() => {
     //   console.log("upload a raw string");
     // });
@@ -407,7 +409,8 @@ const TreeContent = () => {
               gender: gender,
               otherGender: otherGender,
               status: status,
-              story: selectedId + "/" + pid,
+              story: "stories/" + pid + "_" + selectedId,
+              profileImage: profileImage,
               used: memberList[i].used,
             };
             tempList.splice(i, 1, newMember);
@@ -418,6 +421,13 @@ const TreeContent = () => {
         if (pid) {
           saveMemberToDb(newMember);
           saveStory(selectedId);
+          // save image to storage
+          // if (profileImage && imgPath != "") {
+          //   const storageRef = ref(storage, imgPath);
+          //   uploadBytes(storageRef, profileImage).then((snapshot) => {
+          //     window.confirm("success upload");
+          //   });
+          // }
         }
 
         setSelectedId(null);
@@ -504,6 +514,44 @@ const TreeContent = () => {
 
   const handleStoryChange = (content) => {
     setStory(content);
+  };
+
+  const showImg = (input) => {
+    console.log(input);
+    var img = input.target.files[0];
+    // restrict image size
+    var img_size = img.size / 1024;
+    var max_size = 1024;
+    console.log(img_size);
+    if (img_size > max_size) {
+      window.confirm("Image size exceeds 1M");
+    } else {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        // restrict image height and width
+        let image = new Image();
+        image.src = e.target.result;
+        image.onload = function () {
+          if (image.width <= 500 && image.width <= 500) {
+            let profile_image = e.target.result;
+            document.getElementById("upload").src = e.target.result;
+            // save image path
+            var image_path = "images/" + selectedId + "_" + img.name;
+            setImgPath(image_path);
+            setProfileImage(profile_image);
+          } else {
+            window.confirm("image width or height exceeds 500");
+          }
+        };
+      };
+      reader.readAsDataURL(img);
+    }
+  };
+
+  const deleteImg = () => {
+    document.getElementById("upload").src = "";
+    setImgPath("");
+    setProfileImage(null);
   };
 
   return (
@@ -640,12 +688,18 @@ const TreeContent = () => {
                     ],
                   }}
                 />
-                {/* <input
-                type="file"
-                onChange={showImg}
-                id="node_pic"
-                accept=".jpg, .jpeg, .png"
-              /> */}
+                <h1>Profile Image</h1>
+                <div>
+                  <span>image size limit: 1M, 500*500</span>
+                </div>
+                <input
+                  type="file"
+                  onChange={showImg}
+                  id="node_pic"
+                  accept=".jpg, .jpeg, .png"
+                />
+                <button onClick={deleteImg}>delete image</button>
+                <img id="upload" src={selectedMember?.profileImage} />
                 {/* <EditorContent editor={editor} /> */}
                 {/* <Tiptap /> */}
               </div>
