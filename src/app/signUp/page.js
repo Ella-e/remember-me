@@ -8,7 +8,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth, db } from "../firebase-config";
-import { Stack, TextField } from "@mui/material";
+import { Backdrop, CircularProgress, Stack, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import Link from "next/link";
 import css from "./page.module.css";
@@ -75,7 +75,7 @@ const SignUpScreen = () => {
               window.confirm(
                 "woops, something goes wrong, please sign up again"
               );
-              deleteUser(user).then(() => {});
+              deleteUser(user).then(() => { });
             }
           });
         setLoading(false);
@@ -86,7 +86,7 @@ const SignUpScreen = () => {
         if (user) {
           window.confirm("woops, something goes wrong, please sign up again");
           deleteUser(user)
-            .then(() => {})
+            .then(() => { })
             .catch((err) => {
               console.log(err.message);
             });
@@ -128,7 +128,13 @@ const SignUpScreen = () => {
                 placeholder="Password"
               />
             </Stack>
-            {error}
+            {error &&
+              <div>
+                <div>
+                  Error:
+                </div>
+                {error.replace("Firebase:", "").replace("Error", "")}
+              </div>}
             {infoMsg !== "" && <div>{infoMsg}</div>}
             <Stack className={css.inputItem}>
               {loading ? (
@@ -146,6 +152,12 @@ const SignUpScreen = () => {
         <Stack>
           Already has an account? <Link href={"/login"}>Login</Link>
         </Stack>
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { auth } from "../firebase-config";
 import css from "./page.module.css";
 import { StartBtn } from "../utils/customBtn";
+import { message } from "antd";
 
 const resetPassword = () => {
   const [email, setEmail] = useState("");
@@ -22,13 +23,19 @@ const resetPassword = () => {
   });
 
   const retrievePwd = () => {
-    sendPasswordResetEmail(user.auth, email)
-      .then(() => {
-        setInfoMsg("Password Reset link send to your email");
-      })
-      .catch((err) => {
-        setError(err.message);
-      });
+    //FIXME:
+    if (email === "") {
+      message.error("Please enter your email");
+    }
+    else {
+      sendPasswordResetEmail(user.auth, email)
+        .then(() => {
+          setInfoMsg("Password Reset link send to your email");
+        })
+        .catch((err) => {
+          setError(err.message);
+        });
+    }
   };
 
   return (
@@ -52,7 +59,7 @@ const resetPassword = () => {
           {error !== "" && <div>{error}</div>}
           {infoMsg !== "" && <div>{infoMsg}</div>}
           <StartBtn fullWidth variant="outlined" type="submit">
-            Send password reset link
+            Reset Password
           </StartBtn>
         </form>
       </div>

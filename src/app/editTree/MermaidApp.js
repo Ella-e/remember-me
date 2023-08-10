@@ -521,7 +521,7 @@ const App = () => {
       >
         SAVE
       </LightBlueBtn>
-      <span>Notice: please save your changes before switching tab</span>
+      {/* <span style={{ color: "#bbf" }}>Notice: please save your changes before switching tab</span> */}
 
       {desc && hasNode && (
         <MermaidChartComponent chart={desc} callBack={callBack} />

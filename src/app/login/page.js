@@ -9,7 +9,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth, db } from "../firebase-config";
-import { Stack, TextField } from "@mui/material";
+import { Backdrop, CircularProgress, Stack, TextField } from "@mui/material";
 import css from "./page.module.css";
 import { LoadingButton } from "@mui/lab";
 import { StartBtn } from "../utils/customBtn";
@@ -176,6 +176,12 @@ const LoginScreen = () => {
         <Stack>
           Forget Password? <Link href={"/resetPassword"}>Reset password</Link>
         </Stack>
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
       </div>
     </div>
   );
