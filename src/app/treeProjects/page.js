@@ -5,7 +5,6 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDoc,
   getDocs,
   query,
   setDoc,
@@ -33,7 +32,6 @@ import Link from "next/link";
 import { Popover, message } from "antd";
 import ShareModal from "./share";
 import { onAuthStateChanged } from "firebase/auth";
-// import addIcon from "public/image/purple_sky.jpg";
 
 const TreeProjects = () => {
   const [loading, setLoading] = useState(false);
@@ -166,7 +164,6 @@ const TreeProjects = () => {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-      {/* <MyHeader /> */}
       <div className={css.outMost}>
         <h1 className={css.title}>Tree Projects</h1>
         <DeleteAlert />
@@ -176,13 +173,7 @@ const TreeProjects = () => {
               <CardContent className={css.cardBg}>
                 Create new project
                 <div className={css.addImg} onClick={handleCreateProject}></div>
-                {/* <img src={require("../images/add_icon_2.png")} /> */}
               </CardContent>
-              {/* <CardActions className={css.cardActionBg}>
-                <Button onClick={handleCreateProject} href="#">
-                  Start creating your tree!
-                </Button>
-              </CardActions> */}
             </Card>
           </div>
           {projectList.length > 0 &&
@@ -245,11 +236,6 @@ const TreeProjects = () => {
               );
             })}
         </div>
-        {/* {projectList.length == 0 && (
-          <Link onClick={handleCreateProject} href="#">
-            Start creating your tree!
-          </Link>
-        )} */}
       </div>
     </div>
   );

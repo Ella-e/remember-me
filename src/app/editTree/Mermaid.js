@@ -20,11 +20,6 @@ const Controls = () => {
   );
 };
 
-// mermaid.initialize({
-//   startOnLoad: true,
-//   securityLevel: "loose",
-// });
-
 class MermaidChartComponent extends React.Component {
   componentDidMount() {
     window.callback = this.props.callBack;

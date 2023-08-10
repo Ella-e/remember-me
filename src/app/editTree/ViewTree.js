@@ -90,7 +90,6 @@ const ViewTree = () => {
       super(props);
 
       this.callBack = (e) => {
-        console.log(e);
         if (nodeInTree && nodeInTree.docId === e) {
           // setSelected(false);
           setDesc(desc.replace("style " + e + " color:#fff,stroke-dasharray: 5 5", ""));
@@ -111,7 +110,6 @@ const ViewTree = () => {
               setNodeInTree(memberList[i]);
             }
           }
-          // setSelected(true);
         }
       };
     }

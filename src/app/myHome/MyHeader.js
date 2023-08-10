@@ -23,6 +23,7 @@ const MyHeader = () => {
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
   const [showSaveAlert, setShowAlert] = useState(false);
+  const [isHome, setIsHome] = useState(true);
 
   const items = [
     {
@@ -30,8 +31,8 @@ const MyHeader = () => {
       label: (
         <div
           onClick={() => {
+            setIsHome(true);
             if (localStorage.getItem("unsavedChanges")) {
-              console.log("unsaved changes");
               setShowAlert(true);
             } else {
               router.push("/myHome");
@@ -48,6 +49,7 @@ const MyHeader = () => {
       label: (
         <div
           onClick={() => {
+            setIsHome(false);
             if (localStorage.getItem("unsavedChanges")) {
               setShowAlert(true);
             } else {
@@ -86,14 +88,6 @@ const MyHeader = () => {
                 </Space>
               </a>
             </Dropdown>
-            {/* <div
-              className="mr font-20"
-              onClick={() => {
-                router.push("/myHome");
-              }}
-            >
-              Home
-            </div> */}
           </div>
         ) : (
           <div
@@ -136,7 +130,14 @@ const MyHeader = () => {
             <Button
               onClick={() => {
                 setShowAlert(false);
-                router.push("/myHome");
+                if (isHome) {
+                  router.push("/myHome");
+                }
+                else {
+                  setLoading(true);
+                  signOut(auth);
+                  router.push("/");
+                }
               }}
               autoFocus
             >

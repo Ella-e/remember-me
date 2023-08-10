@@ -79,11 +79,6 @@ const App = () => {
     });
 
     return () => {
-      console.log("hi");
-      //FIXME: why not saving
-      saveTreeToDb(desc, subgraphs);
-      updateMemberToDb();
-      console.log("over");
       localStorage.removeItem("memberList");
       localStorage.removeItem("unsavedChanges");
     };
@@ -208,10 +203,6 @@ const App = () => {
       }
       setSelected(true);
     }
-
-    // let onFocusNodeDocId = e;
-    // get selectedMember from local storage
-    // console.log(JSON.parse(localStorage.getItem("selectedMember")));
   };
 
   const refresh = () => {
@@ -228,7 +219,6 @@ const App = () => {
       classDef default fill:#bbf,stroke:#333,stroke-width:3px;
       click ${tempNode.docId} callback`;
       setDesc(tempDesc);
-      console.log(tempDesc);
       setSubgraphs([
         { id: tempNode.docId.slice(0, 10), members: [tempNode.docId] },
       ]);
@@ -359,17 +349,23 @@ const App = () => {
       });
     }
     tempSubgraphs.splice(index, 1);
-    const parentIndex = description.indexOf(` --- ${subgraphId}\n`);
-    if (parentIndex !== -1) {
-      const parentId = description.slice(parentIndex - 10, parentIndex);
+    const parentIdList = [];
+
+    let parentIndex = description.indexOf(` --- ${subgraphId}\n`);
+    while (parentIndex !== -1) {
+      parentIdList.push(parentIndex);
+      parentIndex = description.indexOf(` --- ${subgraphId}\n`, parentIndex + 1);
+    }
+    for (let i = parentIdList.length - 1; i >= 0; i--) {
+      const parentId = description.slice(parentIdList[i] - 10, parentIdList[i]);
       description = description.replace(`${parentId} --- ${subgraphId}`, "");
     }
     if (members.length === 1) {
-      const replace = `        subgraph ${subgraphId}[ ]\n        direction LR\n        ${members[0].id}((${members[0].firstName} ${members[0].lastName}))\n        end`;
+      const replace = `      subgraph ${subgraphId}[ ]\n      direction LR\n      ${members[0].id}((${members[0].firstName} ${members[0].lastName}))\n      end`;
       description = description.replace(replace, "");
     } else {
       description = description.replace(
-        `        subgraph ${subgraphId}[ ]\n        direction LR\n        ${members[0].id}((${members[0].firstName} ${members[0].lastName})) --- ${members[1].id}((${members[1].firstName} ${members[1].lastName}))\n        end`,
+        `      subgraph ${subgraphId}[ ]\n      direction LR\n      ${members[0].id}((${members[0].firstName} ${members[0].lastName})) --- ${members[1].id}((${members[1].firstName} ${members[1].lastName}))\n      end`,
         ""
       );
     }
@@ -446,12 +442,6 @@ const App = () => {
       setHasNode(false);
     }
     setSubgraphs(tempSubgraphs);
-
-    // localStorage.setItem("unsavedChanges", "true");
-
-    // // save to db now
-    // saveTreeToDb(description, tempSubgraphs);
-    // updateMemberToDb();
   };
 
   return (

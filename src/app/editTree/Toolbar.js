@@ -76,7 +76,6 @@ const Toolbar = () => {
       }
     }
     refresh();
-    // localStorage.setItem("refresh", JSON.stringify(new Date()));
   };
 
   const refresh = () => {

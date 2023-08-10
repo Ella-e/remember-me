@@ -47,7 +47,6 @@ const SignUpScreen = () => {
     window.localStorage.setItem("email", email);
     // hash the pwd
     const hashPwd = bscrypt.hashSync(password, 10);
-    console.log(hashPwd);
     createUserWithEmailAndPassword(auth, email, hashPwd)
       .then(async (authUser) => {
         user = auth.currentUser;

@@ -53,7 +53,6 @@ const ShareModal = ({ project, onClose }) => {
       };
       tempList.push(user);
     });
-    console.log(tempList);
     return tempList;
   };
 
