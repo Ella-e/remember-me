@@ -1,34 +1,27 @@
 Orbital 2023 project rememberMe
 
-## Level of achievement: 
+## Level Of Achievement
+
 Apollo 11
 
-## Project scope:
+## About
+
 rememberMe is a platform that enables people to build and manage their genealogy.
+Our released version: https://remember-me-one.vercel.app/
+Full documentation: https://docs.google.com/document/d/1hd69umBYG9E9qotltbTu1tDTq0OQHkDRohEidMDoANU/edit?usp=sharing
 
 Our aim is to provide a vivid platform that enables people to build their family trees and record down family members’ life conveniently. By using our platform, people should be able to find connections with their distant relatives and establish a close bond with the entire family. Additionally, people can use the information they have recorded to observe some patterns within their family, learning useful experiences from various aspects, such as life experiences, inspirational thoughts, and medical backgrounds.
 
 ## Key Features
+
 - Dynamically designed family tree
 - Personalized family record
 - Easy collaboration
 
-## Our progress
-Up to Milestone 1 (2023/05/29), we managed to achieve: 
-- A simple sign up/login feature.
-- A family tree with modifiable tree nodes
+## Getting Started
 
-## Future plan
-Our next step is (probably by Milestone 2):
-- Adding data storage.
-- Design the way our data is being stored (forms in database).
-- Improve the current family tree feature.
-- Improve the current sign up/login feature.
-- Collaboration among users.
-- Better documentation of code.
-
-## Try out the project
 Our project is constructed with [Next.js](https://nextjs.org/) framework. The authentication, storage, and hosting features are supported by [firebase](https://firebase.google.com/). Since we haven't set up the hosting feature, you need to run the development version of it on you own device to get a taste of it.
+
 <!-- This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). -->
 
 First, run the development server:
