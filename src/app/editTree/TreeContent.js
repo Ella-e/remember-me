@@ -112,6 +112,7 @@ const TreeContent = () => {
           otherGender: docData.otherGender,
           status: docData.status,
           story: docData.story,
+          profileImage: docData.profileImage,
           used: docData.used,
         };
         tempMemberList.push(tempMember);
@@ -277,7 +278,8 @@ const TreeContent = () => {
     setEditNode(false);
   };
   const handleSelectMember = (event) => {
-    console.log(event);
+    console.log("event row");
+    console.log(event.row);
     setSelectedMember(event.row);
   };
 
@@ -633,6 +635,7 @@ const TreeContent = () => {
                   accept=".jpg, .jpeg, .png"
                 />
                 <button onClick={deleteImg}>delete image</button>
+
                 <img id="upload" src={selectedMember?.profileImage} />
                 {/* <EditorContent editor={editor} /> */}
                 {/* <Tiptap /> */}

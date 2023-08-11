@@ -2,8 +2,15 @@
 import React, { useEffect, useState } from "react";
 import mermaid from "mermaid";
 import MermaidChartComponent from "./Mermaid";
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
-import { auth, db } from "../firebase-config";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
+import { auth, db, storage } from "../firebase-config";
 import { useSearchParams } from "next/navigation";
 import { Backdrop, CircularProgress } from "@mui/material";
 import { onAuthStateChanged } from "firebase/auth";
@@ -13,6 +20,7 @@ import { LightBlueBtn } from "../utils/customBtn";
 import "./page.css";
 import "suneditor/dist/css/suneditor.min.css";
 import SunEditor from "suneditor-react";
+import { getBytes, ref } from "firebase/storage";
 
 mermaid.initialize({
   startOnLoad: true,
@@ -26,7 +34,7 @@ const ViewTree = () => {
   const searchParams = useSearchParams();
   const [projectName, setProjectName] = useState("");
   const [memberList, setMemberList] = useState(null);
-
+  const [story, setStory] = useState("");
 
   const download = () => {
     const chartElement = document.getElementById("mermaid-chart");
@@ -65,16 +73,21 @@ const ViewTree = () => {
         otherGender: docData.otherGender,
         status: docData.status,
         story: docData.story,
+        profileImage: docData.profileImage,
         docId: doc.id,
       };
       tempMemberList.push(tempMember);
     });
     setMemberList(tempMemberList);
     setLoading(false);
-  }
+  };
 
   const getTree = async () => {
-    const projectRef = doc(db, "projects", searchParams.get("tab").slice(6, 32));
+    const projectRef = doc(
+      db,
+      "projects",
+      searchParams.get("tab").slice(6, 32)
+    );
     const projectSnap = await getDoc(projectRef);
     const project = projectSnap.data();
     setProjectName(project.name);
@@ -85,6 +98,24 @@ const ViewTree = () => {
       setDesc(data.desc);
     }
   };
+
+  const getStory = (storyPath) => {
+    if (storyPath) {
+      getBytes(ref(storage, storyPath))
+        .then((bytes) => {
+          var decoder = new TextDecoder("utf-8");
+          const decoded_story = decoder.decode(bytes);
+          setStory(decoded_story);
+          console.log("decoded");
+          console.log(decoded_story);
+        })
+        .catch((err) => {
+          window.confirm(
+            "Error occur due to updates, please ignore and solve the problem by resaving the member."
+          );
+        });
+    }
+  };
   class App extends React.Component {
     constructor(props) {
       super(props);
@@ -92,15 +123,21 @@ const ViewTree = () => {
       this.callBack = (e) => {
         if (nodeInTree && nodeInTree.docId === e) {
           // setSelected(false);
-          setDesc(desc.replace("style " + e + " color:#fff,stroke-dasharray: 5 5", ""));
+          setDesc(
+            desc.replace("style " + e + " color:#fff,stroke-dasharray: 5 5", "")
+          );
           setNodeInTree(null);
         } else {
           if (!nodeInTree) {
-            setDesc(desc + "\nstyle " + e + " color:#fff,stroke-dasharray: 5 5");
+            setDesc(
+              desc + "\nstyle " + e + " color:#fff,stroke-dasharray: 5 5"
+            );
           } else {
             setDesc(
               desc.replace(
-                "style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5",
+                "style " +
+                  nodeInTree.docId +
+                  " color:#fff,stroke-dasharray: 5 5",
                 "style " + e + " color:#fff,stroke-dasharray: 5 5"
               )
             );
@@ -108,6 +145,8 @@ const ViewTree = () => {
           for (let i = 0; i < memberList.length; i++) {
             if (memberList[i].docId === e) {
               setNodeInTree(memberList[i]);
+              getStory(memberList[i].story);
+              console.log(memberList[i].story);
             }
           }
         }
@@ -123,11 +162,13 @@ const ViewTree = () => {
 
       return (
         <div className="App">
-          <LightBlueBtn variant="contained"
+          <LightBlueBtn
+            variant="contained"
             style={{ marginBottom: "10px" }}
             onClick={() => {
               this.download();
-            }}>
+            }}
+          >
             DOWNLOAD
           </LightBlueBtn>
           {desc && (
@@ -145,47 +186,67 @@ const ViewTree = () => {
   }
 
   return (
-
     <div className="flex ">
-      <div className="justify-center w-two-third">
-        {desc && <App />}
-      </div>
+      <div className="justify-center w-two-third">{desc && <App />}</div>
       <div className=" bg-white" style={{ minWidth: "490px" }}>
         <h2>Member Details</h2>
-        {!desc && (<h3 style={{ color: "#bbf" }}>Please add a member to the tree!</h3>)}
-        {desc && !nodeInTree && (<h3 style={{ color: "#bbf" }}>{`Click a member on the left\nand view his/her life stories!`}</h3>)}
+        {!desc && (
+          <h3 style={{ color: "#bbf" }}>Please add a member to the tree!</h3>
+        )}
+        {desc && !nodeInTree && (
+          <h3
+            style={{ color: "#bbf" }}
+          >{`Click a member on the left\nand view his/her life stories!`}</h3>
+        )}
         {desc && nodeInTree && (
           <div>
             <h3 style={{ color: "#bbf" }}>Name</h3>
             <h3>{nodeInTree.firstName + " " + nodeInTree.lastName}</h3>
-            {nodeInTree.nickName && (<div>
-              <h3 style={{ color: "#bbf" }}>Nick Name</h3>
-              <h3>{nodeInTree.nickName}</h3>
-            </div>)}
-            {nodeInTree.gender && (<div>
-              <h3 style={{ color: "#bbf" }}>Gender</h3>
-              <h3>{nodeInTree.gender === "other" ? (nodeInTree.otherGender ? nodeInTree.otherGender : "other") : nodeInTree.gender}</h3>
-            </div>)
-            }
-            {nodeInTree.status && (<div>
-              <h3 style={{ color: "#bbf" }}>Status</h3>
-              <h3>{nodeInTree.status}</h3>
-            </div>)
-            }
-            {nodeInTree.story && (<div>
-              <h3 style={{ color: "#bbf" }}>Life Story</h3>
-              <SunEditor
-                disable
-                disableToolbar
-                setContents={nodeInTree.story}
-                hideToolbar
-              />
-            </div>)
-            }
+            {nodeInTree.nickName && (
+              <div>
+                <h3 style={{ color: "#bbf" }}>Nick Name</h3>
+                <h3>{nodeInTree.nickName}</h3>
+              </div>
+            )}
+            {nodeInTree.gender && (
+              <div>
+                <h3 style={{ color: "#bbf" }}>Gender</h3>
+                <h3>
+                  {nodeInTree.gender === "other"
+                    ? nodeInTree.otherGender
+                      ? nodeInTree.otherGender
+                      : "other"
+                    : nodeInTree.gender}
+                </h3>
+              </div>
+            )}
+            {nodeInTree.status && (
+              <div>
+                <h3 style={{ color: "#bbf" }}>Status</h3>
+                <h3>{nodeInTree.status}</h3>
+              </div>
+            )}
+            {nodeInTree.story && (
+              <div>
+                <h3 style={{ color: "#bbf" }}>Life Story</h3>
+                {/* {story} */}
+                <SunEditor
+                  disable
+                  disableToolbar
+                  setContents={story}
+                  hideToolbar
+                />
+              </div>
+            )}
+            {nodeInTree.profileImage && (
+              <div>
+                <h3 style={{ color: "#bbf" }}>Profile Image</h3>
+                <img src={nodeInTree.profileImage} />
+              </div>
+            )}
           </div>
         )}
       </div>
-
     </div>
   );
 };
