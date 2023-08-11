@@ -38,8 +38,6 @@ const TreeProjects = () => {
   const [projectList, setProjectList] = useState([]);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pid = searchParams.get("pid");
-  const [showAlert, setShowAlert] = useState(false);
   const [deleteMember, setDeleteMember] = useState(null);
   const [shareProject, setShareProject] = useState(null);
   const [shareVisible, setShareVisible] = useState(false);

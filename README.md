@@ -26,6 +26,11 @@ Our aim is to provide a vivid platform that enables people to build their family
 
 Our project is constructed with [Next.js](https://nextjs.org/) framework. The authentication and storage features are supported by [Firebase](https://firebase.google.com/). The hosting is done by [Vercel](https://vercel.com/dashboard).
 
+To build the project locally, run:
+`npm install`
+then run:
+`npm run dev`
+
 Visit our website at [here](https://remember-me-one.vercel.app/)
 
 <!-- To learn more about Next.js, take a look at the following resources:

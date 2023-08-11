@@ -48,13 +48,13 @@ const LoginScreen = () => {
     event.preventDefault();
     try {
       setLoading(true);
-      // compare the pwd
+      // compare the pwd - function that temporarily doesn't need
       // check if user is in the database && get the hashed pwd from database
       // const q = query(collection(db, "users"), where("email", "==", email));
       // const querySnapshot = await getDocs(q);
       // querySnapshot.forEach((doc) => {
       //   const docData = doc.data();
-      // password match
+      // call firebase sign in function
       setPersistence(auth, browserLocalPersistence).then(() => {
         signInWithEmailAndPassword(auth, email, password)
           .then((authUser) => {
@@ -103,8 +103,6 @@ const LoginScreen = () => {
 
   return (
     <div className={css.outMost}>
-      {/* {error && <div>{error}</div>} */}
-      {/* <img src="bg_2_blur.jpg" alt="bg" /> */}
       <div className={css.inputBox}>
         <Stack>
           <h1 className="title">Login</h1>

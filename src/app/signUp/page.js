@@ -14,7 +14,6 @@ import Link from "next/link";
 import css from "./page.module.css";
 import { doc, setDoc } from "firebase/firestore";
 import { StartBtn } from "../utils/customBtn";
-import bscrypt from "bcryptjs";
 
 const SignUpScreen = () => {
   const [email, setEmail] = useState("");
@@ -28,16 +27,6 @@ const SignUpScreen = () => {
     url: "http://localhost:3000/login",
     handleCodeInApp: true,
   };
-
-  //   React.useEffect(() => {
-  //     user = auth.currentUser;
-  //     if (user.emailVerified) {
-  //       const saved_email = window.localStorage.getItem("email");
-  //       router.push("/myHome");
-  //     } else {
-  //       signOut(auth);
-  //     }
-  //   }, []);
 
   const handleSignUp = (event) => {
     event.preventDefault();
@@ -60,12 +49,6 @@ const SignUpScreen = () => {
           .then(() => {
             window.confirm("A verification link has sent to your email");
             signOut(auth);
-            //   if (user.emailVerified) {
-            //     const saved_email = window.localStorage.getItem("email");
-            //     router.push("/myHome");
-            //   } else {
-            //     signOut(auth);
-            //   }
           })
           .catch((error) => {
             // if there is an error, delete the created user.
@@ -132,7 +115,6 @@ const SignUpScreen = () => {
                 {error.replace("Firebase:", "").replace("Error", "")}
               </div>
             )}
-            {/* {infoMsg !== "" && <div>{infoMsg}</div>} */}
             <Stack className={css.inputItem}>
               {loading ? (
                 <LoadingButton loading variant="outlined">
