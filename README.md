@@ -12,6 +12,8 @@ Our released version: https://remember-me-one.vercel.app/
 
 Full documentation: https://docs.google.com/document/d/1hd69umBYG9E9qotltbTu1tDTq0OQHkDRohEidMDoANU/edit?usp=sharing
 
+Project Poster: https://drive.google.com/file/d/1SVEtNl8e7ENsyq9K-Pa6cPrm7_h-TQoA/view?usp=drive_link
+
 Our aim is to provide a vivid platform that enables people to build their family trees and record down family members’ life conveniently. By using our platform, people should be able to find connections with their distant relatives and establish a close bond with the entire family. Additionally, people can use the information they have recorded to observe some patterns within their family, learning useful experiences from various aspects, such as life experiences, inspirational thoughts, and medical backgrounds.
 
 ## Key Features
@@ -22,21 +24,9 @@ Our aim is to provide a vivid platform that enables people to build their family
 
 ## Getting Started
 
-Our project is constructed with [Next.js](https://nextjs.org/) framework. The authentication, storage, and hosting features are supported by [firebase](https://firebase.google.com/). Since we haven't set up the hosting feature, you need to run the development version of it on you own device to get a taste of it.
+Our project is constructed with [Next.js](https://nextjs.org/) framework. The authentication and storage features are supported by [Firebase](https://firebase.google.com/). The hosting is done by [Vercel](https://vercel.com/dashboard).
 
-<!-- This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). -->
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
-
-Next, Open [http://localhost:3000](http://localhost:3000) with your browser to see the website demo.
+Visit our website at [here](https://remember-me-one.vercel.app/)
 
 <!-- To learn more about Next.js, take a look at the following resources:
 

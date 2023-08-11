@@ -58,7 +58,7 @@ const SignUpScreen = () => {
         // send email verification
         sendEmailVerification(user, actionCodeSetting)
           .then(() => {
-            setInfoMsg("A verification link has sent to your email");
+            window.confirm("A verification link has sent to your email");
             signOut(auth);
             //   if (user.emailVerified) {
             //     const saved_email = window.localStorage.getItem("email");
@@ -132,7 +132,7 @@ const SignUpScreen = () => {
                 {error.replace("Firebase:", "").replace("Error", "")}
               </div>
             )}
-            {infoMsg !== "" && <div>{infoMsg}</div>}
+            {/* {infoMsg !== "" && <div>{infoMsg}</div>} */}
             <Stack className={css.inputItem}>
               {loading ? (
                 <LoadingButton loading variant="outlined">
