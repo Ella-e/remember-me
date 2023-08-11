@@ -121,9 +121,10 @@ const Toolbar = () => {
 
   const [memberList, setMemberList] = useState(new Array());
   const columns = [
-    { field: "id", headerName: "ID", width: 150 },
+
     { field: "firstName", headerName: "First name", width: 130 },
     { field: "lastName", headerName: "Last name", width: 130 },
+    { field: "nickName", headerName: "Nick name", width: 150 },
   ];
 
   const handleSelectRelation = (value) => {
@@ -153,6 +154,7 @@ const Toolbar = () => {
           docId: doc.id,
           subgraphId: docData.subgraphId,
           used: docData.used,
+          nickName: docData.nickName,
         };
         tempMemberList.push(tempMember);
       });
