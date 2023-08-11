@@ -85,6 +85,10 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    console.log(desc);
+  }, [desc]);
+
+  useEffect(() => {
     if (pid) {
       getTree();
     }

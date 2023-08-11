@@ -58,7 +58,7 @@ const SignUpScreen = () => {
         // send email verification
         sendEmailVerification(user, actionCodeSetting)
           .then(() => {
-            setInfoMsg("A verification link has sent to your email");
+            setInfoMsg("Verification link sent!");
             signOut(auth);
             //   if (user.emailVerified) {
             //     const saved_email = window.localStorage.getItem("email");
@@ -73,7 +73,7 @@ const SignUpScreen = () => {
               window.confirm(
                 "woops, something goes wrong, please sign up again"
               );
-              deleteUser(user).then(() => {});
+              deleteUser(user).then(() => { });
             }
           });
         setLoading(false);
@@ -84,7 +84,7 @@ const SignUpScreen = () => {
         if (user) {
           window.confirm("woops, something goes wrong, please sign up again");
           deleteUser(user)
-            .then(() => {})
+            .then(() => { })
             .catch((err) => {
               console.log(err.message);
             });
