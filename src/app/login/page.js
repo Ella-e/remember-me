@@ -50,43 +50,36 @@ const LoginScreen = () => {
       setLoading(true);
       // compare the pwd
       // check if user is in the database && get the hashed pwd from database
-      const q = query(collection(db, "users"), where("email", "==", email));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        const docData = doc.data();
-        bscrypt.compare(password, docData.hashPwd, function (err, isMatch) {
-          if (err) {
-            handleError(err.message);
-          } else if (!isMatch) {
-            //password incorrect
-            handleError("password incorrect");
-          } else {
-            // password match
-            setPersistence(auth, browserLocalPersistence).then(() => {
-              signInWithEmailAndPassword(auth, email, docData.hashPwd)
-                .then((authUser) => {
-                  user = auth.currentUser;
-                  if (user.emailVerified) {
-                    // handleSaveToken(JSON.stringify(user), docData.hashPwd);
-                    router.push("/myHome");
-                  } else {
-                    window.confirm(
-                      "please click the link in your email to verify first"
-                    );
-                    setLoading(false);
-                    signOut(auth);
-                    router.push("/login");
-                  }
-                })
-                .catch((error) => {
-                  handleError(error.message);
-                });
-            });
-          }
-        });
+      // const q = query(collection(db, "users"), where("email", "==", email));
+      // const querySnapshot = await getDocs(q);
+      // querySnapshot.forEach((doc) => {
+      //   const docData = doc.data();
+      // password match
+      setPersistence(auth, browserLocalPersistence).then(() => {
+        signInWithEmailAndPassword(auth, email, password)
+          .then((authUser) => {
+            user = auth.currentUser;
+            if (user.emailVerified) {
+              // handleSaveToken(JSON.stringify(user), docData.hashPwd);
+              router.push("/myHome");
+            } else {
+              window.confirm(
+                "please click the link in your email to verify first"
+              );
+              setLoading(false);
+              signOut(auth);
+              router.push("/login");
+            }
+          })
+          .catch((error) => {
+            window.confirm(error.message);
+            setLoading(false);
+          });
       });
+      // });
     } catch (error) {
-      handleError(error.message);
+      window.confirm(error.message);
+      setLoading(false);
     }
   };
 
@@ -154,8 +147,8 @@ const LoginScreen = () => {
               )}
             </Stack>
             <Stack>
-              {errMsg !== "" && <div>{errMsg}</div>}
-              {infoMsg !== "" && <div>{infoMsg}</div>}
+              {errMsg !== "" && window.confirm("Error: " + errMsg)}
+              {infoMsg !== "" && window.confirm(infoMsg)}
             </Stack>
             <Stack className={css.inputItem}>
               {loading ? (

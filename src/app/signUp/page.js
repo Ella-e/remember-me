@@ -46,14 +46,13 @@ const SignUpScreen = () => {
     // Email link verification
     window.localStorage.setItem("email", email);
     // hash the pwd
-    const hashPwd = bscrypt.hashSync(password, 10);
-    createUserWithEmailAndPassword(auth, email, hashPwd)
+    // const hashPwd = bscrypt.hashSync(password, 10);
+    createUserWithEmailAndPassword(auth, email, password)
       .then(async (authUser) => {
         user = auth.currentUser;
         // add user into the database
         await setDoc(doc(db, "users", authUser.user.uid), {
           email: email,
-          hashPwd: hashPwd,
           uid: authUser.user.uid,
         });
         // send email verification
@@ -74,7 +73,7 @@ const SignUpScreen = () => {
               window.confirm(
                 "woops, something goes wrong, please sign up again"
               );
-              deleteUser(user).then(() => { });
+              deleteUser(user).then(() => {});
             }
           });
         setLoading(false);
@@ -85,7 +84,7 @@ const SignUpScreen = () => {
         if (user) {
           window.confirm("woops, something goes wrong, please sign up again");
           deleteUser(user)
-            .then(() => { })
+            .then(() => {})
             .catch((err) => {
               console.log(err.message);
             });
@@ -127,13 +126,12 @@ const SignUpScreen = () => {
                 placeholder="Password"
               />
             </Stack>
-            {error &&
+            {error && (
               <div>
-                <div>
-                  Error:
-                </div>
+                <div>Error:</div>
                 {error.replace("Firebase:", "").replace("Error", "")}
-              </div>}
+              </div>
+            )}
             {infoMsg !== "" && <div>{infoMsg}</div>}
             <Stack className={css.inputItem}>
               {loading ? (
