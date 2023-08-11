@@ -41,6 +41,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { LightBlueBtn, ThemeBtn } from "../utils/customBtn";
 import { onAuthStateChanged } from "firebase/auth";
 import { getBytes, ref, uploadBytes } from "firebase/storage";
+import { observer } from "mobx-react-lite";
+import { treeStore } from "./store";
 
 const TreeContent = () => {
   const [editNode, setEditNode] = useState(false);
@@ -60,6 +62,7 @@ const TreeContent = () => {
   const [storyPath, setStoryPath] = useState("");
   const [imgPath, setImgPath] = useState("");
   const [profileImage, setProfileImage] = useState(null);
+  const { setHasNode } = treeStore;
 
   // Initialize memerbList
   const [memberList, setMemberList] = useState(new Array());
@@ -70,6 +73,8 @@ const TreeContent = () => {
   const searchParams = useSearchParams();
 
   const [user, setUser] = useState(null);
+
+
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -87,6 +92,7 @@ const TreeContent = () => {
   useEffect(() => {
     if (pid) {
       getMemberList(user);
+      getDbMemberList();
     }
   }, [pid]);
 
@@ -104,6 +110,7 @@ const TreeContent = () => {
         // doc.data() is never undefined for query doc snapshots
         const docData = doc.data();
         const tempMember = {
+          docId: doc.id,
           id: docData.id,
           firstName: docData.firstName,
           lastName: docData.lastName,
@@ -114,6 +121,7 @@ const TreeContent = () => {
           story: docData.story,
           profileImage: docData.profileImage,
           used: docData.used,
+          subgraphId: docData.subgraphId,
         };
         tempMemberList.push(tempMember);
         console.log(doc.id, " => ", doc.data());
@@ -121,6 +129,164 @@ const TreeContent = () => {
       setMemberList(tempMemberList);
     }
     setLoading(false);
+  };
+
+  const getDbMemberList = async () => {
+    const q = query(
+      collection(db, "nodes"),
+      where("pid", "==", searchParams.get("tab").slice(6, 32))
+    );
+    const querySnapshot = await getDocs(q);
+    // const tempMemberList = [...memberList];
+    let tempMemberList = new Array();
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      const docData = doc.data();
+      const tempMember = {
+        id: docData.id,
+        firstName: docData.firstName,
+        lastName: docData.lastName,
+        docId: doc.id,
+        subgraphId: docData.subgraphId,
+        used: docData.used,
+        nickName: docData.nickName,
+      };
+      tempMemberList.push(tempMember);
+    });
+    localStorage.setItem("memberList", JSON.stringify(tempMemberList));
+  };
+
+  const updateDeletedMember = async (member) => {
+    if (!member.used) {
+      return;
+    }
+    const treeRef = doc(db, "trees", pid);
+    const tree = await getDoc(treeRef);
+    const treeData = tree.data();
+    let desc = treeData.desc;
+    let subgraphs = treeData.subgraphs;
+    let deletedList = [member];
+    const { description, tempSubgraphs, deletedMembers } = handleDelete(desc, member, subgraphs, deletedList);
+    updateDoc(treeRef, {
+      desc: description,
+      subgraphs: tempSubgraphs,
+    });
+    return deletedMembers;
+  };
+
+  const handleDeleteAction = (subgraphId, description, tempSubgraphs, deletedList) => {
+    const memberList = JSON.parse(localStorage.getItem("memberList"));
+    const index = tempSubgraphs.findIndex(
+      (subgraph) => subgraph.id === subgraphId
+    );
+    const members = [];
+    const subgraphMembers = tempSubgraphs[index].members;
+    for (let i = 0; i < subgraphMembers.length; i++) {
+      const id = subgraphMembers[i];
+      description = description.replace(`click ${id} callback`, "");
+      const memberIndex = memberList.findIndex((member) => member.id === id);
+      memberList[memberIndex].subgraphId = "";
+      memberList[memberIndex].used = false;
+      members.push({
+        id: id,
+        firstName: memberList[memberIndex].firstName,
+        lastName: memberList[memberIndex].lastName,
+      });
+    }
+    tempSubgraphs.splice(index, 1);
+    const parentIdList = [];
+
+    let parentIndex = description.indexOf(` --- ${subgraphId}\n`);
+    while (parentIndex !== -1) {
+      parentIdList.push(parentIndex);
+      parentIndex = description.indexOf(` --- ${subgraphId}\n`, parentIndex + 1);
+    }
+    for (let i = parentIdList.length - 1; i >= 0; i--) {
+      const parentId = description.slice(parentIdList[i] - 10, parentIdList[i]);
+      description = description.replace(`${parentId} --- ${subgraphId}`, "");
+    }
+    if (members.length === 1) {
+      const replace = `      subgraph ${subgraphId}[ ]\n      direction LR\n      ${members[0].id}((${members[0].firstName} ${members[0].lastName}))\n      end`;
+      description = description.replace(replace, "");
+      deleteMemberFromDb(members[0]);
+    } else {
+      description = description.replace(
+        `      subgraph ${subgraphId}[ ]\n      direction LR\n      ${members[0].id}((${members[0].firstName} ${members[0].lastName})) --- ${members[1].id}((${members[1].firstName} ${members[1].lastName}))\n      end`,
+        ""
+      );
+      deleteMemberFromDb(members[0]);
+      deleteMemberFromDb(members[1]);
+    }
+    localStorage.setItem("memberList", JSON.stringify(memberList));
+    return { description, tempSubgraphs, deletedList };
+  };
+
+  const handleDelete = (desc, nodeInTree, subgraphs, deletedList) => {
+    let description = desc.slice(
+      0,
+      desc.indexOf(`style ${nodeInTree.docId} color:#fff,stroke-dasharray: 5 5`)
+    );
+    const index = subgraphs.findIndex(
+      (subgraph) => subgraph.id === nodeInTree.subgraphId
+    );
+    let tempSubgraphs = subgraphs;
+    const memberList = JSON.parse(localStorage.getItem("memberList"));
+    if (tempSubgraphs[index].members.length > 1) {
+      description = description
+        .replace(
+          `${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName})) --- `,
+          ""
+        )
+        .replace(
+          ` --- ${nodeInTree.docId}((${nodeInTree.firstName} ${nodeInTree.lastName}))`,
+          ""
+        )
+        .replace(`click ${nodeInTree.docId} callback`, "")
+        .replace(
+          "style " + nodeInTree.docId + " color:#fff,stroke-dasharray: 5 5",
+          ""
+        );
+      tempSubgraphs[index].members.splice(
+        tempSubgraphs[index].members.indexOf(nodeInTree.docId),
+        1
+      );
+      const memberIndex = memberList.findIndex(
+        (member) => member.id === nodeInTree.id
+      );
+      memberList[memberIndex].subgraphId = "";
+      memberList[memberIndex].used = false;
+      localStorage.setItem("memberList", JSON.stringify(memberList));
+    } else {
+      let subgraphId = nodeInTree.subgraphId;
+      const result = handleDeleteAction(subgraphId, description, tempSubgraphs, deletedList);
+      description = result.description;
+      tempSubgraphs = result.tempSubgraphs;
+      deletedList = result.deletedList;
+      let indexes = [];
+      let index = description.indexOf(`${subgraphId} ---`);
+      while (index !== -1) {
+        indexes.push(description.slice(index + 15, index + 25));
+        index = description.indexOf(`${subgraphId} ---`, index + 1);
+      }
+      while (indexes.length > 0) {
+        let sub = indexes[0];
+        let index = description.indexOf(`${sub} ---`);
+        while (index !== -1) {
+          indexes.push(description.slice(index + 15, index + 25));
+          index = description.indexOf(`${sub} ---`, index + 1);
+        }
+        const result = handleDeleteAction(sub, description, tempSubgraphs, deletedList);
+        description = result.description;
+        tempSubgraphs = result.tempSubgraphs;
+        deletedList = result.deletedList;
+        indexes.splice(0, 1);
+      }
+    }
+    if (tempSubgraphs.length === 0) {
+      description = "";
+      setHasNode(false);
+    }
+    return { description, tempSubgraphs, deletedList };
   };
 
   const MemberList = () => {
@@ -212,6 +378,7 @@ const TreeContent = () => {
    * delete a member from database
    */
   const deleteMemberFromDb = async (member) => {
+    console.log(member);
     await deleteDoc(doc(db, "nodes", member.id)).then(() => {
       clearVar();
     });
@@ -332,7 +499,7 @@ const TreeContent = () => {
     setStoryPath("stories/" + pid + "_" + uid);
     const storageRef = ref(storage, story_path);
     const file = new File([story], story_path);
-    uploadBytes(storageRef, file).then((snapshot) => {});
+    uploadBytes(storageRef, file).then((snapshot) => { });
   };
 
   /**
@@ -386,21 +553,21 @@ const TreeContent = () => {
   /**
    * handle deleteMember action
    */
-  const deleteMember = (event) => {
+  const deleteMember = async (event) => {
     setShowAlert(false);
     // display a popup telling user this is an action in the danger zone
     if (selectedMember) {
       try {
         for (var i = 0; i < memberList.length; i++) {
           if (memberList[i].id === selectedMember.id) {
-            let tempList = [...memberList];
-            tempList.splice(i, 1);
+            // tempList.splice(i, 1);
             // delete member in the database
             if (user) {
+              updateDeletedMember(memberList[i]);
               deleteMemberFromDb(memberList[i]);
+              // update memberList
+              getMemberList(user);;
             }
-            // update memberList
-            setMemberList(tempList);
           }
         }
         clearVar();
@@ -557,7 +724,7 @@ const TreeContent = () => {
                 value={firstName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setFirstName(e.target.value)}
-                // placeholder=""
+              // placeholder=""
               ></Input.TextArea>
               <h1>
                 Last Name<i style={{ color: "red" }}>*</i>
@@ -566,14 +733,14 @@ const TreeContent = () => {
                 value={lastName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setLastName(e.target.value)}
-                // placeholder=""
+              // placeholder=""
               ></Input.TextArea>
               <h1>Nick Name</h1>
               <Input.TextArea
                 value={nickName}
                 className="px-4 py-2 outline-none resize-none !h-full !border-none flex"
                 onChange={(e) => setNickName(e.target.value)}
-                // placeholder=""
+              // placeholder=""
               ></Input.TextArea>
               <h1>Gender</h1>
               <Select
@@ -655,4 +822,4 @@ const TreeContent = () => {
   );
 };
 
-export default TreeContent;
+export default observer(TreeContent);
